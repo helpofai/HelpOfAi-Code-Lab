@@ -10,7 +10,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Update({ currentVersion, buildId, lastCommitDate, commits, localPendingMigrations, systemInfo }) {
     const { flash = {} } = usePage().props;
-    const [isChecking, setIsChecking] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [updateLogs, setUpdateLogs] = useState([]);
+    const [progress, setProgress] = useState(0);
 
     const handleCheckUpdate = () => {
         setIsChecking(true);
@@ -18,6 +20,55 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
             preserveScroll: true,
             onFinish: () => setIsChecking(false),
         });
+    };
+
+    const handleUpdateNow = async () => {
+        if (!confirm("Are you sure you want to update the system? This might cause brief downtime.")) return;
+
+        setIsUpdating(true);
+        setUpdateLogs([]);
+        setProgress(0);
+
+        try {
+            const response = await fetch(route('admin.update.start'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': usePage().props.auth?.csrf_token || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                },
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n\n');
+
+                lines.forEach(line => {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.substring(6));
+                            setUpdateLogs(prev => [...prev, data]);
+                            if (data.progress) setProgress(data.progress);
+                            if (data.status === 'done') {
+                                setTimeout(() => window.location.reload(), 2000);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing stream data', e);
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Update failed', error);
+            setUpdateLogs(prev => [...prev, { message: 'Connection failed.', status: 'error' }]);
+        } finally {
+            setIsUpdating(false);
+        }
     };
 
     const hasChangedFiles = flash.changedFiles && flash.changedFiles.length > 0;
@@ -65,17 +116,65 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                             </p>
                         </div>
 
-                        <button 
-                            onClick={handleCheckUpdate}
-                            disabled={isChecking}
-                            className={`group px-8 py-4 bg-white text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-purple-400 transition-all flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed ${isChecking ? 'animate-pulse' : ''}`}
-                        >
-                            <RefreshCw size={16} className={isChecking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform'} />
-                            <span>{isChecking ? 'Syncing_Remote...' : 'Check_Updates'}</span>
-                        </button>
+                        <div className="flex space-x-4">
+                            <button 
+                                onClick={handleCheckUpdate}
+                                disabled={isChecking || isUpdating}
+                                className={`group px-8 py-4 bg-white/5 border border-white/10 text-white font-black uppercase text-xs tracking-widest rounded-xl hover:bg-white/10 transition-all flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed ${isChecking ? 'animate-pulse' : ''}`}
+                            >
+                                <RefreshCw size={16} className={isChecking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform'} />
+                                <span>{isChecking ? 'Syncing...' : 'Check_Updates'}</span>
+                            </button>
+
+                            {flash.updateAvailable && (
+                                <button 
+                                    onClick={handleUpdateNow}
+                                    disabled={isUpdating}
+                                    className="group px-8 py-4 bg-purple-600 text-white font-black uppercase text-xs tracking-widest rounded-xl hover:bg-purple-500 transition-all flex items-center space-x-3 shadow-lg shadow-purple-500/20 disabled:opacity-50"
+                                >
+                                    <ArrowUpCircle size={16} className={isUpdating ? 'animate-bounce' : ''} />
+                                    <span>{isUpdating ? 'Updating...' : 'Update_Now'}</span>
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                    {flash.message && (
+                    {/* LIVE TERMINAL LOGS */}
+                    <AnimatePresence>
+                        {isUpdating && (
+                            <motion.div 
+                                initial={{ height: 0, opacity: 0 }} 
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="mt-8 overflow-hidden"
+                            >
+                                <div className="bg-[#0c0c0c] border border-white/10 rounded-xl p-4 font-mono text-xs max-h-64 overflow-y-auto custom-scrollbar">
+                                    <div className="flex justify-between items-center mb-2 pb-2 border-b border-white/5">
+                                        <span className="text-slate-500 uppercase tracking-widest text-[10px]">System_Log</span>
+                                        <span className="text-purple-400 font-bold">{progress}%</span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        {updateLogs.map((log, i) => (
+                                            <div key={i} className={`flex items-start space-x-2 ${log.status === 'error' ? 'text-rose-400' : log.status === 'success' ? 'text-green-400' : 'text-slate-300'}`}>
+                                                <span className="text-slate-600">[{log.timestamp}]</span>
+                                                <span>{log.message}</span>
+                                            </div>
+                                        ))}
+                                        <div ref={(el) => el?.scrollIntoView({ behavior: 'smooth' })} />
+                                    </div>
+                                </div>
+                                <div className="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden">
+                                    <motion.div 
+                                        initial={{ width: 0 }} 
+                                        animate={{ width: `${progress}%` }} 
+                                        className="h-full bg-purple-500"
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {flash.message && !isUpdating && (
                         <motion.div 
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
