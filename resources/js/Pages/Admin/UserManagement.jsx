@@ -1,0 +1,246 @@
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, usePage } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    Users, Shield, Trash2, Search, 
+    UserCheck, AlertTriangle, UserMinus,
+    ChevronDown, Save, Loader2, Check,
+    Plus, Edit, Lock, Unlock, X, UserPlus,
+    Mail, ShieldAlert, Cpu, ShieldCheck
+} from 'lucide-react';
+import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
+import TextInput from '@/Components/TextInput';
+import PrimaryButton from '@/Components/PrimaryButton';
+import InputLabel from '@/Components/InputLabel';
+
+export default function UserManagement() {
+    const { auth } = usePage().props;
+    const [users, setUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [updatingId, setUpdatingId] = useState(null);
+    const [showModal, setShowModal] = useState(null); 
+    const [editingUser, setEditingUser] = useState(null);
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user' });
+
+    const fetchUsers = async () => {
+        try {
+            const res = await axios.get('/api/admin/users');
+            setUsers(res.data);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchUsers(); }, []);
+
+    const handleRoleChange = async (id, newRole) => {
+        setUpdatingId(id);
+        try {
+            await axios.put(`/api/admin/users/${id}/role`, { role: newRole });
+            setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
+        } catch (e) {
+            alert('Failed to update clearance.');
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    const handleToggleBlock = async (id) => {
+        setUpdatingId(id);
+        try {
+            await axios.post(`/api/admin/users/${id}/block`);
+            setUsers(users.map(u => u.id === id ? { ...u, is_blocked: !u.is_blocked } : u));
+        } catch (e) {
+            alert('Blocking protocol failed.');
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    const handleDeleteUser = async (id) => {
+        if (!confirm('EXTERMINATE NODE: Permanent removal. Continue?')) return;
+        try {
+            await axios.delete(`/api/admin/users/${id}`);
+            setUsers(users.filter(u => u.id !== id));
+        } catch (e) {
+            alert('Deletion protocol failed.');
+        }
+    };
+
+    const handleSaveUser = async (e) => {
+        e.preventDefault();
+        try {
+            if (showModal === 'create') {
+                const res = await axios.post('/api/admin/users', formData);
+                setUsers([res.data, ...users]);
+            } else {
+                const res = await axios.put(`/api/admin/users/${editingUser.id}`, formData);
+                setUsers(users.map(u => u.id === editingUser.id ? res.data : u));
+            }
+            setShowModal(null);
+            setFormData({ name: '', email: '', password: '', role: 'user' });
+        } catch (e) {
+            alert('Protocol error: Check unique constraints.');
+        }
+    };
+
+    const filteredUsers = users.filter(u => 
+        u.name.toLowerCase().includes(search.toLowerCase()) || 
+        u.email.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const getRoleStyles = (role) => {
+        switch(role) {
+            case 'admin': return 'text-rose-400 border-rose-500/30 bg-rose-500/10';
+            case 'paid-user': return 'text-amber-400 border-amber-500/30 bg-amber-500/10';
+            case 'member': return 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10';
+            default: return 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10';
+        }
+    };
+
+    return (
+        <AuthenticatedLayout
+            header={
+                <div className="flex justify-between items-center w-full text-left">
+                    <div className="flex items-center space-x-4 text-left">
+                        <div className="p-2 bg-rose-500/10 border border-rose-400/30 rounded-lg">
+                            <Users className="text-rose-400" size={20} />
+                        </div>
+                        <div className="text-left">
+                            <h2 className="text-lg font-black text-white tracking-tighter uppercase leading-tight italic">User_Matrix</h2>
+                            <p className="text-[8px] text-rose-500/60 uppercase tracking-[0.4em] font-bold">Total Active Nodes: {users.length}</p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-6">
+                        <div className="relative hidden md:block">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" size={14} />
+                            <input 
+                                type="text"
+                                placeholder="Identify_Node..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-[10px] font-black uppercase tracking-widest focus:border-rose-500/50 focus:ring-0 w-64 transition-all"
+                            />
+                        </div>
+                        <button 
+                            onClick={() => { setFormData({ name: '', email: '', password: '', role: 'user' }); setShowModal('create'); }}
+                            className="flex items-center px-6 py-2 bg-white text-black rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-cyan-400 transition-all shadow-xl"
+                        >
+                            <Plus className="mr-2" size={14} strokeWidth={3} /> Create_Node
+                        </button>
+                    </div>
+                </div>
+            }
+        >
+            <Head title="User Management" />
+            <div className="relative min-h-full p-8 lg:p-12 overflow-y-auto">
+                <AnimatedGrid />
+                <div className="max-w-7xl mx-auto relative z-10">
+                    <AnimatePresence mode="wait">
+                        {isLoading && !users.length ? (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-48 space-y-6">
+                                <div className="w-12 h-12 border-4 border-rose-500/20 border-t-rose-500 rounded-full animate-spin" />
+                                <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.5em] animate-pulse">Syncing_User_Database...</span>
+                            </motion.div>
+                        ) : (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl">
+                                <div className="overflow-x-auto text-left">
+                                    <table className="w-full text-left">
+                                        <thead>
+                                            <tr className="border-b border-white/10 bg-white/[0.02]">
+                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Node_Ident</th>
+                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Clearance</th>
+                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Status</th>
+                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {filteredUsers.map((user) => (
+                                                <motion.tr key={user.id} layout className="group hover:bg-white/[0.02] transition-colors">
+                                                    <td className="px-8 py-6">
+                                                        <div className="flex flex-col">
+                                                            <span className={`text-sm font-black uppercase tracking-tight transition-colors ${user.is_blocked ? 'text-rose-500 line-through opacity-50' : 'text-white group-hover:text-cyan-400'}`}>{user.name}</span>
+                                                            <span className="text-[10px] font-mono text-white/30 lowercase">{user.email}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-8 py-6">
+                                                        <div className="relative inline-block w-40">
+                                                            <select value={user.role} onChange={(e) => handleRoleChange(user.id, e.target.value)} disabled={updatingId === user.id}
+                                                                className={`w-full appearance-none px-4 py-2 rounded-lg border text-[9px] font-black uppercase tracking-widest focus:ring-0 focus:border-white transition-all cursor-pointer ${getRoleStyles(user.role)}`}
+                                                            >
+                                                                <option value="user">User</option><option value="member">Member</option><option value="paid-user">Paid-User</option><option value="admin">Admin</option>
+                                                            </select>
+                                                            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none" />
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-8 py-6 text-left">
+                                                        <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest ${user.is_blocked ? 'text-rose-500 border-rose-500/20 bg-rose-500/5' : 'text-green-400 border-green-500/20 bg-green-500/5'}`}>
+                                                            {user.is_blocked ? <ShieldAlert size={10} /> : <ShieldCheck size={10} />}
+                                                            <span>{user.is_blocked ? 'Isolated' : 'Optimal'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-8 py-6 text-right">
+                                                        <div className="flex justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-all">
+                                                            <button onClick={() => { setEditingUser(user); setFormData({ name: user.name, email: user.email, role: user.role }); setShowModal('edit'); }}
+                                                                className="p-2.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-xl hover:bg-cyan-500 hover:text-black transition-all" title="Edit Node"
+                                                            ><Edit size={16} /></button>
+                                                            <button onClick={() => handleToggleBlock(user.id)} disabled={user.id === auth.user.id}
+                                                                className={`p-2.5 border rounded-xl transition-all ${user.is_blocked ? 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500 hover:text-black' : 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500 hover:text-black'}`}
+                                                                title={user.is_blocked ? 'Unblock' : 'Block'}
+                                                            >{user.is_blocked ? <Unlock size={16} /> : <Lock size={16} />}</button>
+                                                            <button onClick={() => handleDeleteUser(user.id)} disabled={user.id === auth.user.id}
+                                                                className="p-2.5 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-xl hover:bg-rose-500 hover:text-white transition-all" title="Delete Node"
+                                                            ><Trash2 size={16} /></button>
+                                                        </div>
+                                                    </td>
+                                                </motion.tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </div>
+
+            <AnimatePresence>
+                {showModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowModal(null)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-[#0f172a] border border-white/10 w-full max-w-lg rounded-[3rem] p-12 shadow-2xl overflow-hidden text-left">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+                            <div className="flex items-center space-x-4 mb-10 text-left">
+                                <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/30">
+                                    {showModal === 'create' ? <UserPlus className="text-cyan-400" size={24} /> : <Edit className="text-cyan-400" size={24} />}
+                                </div>
+                                <h3 className="text-xl font-black uppercase tracking-widest text-white">{showModal === 'create' ? 'Init_New_Node' : 'Re_Config_Node'}</h3>
+                            </div>
+                            <form onSubmit={handleSaveUser} className="space-y-6">
+                                <div className="space-y-2 text-left"><InputLabel value="Node_Alias" /><TextInput value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="IDENT_NAME..." required /></div>
+                                <div className="space-y-2 text-left"><InputLabel value="Neural_Address" /><TextInput type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="IDENT_EMAIL..." required /></div>
+                                {showModal === 'create' && <div className="space-y-2 text-left"><InputLabel value="Access_Cipher" /><TextInput type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="SECURE_PASSWORD..." required /></div>}
+                                <div className="space-y-2 text-left"><InputLabel value="Clearance_Level" />
+                                    <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}
+                                        className="w-full bg-black/40 border border-white/10 text-white font-mono text-xs rounded-xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all uppercase tracking-widest"
+                                    ><option value="user">User</option><option value="member">Member</option><option value="paid-user">Paid-User</option><option value="admin">Admin</option></select>
+                                </div>
+                                <div className="pt-6 flex space-x-4">
+                                    <button type="button" onClick={() => setShowModal(null)} className="flex-1 py-4 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">Cancel_Abort</button>
+                                    <PrimaryButton className="flex-1 py-4">Execute_Changes</PrimaryButton>
+                                </div>
+                            </form>
+                            <button onClick={() => setShowModal(null)} className="absolute top-10 right-10 text-gray-500 hover:text-white transition-all"><X size={24} /></button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </AuthenticatedLayout>
+    );
+}
