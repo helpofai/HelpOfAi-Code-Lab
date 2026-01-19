@@ -15,7 +15,8 @@ class UpdateController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Update', [
-            'currentVersion' => $this->safelyRunGit('git rev-parse --short HEAD', 'UNKNOWN'),
+            'currentVersion' => config('app.version'),
+            'buildId' => $this->safelyRunGit('git rev-parse --short HEAD', 'N/A'),
             'lastCommitDate' => $this->safelyRunGit('git log -1 --format=%cd', 'UNKNOWN'),
             'commits' => $this->getGitLog(),
             'localPendingMigrations' => $this->getLocalPendingMigrations(),
@@ -50,6 +51,7 @@ class UpdateController extends Controller
     private function getSystemInfo()
     {
         return [
+            'app_version' => config('app.version'),
             'php_version' => PHP_VERSION,
             'laravel_version' => app()->version(),
             'environment' => app()->environment(),

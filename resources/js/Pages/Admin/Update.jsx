@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Update({ currentVersion, lastCommitDate, commits, localPendingMigrations, systemInfo }) {
+export default function Update({ currentVersion, buildId, lastCommitDate, commits, localPendingMigrations, systemInfo }) {
     const { flash = {} } = usePage().props;
     const [isChecking, setIsChecking] = useState(false);
 
@@ -57,7 +57,8 @@ export default function Update({ currentVersion, lastCommitDate, commits, localP
                                 </span>
                             </div>
                             <h3 className="text-4xl font-black text-white tracking-tighter mb-2">
-                                NODE_VERSION: <span className="text-purple-400">{currentVersion}</span>
+                                NODE_V: <span className="text-purple-400">{currentVersion}</span>
+                                <span className="text-xs text-slate-600 ml-4 font-mono uppercase tracking-widest">Build: {buildId}</span>
                             </h3>
                             <p className="text-xs font-mono text-slate-400 flex items-center">
                                 <Clock size={12} className="mr-2" /> Last Sync: {lastCommitDate}
