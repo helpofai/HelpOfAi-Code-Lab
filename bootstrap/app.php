@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+        
+        // AUTO-CONFIGURATION: Trust all proxies for production load balancers (Nginx/Cloudflare)
+        $middleware->trustProxies(at: '*');
 
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,

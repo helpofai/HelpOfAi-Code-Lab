@@ -2,6 +2,16 @@
 
 use Illuminate\Support\Str;
 
+// AUTOMATIC DOMAIN DETECTION FOR WILDCARD SESSIONS
+$appUrl = env('APP_URL');
+$host = parse_url($appUrl, PHP_URL_HOST);
+$defaultSessionDomain = null;
+
+if ($host && $host !== 'localhost' && !filter_var($host, FILTER_VALIDATE_IP)) {
+    // Strip www. and add leading dot for wildcard support
+    $defaultSessionDomain = '.' . preg_replace('/^www\./', '', $host);
+}
+
 return [
 
     /*
@@ -156,7 +166,7 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => env('SESSION_DOMAIN', $defaultSessionDomain),
 
     /*
     |--------------------------------------------------------------------------
