@@ -2,9 +2,14 @@
 
 This guide details how to configure **HOACodeLab** for a production environment, specifically focusing on handling main domains (e.g., `hoacodelab.com`) and subdomains (e.g., `admin.hoacodelab.com` or `project.hoacodelab.com`).
 
+**repository Strategy: "Easy Mode"**
+- **Tracked:** `/vendor` (PHP Dependencies), `/node_modules` (JS Dependencies), `/public/build` (Compiled Assets).
+- **Ignored:** `.env` (Secrets/Configuration).
+- **Benefit:** You do *not* need to run `composer install` or `npm run build` on your production server.
+
 ## 1. Environment Configuration (.env)
 
-Update your `.env` file on the production server with the following settings.
+**CRITICAL:** The `.env` file is **NOT** in Git. You must manually create this file on your production server.
 
 ### Base Configuration
 ```ini
@@ -129,23 +134,37 @@ Then edit `config/cors.php`:
 'supports_credentials' => true, // CRITICAL for auth
 ```
 
-## 5. Deployment Steps
+## 5. Deployment Steps (Simplified)
 
-1.  **Clone/Pull Code**: `git pull origin main`
-2.  **Install Dependencies**:
+Since you are committing `vendor` and `node_modules` to Git, your deployment on the server is much faster.
+
+1.  **Pull Latest Code**:
     ```bash
-    composer install --optimize-autoloader --no-dev
-    npm ci
-    npm run build
+    cd /var/www/hoacodelab
+    git pull origin main
     ```
-3.  **Cache Configuration**:
+    *Note: If you get "local changes" errors, you can run `git reset --hard origin/main` (WARNING: This deletes any changes you made directly on the server).*
+
+2.  **Verify .env**:
+    Ensure your `.env` file exists and has the correct database credentials. It is NOT updated by git pull.
+
+3.  **Optimize & Cache**:
     ```bash
     php artisan config:cache
     php artisan route:cache
     php artisan view:cache
+    php artisan event:cache
     ```
-4.  **Run Migrations**: `php artisan migrate --force`
-5.  **Restart Queue**: `php artisan queue:restart`
+
+4.  **Run Migrations**:
+    ```bash
+    php artisan migrate --force
+    ```
+
+5.  **Restart Queue (if applicable)**:
+    ```bash
+    php artisan queue:restart
+    ```
 
 ## 6. Subdomain Routing (Optional)
 

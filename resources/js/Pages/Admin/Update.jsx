@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { 
     RefreshCw, GitBranch, GitCommit, Clock, 
     CheckCircle, AlertCircle, Server, Terminal,
-    ArrowUpCircle
+    ArrowUpCircle, Activity
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -244,10 +244,6 @@ export default function Update({ currentVersion, lastCommitDate, commits, localP
                     </div>
                 </div>
 
-            </div>
-        </AuthenticatedLayout>
-    );
-}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-6">
                         <div className="flex items-center space-x-3 px-2">
