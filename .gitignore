@@ -1,2 +1,5 @@
 .env
+.env.backup
+.env.production
+public/hot
 
