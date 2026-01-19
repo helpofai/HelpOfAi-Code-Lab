@@ -129,6 +129,24 @@ export default function Welcome({ auth, siteSettings }) {
     const metaKeywords = getSetting('seo_meta_keywords', 'code editor, online ide, html, css, javascript');
     const ogImage = getSetting('seo_og_image', null);
 
+    // TYPOGRAPHY SETTINGS
+    const typoFont = getSetting('typography_font_family', 'Inter, sans-serif');
+    const typoBodySize = getSetting('typography_body_size', '1rem');
+    const typoLineHeightBody = getSetting('typography_line_height_body', '1.6');
+    const typoWeightBody = getSetting('typography_font_weight_body', '400');
+    
+    const typoLineHeightHeadings = getSetting('typography_line_height_headings', '1.2');
+    const typoLetterSpacingHeadings = getSetting('typography_letter_spacing_headings', '-0.02em');
+    const typoTransformHeadings = getSetting('typography_transform_headings', 'uppercase');
+    const typoWeightHeadings = getSetting('typography_font_weight_headings', '900');
+
+    const typoH1 = getSetting('typography_h1_size', '4rem');
+    const typoH2 = getSetting('typography_h2_size', '3rem');
+    const typoH3 = getSetting('typography_h3_size', '2rem');
+    const typoH4 = getSetting('typography_h4_size', '1.5rem');
+    const typoH5 = getSetting('typography_h5_size', '1.25rem');
+    const typoH6 = getSetting('typography_h6_size', '1rem');
+
 
     return (
         <div className="min-h-screen bg-black text-white font-mono selection:bg-cyan-500/30 overflow-x-hidden">
@@ -361,7 +379,29 @@ export default function Welcome({ auth, siteSettings }) {
                     </footer>
                 </div>
             </div>
-            <style dangerouslySetInnerHTML={{ __html: `body { background-color: black; cursor: crosshair; } .bg-scanlines { background: linear-gradient(to bottom, transparent 50%, black 50%); background-size: 100% 4px; }` }} />
+            <style dangerouslySetInnerHTML={{ __html: `
+                body { 
+                    background-color: black; 
+                    cursor: crosshair; 
+                    font-family: ${typoFont}; 
+                    font-size: ${typoBodySize};
+                    line-height: ${typoLineHeightBody};
+                    font-weight: ${typoWeightBody};
+                } 
+                h1, h2, h3, h4, h5, h6 {
+                    line-height: ${typoLineHeightHeadings};
+                    letter-spacing: ${typoLetterSpacingHeadings};
+                    text-transform: ${typoTransformHeadings};
+                    font-weight: ${typoWeightHeadings} !important;
+                }
+                h1 { font-size: ${typoH1} !important; }
+                h2 { font-size: ${typoH2} !important; }
+                h3 { font-size: ${typoH3} !important; }
+                h4 { font-size: ${typoH4} !important; }
+                h5 { font-size: ${typoH5} !important; }
+                h6 { font-size: ${typoH6} !important; }
+                .bg-scanlines { background: linear-gradient(to bottom, transparent 50%, black 50%); background-size: 100% 4px; }
+            ` }} />
         </div>
     );
 }

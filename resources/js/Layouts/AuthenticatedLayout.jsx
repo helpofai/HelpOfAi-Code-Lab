@@ -41,7 +41,7 @@ export default function AuthenticatedLayout({ header, children }) {
         { name: 'Admin Command', icon: Shield, href: route('admin.dashboard'), active: route().current('admin.dashboard') },
         { name: 'User Matrix', icon: Users, href: route('admin.users'), active: route().current('admin.users') },
         { name: 'Front Management', icon: LayoutDashboard, href: route('admin.front-management'), active: route().current('admin.front-management') },
-        { name: 'System Logs', icon: Terminal, href: '#', active: false },
+        { name: 'System Update', icon: Terminal, href: route('admin.update'), active: route().current('admin.update') },
         { name: 'Security', icon: Key, href: '#', active: false },
     ];
 

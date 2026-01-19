@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin\FrontManagementController;
 use App\Models\SiteSetting;
 
 Route::get('/', function () {
-    $settings = SiteSetting::whereIn('group', ['home', 'branding', 'seo'])->get()->mapWithKeys(function ($item) {
+    $settings = SiteSetting::whereIn('group', ['home', 'branding', 'seo', 'typography'])->get()->mapWithKeys(function ($item) {
         return [$item->key => $item->value];
     });
 
@@ -55,6 +55,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     Route::get('/admin/front-management', [FrontManagementController::class, 'index'])->name('admin.front-management');
     Route::post('/admin/front-management', [FrontManagementController::class, 'update'])->name('admin.front-management.update');
+
+    Route::get('/admin/update', [\App\Http\Controllers\Admin\UpdateController::class, 'index'])->name('admin.update');
+    Route::post('/admin/update/check', [\App\Http\Controllers\Admin\UpdateController::class, 'check'])->name('admin.update.check');
 });
 
 Route::middleware('auth')->group(function () {

@@ -34,6 +34,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'flash' => [
+                'message' => fn () => $request->session()->get('message'),
+                'updateAvailable' => fn () => $request->session()->get('updateAvailable'),
+                'behindCount' => fn () => $request->session()->get('behindCount'),
+                'changedFiles' => fn () => $request->session()->get('changedFiles'),
+                'remotePendingMigrations' => fn () => $request->session()->get('remotePendingMigrations'),
+            ],
         ];
     }
 }

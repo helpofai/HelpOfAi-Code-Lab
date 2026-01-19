@@ -191,6 +191,120 @@ export default function FrontManagement({ settings }) {
                             </div>
                         </Section>
 
+                        {/* TYPOGRAPHY CONFIGURATION */}
+                        <Section title="Typography_System" icon={Type} color="indigo">
+                            <div className="space-y-8">
+                                {/* Global Font Settings */}
+                                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-6">
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 border-b border-white/5 pb-2">Global Settings</h4>
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Font Family</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.settings.typography_font_family || ''}
+                                                onChange={(e) => handleSettingChange('typography_font_family', e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-indigo-500 transition-colors font-bold"
+                                                placeholder="Inter, sans-serif"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Body Text Configuration */}
+                                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-6">
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 border-b border-white/5 pb-2">Body Text Protocol</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Base Size</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.settings.typography_body_size || ''}
+                                                onChange={(e) => handleSettingChange('typography_body_size', e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-indigo-500 transition-colors font-medium"
+                                                placeholder="1rem"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Line Height</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.settings.typography_line_height_body || ''}
+                                                onChange={(e) => handleSettingChange('typography_line_height_body', e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-indigo-500 transition-colors font-medium"
+                                                placeholder="1.6"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Weight</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.settings.typography_font_weight_body || ''}
+                                                onChange={(e) => handleSettingChange('typography_font_weight_body', e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-indigo-500 transition-colors font-medium"
+                                                placeholder="400"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Headings Configuration */}
+                                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-6">
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 border-b border-white/5 pb-2">Header Matrix</h4>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                         <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Line Height</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.settings.typography_line_height_headings || ''}
+                                                onChange={(e) => handleSettingChange('typography_line_height_headings', e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-indigo-500 transition-colors font-medium"
+                                                placeholder="1.2"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Letter Spacing</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.settings.typography_letter_spacing_headings || ''}
+                                                onChange={(e) => handleSettingChange('typography_letter_spacing_headings', e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-indigo-500 transition-colors font-medium"
+                                                placeholder="-0.02em"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Transform</label>
+                                             <select 
+                                                value={data.settings.typography_transform_headings || 'none'}
+                                                onChange={(e) => handleSettingChange('typography_transform_headings', e.target.value)}
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-indigo-500 transition-colors font-medium appearance-none"
+                                            >
+                                                <option value="none">None</option>
+                                                <option value="uppercase">Uppercase</option>
+                                                <option value="capitalize">Capitalize</option>
+                                                <option value="lowercase">Lowercase</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-4 border-t border-white/5">
+                                        {['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].map((tag) => (
+                                            <div key={tag} className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{tag.toUpperCase()} Size</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={data.settings[`typography_${tag}_size`] || ''}
+                                                    onChange={(e) => handleSettingChange(`typography_${tag}_size`, e.target.value)}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-indigo-500 transition-colors font-bold"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </Section>
+
                         {/* HERO SECTION */}
                         <Section title="Hero_Configuration" icon={Type} color="indigo" defaultOpen={true}>
                             <div className="space-y-2">

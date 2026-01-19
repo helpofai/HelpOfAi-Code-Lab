@@ -12,8 +12,8 @@ class FrontManagementController extends Controller
 {
     public function index()
     {
-        // Fetch settings for 'home', 'branding', and 'seo' groups
-        $settings = SiteSetting::whereIn('group', ['home', 'branding', 'seo'])->get();
+        // Fetch settings for 'home', 'branding', 'seo', 'typography' groups
+        $settings = SiteSetting::whereIn('group', ['home', 'branding', 'seo', 'typography'])->get();
         
         $settingsMap = $settings->mapWithKeys(function ($item) {
             return [$item->key => $item->value];
