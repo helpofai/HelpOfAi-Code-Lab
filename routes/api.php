@@ -24,7 +24,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('projects', ProjectController::class);
+    Route::apiResource('projects', ProjectController::class)->except(['show']);
     Route::apiResource('collections', CollectionController::class);
     Route::post('collections/{collection}/add', [CollectionController::class, 'addProject']);
 });
