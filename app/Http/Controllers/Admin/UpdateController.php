@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Http;
 
 class UpdateController extends Controller
 {
+    // GitHub API endpoints for version checking
     private $repoUrl = 'https://raw.githubusercontent.com/helpofai/HelpOfAi-Code-Lab/main/.env.example';
     private $commitsUrl = 'https://api.github.com/repos/helpofai/HelpOfAi-Code-Lab/commits';
 
