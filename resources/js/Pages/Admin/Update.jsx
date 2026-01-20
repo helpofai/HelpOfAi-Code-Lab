@@ -135,8 +135,9 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                 </span>
                             </div>
                             <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-2">
-                                <h3 className="text-3xl md:text-4xl font-black text-white tracking-tighter">
+                                <h3 className="text-3xl md:text-4xl font-black text-white tracking-tighter flex items-center gap-3">
                                     VER: <span className="text-purple-400">{currentVersion}</span>
+                                    <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30 uppercase tracking-tighter">Stable</span>
                                     {latestVersion && latestVersion !== currentVersion && (
                                         <span className="text-slate-500 ml-2 text-xl">→ <span className="text-amber-400">{latestVersion}</span></span>
                                     )}
