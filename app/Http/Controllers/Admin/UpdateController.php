@@ -226,7 +226,78 @@ class UpdateController extends Controller
             
             if ($pull->successful()) {
                 $this->sendUpdateLog($pull->output());
-                $this->sendUpdateLog("Code updated successfully.", 40, 'success');
+                $this->sendUpdateLog("Code updated successfully.", 30, 'success');
+
+                // 1.5 Update .env intelligently
+                $this->sendUpdateLog("Updating configuration...", 35);
+                try {
+                    $envPath = base_path('.env');
+                    $examplePath = base_path('.env.example');
+
+                    if (File::exists($envPath) && File::exists($examplePath)) {
+                        $envContent = File::get($envPath);
+                        $exampleContent = File::get($examplePath);
+
+                        // Parse .env into lines to preserve comments/spacing as much as possible for existing content
+                        $envLines = explode("\n", $envContent);
+                        
+                        // Parse .env.example to get new keys and version
+                        preg_match_all('/^([A-Z0-9_]+)=(.*)$/m', $exampleContent, $matches, PREG_SET_ORDER);
+                        $exampleKeys = [];
+                        $newVersion = null;
+
+                        foreach ($matches as $match) {
+                            $key = $match[1];
+                            $value = $match[2];
+                            $exampleKeys[$key] = $value;
+                            if ($key === 'APP_VERSION') {
+                                $newVersion = trim($value);
+                            }
+                        }
+
+                        // Check for existing keys in .env
+                        $existingKeys = [];
+                        foreach ($envLines as $line) {
+                            if (preg_match('/^\s*([A-Z0-9_]+)=/', $line, $match)) {
+                                $existingKeys[] = $match[1];
+                            }
+                        }
+
+                        $updatedEnvContent = $envContent;
+                        $hasChanges = false;
+
+                        // Append new keys
+                        foreach ($exampleKeys as $key => $value) {
+                            if (!in_array($key, $existingKeys)) {
+                                $updatedEnvContent .= "\n{$key}={$value}";
+                                $hasChanges = true;
+                                $this->sendUpdateLog("Added new config: {$key}", 36);
+                            }
+                        }
+
+                        // Update APP_VERSION
+                        if ($newVersion) {
+                            $pattern = '/^APP_VERSION=.*$/m';
+                            if (preg_match($pattern, $updatedEnvContent)) {
+                                $updatedEnvContent = preg_replace($pattern, "APP_VERSION={$newVersion}", $updatedEnvContent);
+                            } else {
+                                $updatedEnvContent .= "\nAPP_VERSION={$newVersion}";
+                            }
+                            $hasChanges = true;
+                            $this->sendUpdateLog("Updated APP_VERSION to {$newVersion}", 38);
+                        }
+
+                        if ($hasChanges) {
+                            File::put($envPath, $updatedEnvContent);
+                            $this->sendUpdateLog("Configuration file updated.", 40, 'success');
+                        } else {
+                            $this->sendUpdateLog("Configuration is already up to date.", 40);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $this->sendUpdateLog("Failed to update .env: " . $e->getMessage(), 40, 'error');
+                }
+
             } else {
                 $this->sendUpdateLog("Git pull failed: " . $pull->errorOutput(), 40, 'error');
                 return; // Stop if pull fails
