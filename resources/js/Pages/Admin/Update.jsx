@@ -14,6 +14,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateLogs, setUpdateLogs] = useState([]);
     const [progress, setProgress] = useState(0);
+    const [lastCheckedTime, setLastCheckedTime] = useState(null);
     const logsEndRef = useRef(null);
 
     // Auto-scroll logs
@@ -25,7 +26,10 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
         setIsChecking(true);
         router.post(route('admin.update.check'), {}, {
             preserveScroll: true,
-            onFinish: () => setIsChecking(false),
+            onFinish: () => {
+                setIsChecking(false);
+                setLastCheckedTime(new Date().toLocaleTimeString());
+            },
         });
     };
 
@@ -145,14 +149,19 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                         </div>
 
                         <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3 sm:space-x-4">
-                            <button 
-                                onClick={handleCheckUpdate}
-                                disabled={isChecking || isUpdating}
-                                className={`group flex-1 sm:flex-initial justify-center px-6 md:px-8 py-3 md:py-4 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-xl hover:bg-white/10 transition-all flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed ${isChecking ? 'animate-pulse' : ''}`}
-                            >
-                                <RefreshCw size={14} className={isChecking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform'} />
-                                <span>{isChecking ? 'Syncing...' : 'Check_Updates'}</span>
-                            </button>
+                            <div className="flex flex-col gap-1 w-full sm:w-auto">
+                                <button 
+                                    onClick={handleCheckUpdate}
+                                    disabled={isChecking || isUpdating}
+                                    className={`group flex-1 sm:flex-initial justify-center px-6 md:px-8 py-3 md:py-4 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-xl hover:bg-white/10 transition-all flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed ${isChecking ? 'animate-pulse' : ''}`}
+                                >
+                                    <RefreshCw size={14} className={isChecking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform'} />
+                                    <span>{isChecking ? 'Syncing...' : 'Check_Updates'}</span>
+                                </button>
+                                {lastCheckedTime && (
+                                    <span className="text-[9px] text-slate-500 text-center font-mono">Last checked: {lastCheckedTime}</span>
+                                )}
+                            </div>
 
                             {flash.updateAvailable && (
                                 gitStatus === 'OK' ? (
@@ -170,7 +179,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                     </button>
                                 ) : (
                                     <div className="px-4 py-2 bg-rose-500/10 border border-rose-500/30 rounded-xl text-[10px] font-bold text-rose-400 uppercase tracking-wide">
-                                        Git/Proc_Open Restricted.
+                                        Auto-Update Unavailable (Git/Proc_Open Disabled). Please update manually via FTP.
                                     </div>
                                 )
                             )}
