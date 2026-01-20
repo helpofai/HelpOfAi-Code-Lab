@@ -240,12 +240,19 @@ class UpdateController extends Controller
                 return;
             }
 
-            // 1. Git Pull
+            // 1. Git Update (Force Reset to match Remote)
             $this->sendUpdateLog("Fetching latest code from repository...", 20);
-            $pull = Process::path(base_path())->run('git pull origin main');
+            $fetch = Process::path(base_path())->run('git fetch origin main');
             
-            if ($pull->successful()) {
-                $this->sendUpdateLog($pull->output());
+            if ($fetch->successful()) {
+                $this->sendUpdateLog("Synchronizing local files...", 25);
+                $reset = Process::path(base_path())->run('git reset --hard origin/main');
+                
+                if (!$reset->successful()) {
+                    $this->sendUpdateLog("Sync failed: " . $reset->errorOutput(), 25, 'error');
+                    return;
+                }
+
                 $this->sendUpdateLog("Code updated successfully.", 30, 'success');
 
                 // 1.5 Update .env intelligently
