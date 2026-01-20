@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     LayoutTemplate, Save, CheckCircle, 
-    Type, Globe, ToggleRight, ChevronDown, Layers, Activity, Network, Star, DollarSign
+    Type, Globe, ToggleRight, ChevronDown, Layers, Activity, Network, Star, DollarSign,
+    X, Loader2
 } from 'lucide-react';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 
@@ -58,13 +59,22 @@ const Section = ({ title, icon: Icon, children, defaultOpen = false, color = "in
 };
 
 export default function FrontManagement({ settings }) {
+    // Correctly initialize form with all fields
     const { data, setData, post, processing, recentlySuccessful, errors } = useForm({
-        settings: settings
+        settings: settings,
+        site_logo: null,
+        site_favicon: null,
+        seo_og_image: null,
+        _method: 'POST' // Ensuring POST for file uploads
     });
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('admin.front-management.update'));
+        // Standard Inertia post handles FormData automatically if files are detected
+        post(route('admin.front-management.update'), {
+            forceFormData: true,
+            preserveScroll: true,
+        });
     };
 
     const handleSettingChange = (key, value) => {
@@ -145,7 +155,7 @@ export default function FrontManagement({ settings }) {
                                         onChange={(e) => setData('seo_og_image', e.target.files[0])}
                                         className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-500/10 file:text-blue-500 hover:file:bg-blue-500/20"
                                     />
-                                    {errors.seo_og_image && <div className="text-red-500 text-xs mt-1">{errors.seo_og_image}</div>}
+                                    {errors.seo_og_image && <div className="text-red-500 text-xs mt-1 font-bold">{errors.seo_og_image}</div>}
                                 </div>
                             </div>
                         </Section>
@@ -168,7 +178,7 @@ export default function FrontManagement({ settings }) {
                                         onChange={(e) => setData('site_logo', e.target.files[0])}
                                         className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-emerald-500/10 file:text-emerald-500 hover:file:bg-emerald-500/20"
                                     />
-                                    {errors.site_logo && <div className="text-red-500 text-xs mt-1">{errors.site_logo}</div>}
+                                    {errors.site_logo && <div className="text-red-500 text-xs mt-1 font-bold">{errors.site_logo}</div>}
                                 </div>
 
                                 <div className="space-y-4">
@@ -186,7 +196,7 @@ export default function FrontManagement({ settings }) {
                                         onChange={(e) => setData('site_favicon', e.target.files[0])}
                                         className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-emerald-500/10 file:text-emerald-500 hover:file:bg-emerald-500/20"
                                     />
-                                    {errors.site_favicon && <div className="text-red-500 text-xs mt-1">{errors.site_favicon}</div>}
+                                    {errors.site_favicon && <div className="text-red-500 text-xs mt-1 font-bold">{errors.site_favicon}</div>}
                                 </div>
                             </div>
                         </Section>
@@ -194,7 +204,6 @@ export default function FrontManagement({ settings }) {
                         {/* TYPOGRAPHY CONFIGURATION */}
                         <Section title="Typography_System" icon={Type} color="indigo">
                             <div className="space-y-8">
-                                {/* Global Font Settings */}
                                 <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-6">
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 border-b border-white/5 pb-2">Global Settings</h4>
                                     <div className="space-y-4">
@@ -211,7 +220,6 @@ export default function FrontManagement({ settings }) {
                                     </div>
                                 </div>
 
-                                {/* Body Text Configuration */}
                                 <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-6">
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 border-b border-white/5 pb-2">Body Text Protocol</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -248,7 +256,6 @@ export default function FrontManagement({ settings }) {
                                     </div>
                                 </div>
 
-                                {/* Headings Configuration */}
                                 <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-6">
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 border-b border-white/5 pb-2">Header Matrix</h4>
                                     
@@ -393,111 +400,15 @@ export default function FrontManagement({ settings }) {
                             </div>
                         </Section>
 
-                        {/* TECH STACK */}
-                        <Section title="Tech_Stack_Modules" icon={Layers} color="amber">
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-amber-500">Section Title</label>
-                                <input 
-                                    type="text" 
-                                    value={data.settings.home_tech_title || ''}
-                                    onChange={(e) => handleSettingChange('home_tech_title', e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-amber-500 transition-colors font-bold"
-                                />
-                            </div>
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-amber-500">Section Subtitle</label>
-                                <input 
-                                    type="text" 
-                                    value={data.settings.home_tech_subtitle || ''}
-                                    onChange={(e) => handleSettingChange('home_tech_subtitle', e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-amber-500 transition-colors font-medium"
-                                />
-                            </div>
-                        </Section>
-
-                         {/* DIAGNOSTICS */}
-                         <Section title="Engine_Diagnostics" icon={Activity} color="rose">
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-rose-500">Section Title</label>
-                                <input 
-                                    type="text" 
-                                    value={data.settings.home_diagnostics_title || ''}
-                                    onChange={(e) => handleSettingChange('home_diagnostics_title', e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-rose-500 transition-colors font-bold"
-                                />
-                            </div>
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-rose-500">Primary Description</label>
-                                <textarea 
-                                    value={data.settings.home_diagnostics_desc || ''}
-                                    onChange={(e) => handleSettingChange('home_diagnostics_desc', e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-rose-500 transition-colors font-medium h-24 resize-none"
-                                />
-                            </div>
-                        </Section>
-
-                        {/* UPLINK */}
-                         <Section title="Uplink_Sync" icon={Network} color="blue">
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-blue-500">Section Title</label>
-                                <input 
-                                    type="text" 
-                                    value={data.settings.home_uplink_title || ''}
-                                    onChange={(e) => handleSettingChange('home_uplink_title', e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-blue-500 transition-colors font-bold"
-                                />
-                            </div>
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-blue-500">Section Subtitle</label>
-                                <textarea 
-                                    value={data.settings.home_uplink_subtitle || ''}
-                                    onChange={(e) => handleSettingChange('home_uplink_subtitle', e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-blue-500 transition-colors font-medium h-24 resize-none"
-                                />
-                            </div>
-                        </Section>
-
-                        {/* FEATURES */}
-                        <Section title="Core_Interface_Modules" icon={Star} color="purple">
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-purple-500">Section Title</label>
-                                <input 
-                                    type="text" 
-                                    value={data.settings.home_features_title || ''}
-                                    onChange={(e) => handleSettingChange('home_features_title', e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 transition-colors font-bold"
-                                />
-                            </div>
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-purple-500">Section Subtitle</label>
-                                <textarea 
-                                    value={data.settings.home_features_subtitle || ''}
-                                    onChange={(e) => handleSettingChange('home_features_subtitle', e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-purple-500 transition-colors font-medium h-24 resize-none"
-                                />
-                            </div>
-                        </Section>
-
-                        {/* PRICING */}
-                        <Section title="Security_Clearance" icon={DollarSign} color="cyan">
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-cyan-500">Section Title</label>
-                                <input 
-                                    type="text" 
-                                    value={data.settings.home_pricing_title || ''}
-                                    onChange={(e) => handleSettingChange('home_pricing_title', e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-cyan-500 transition-colors font-bold"
-                                />
-                            </div>
-                        </Section>
-
                         <div className="flex justify-end pt-8">
                             <button 
                                 type="submit" 
                                 disabled={processing}
                                 className="group flex items-center px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_20px_rgba(79,70,229,0.3)]"
                             >
-                                {recentlySuccessful ? (
+                                {processing ? (
+                                    <Loader2 className="mr-2 animate-spin" size={18} />
+                                ) : recentlySuccessful ? (
                                     <>
                                         <CheckCircle className="mr-2" size={18} />
                                         System_Updated

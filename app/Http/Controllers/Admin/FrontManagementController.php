@@ -35,6 +35,11 @@ class FrontManagementController extends Controller
         ]);
 
         $data = $request->input('settings', []);
+        
+        // If data is a string (due to multipart/form-data handling), decode it
+        if (is_string($data)) {
+            $data = json_decode($data, true) ?? [];
+        }
 
         // Handle File Uploads
         if ($request->hasFile('site_logo')) {
