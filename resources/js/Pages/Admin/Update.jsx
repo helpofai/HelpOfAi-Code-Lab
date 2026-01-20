@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Update({ currentVersion, buildId, lastCommitDate, commits, localPendingMigrations, systemInfo }) {
     const { flash = {} } = usePage().props;
+    const [isChecking, setIsChecking] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateLogs, setUpdateLogs] = useState([]);
     const [progress, setProgress] = useState(0);
