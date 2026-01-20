@@ -60,10 +60,16 @@ class FrontManagementController extends Controller
         // Handle Text Settings
         if (!empty($data)) {
             foreach ($data as $key => $value) {
-                // Skip file keys if they are passed in settings array by mistake
+                // Skip file keys
                 if (in_array($key, ['site_logo', 'site_favicon', 'seo_og_image'])) continue;
                 
-                SiteSetting::where('key', $key)->update(['value' => $value]);
+                // Determine group based on key prefix
+                $group = 'home';
+                if (str_starts_with($key, 'seo_')) $group = 'seo';
+                if (str_starts_with($key, 'typography_')) $group = 'typography';
+                if (str_starts_with($key, 'site_')) $group = 'branding';
+
+                SiteSetting::set($key, $value, $group, 'text');
             }
         }
 
