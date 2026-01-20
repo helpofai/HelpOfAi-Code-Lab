@@ -10,7 +10,7 @@ import {
     Target, Crosshair, ExternalLink, User, Clock, Monitor, Box, Triangle,
     ChevronDown, Rocket
 } from 'lucide-react';
-import DeveloperGrid from '@/Components/Visuals/DeveloperGrid';
+import DigitalLabBackground from '@/Components/Visuals/DigitalLabBackground';
 import SystemBoot from '@/Components/Visuals/SystemBoot';
 import CursorGlow from '@/Components/Visuals/CursorGlow';
 import TextDecode from '@/Components/Visuals/TextDecode';
@@ -144,7 +144,7 @@ export default function Welcome({ auth, siteSettings }) {
 
             <div className="relative">
                 <div className="fixed inset-0 z-0">
-                    <DeveloperGrid />
+                    <DigitalLabBackground />
                     <CursorGlow />
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
                     <div className="absolute inset-0 bg-scanlines opacity-[0.06] z-10 pointer-events-none"></div>
