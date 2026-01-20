@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import SystemBoot from '@/Components/Visuals/SystemBoot';
+import ScrollToTop from '@/Components/Visuals/ScrollToTop';
 
 export default function GlobalBootWrapper({ children }) {
     const [isBooted, setIsBooted] = useState(false);
 
-    // We can also trigger re-boots on Inertia navigation if desired, 
-    // but usually, a single boot per session is more professional.
-    
     return (
         <>
             <AnimatePresence mode="wait">
@@ -23,6 +21,7 @@ export default function GlobalBootWrapper({ children }) {
                 className="min-h-screen h-full"
             >
                 {children}
+                <ScrollToTop />
             </motion.div>
         </>
     );
