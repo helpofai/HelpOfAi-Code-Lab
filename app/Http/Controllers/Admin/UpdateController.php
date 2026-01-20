@@ -238,10 +238,15 @@ class UpdateController extends Controller
                     $examplePath = base_path('.env.example');
 
                     if (File::exists($envPath) && File::exists($examplePath)) {
+                        
+                        if (!is_writable($envPath)) {
+                            $this->sendUpdateLog("CRITICAL: .env file is not writable. Check permissions.", 36, 'error');
+                        }
+
                         $envContent = File::get($envPath);
                         $exampleContent = File::get($examplePath);
 
-                        // Parse .env into lines to preserve comments/spacing as much as possible for existing content
+                        // Parse .env into lines
                         $envLines = explode("\n", $envContent);
                         
                         // Parse .env.example to get new keys and version
@@ -278,31 +283,33 @@ class UpdateController extends Controller
                             }
                         }
 
-                        // Update APP_VERSION
+                        // Update APP_VERSION with a more flexible regex
                         if ($newVersion) {
-                            $this->sendUpdateLog("Detected new version in example: {$newVersion}", 37);
-                            $pattern = '/^APP_VERSION=.*$/m';
+                            $this->sendUpdateLog("Remote version detected: {$newVersion}", 37);
+                            $pattern = '/^\s*APP_VERSION\s*=\s*.*$/m';
                             if (preg_match($pattern, $updatedEnvContent)) {
                                 $updatedEnvContent = preg_replace($pattern, "APP_VERSION={$newVersion}", $updatedEnvContent);
+                                $hasChanges = true;
                             } else {
                                 $updatedEnvContent = rtrim($updatedEnvContent) . "\nAPP_VERSION={$newVersion}\n";
+                                $hasChanges = true;
                             }
-                            $hasChanges = true;
                         }
 
                         if ($hasChanges) {
                             File::put($envPath, $updatedEnvContent);
-                            $this->sendUpdateLog("Local .env file has been updated.", 39, 'success');
+                            $this->sendUpdateLog("Local .env file has been synchronized.", 39, 'success');
                             
-                            // CRITICAL: Clear config cache immediately so the next steps see the new version
-                            Process::path(base_path())->run('php artisan config:clear');
-                            $this->sendUpdateLog("Configuration cache cleared.", 40);
+                            // CRITICAL: Clear config cache immediately using PHP binary
+                            $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
+                            $clear = Process::path(base_path())->run("$php artisan config:clear");
+                            $this->sendUpdateLog("System cache reset: " . ($clear->successful() ? 'OK' : 'FAILED'), 40);
                         } else {
-                            $this->sendUpdateLog("No configuration changes needed.", 40);
+                            $this->sendUpdateLog("Configuration is already optimal.", 40);
                         }
                     }
                 } catch (\Exception $e) {
-                    $this->sendUpdateLog("Failed to update .env: " . $e->getMessage(), 40, 'error');
+                    $this->sendUpdateLog("Config Sync Error: " . $e->getMessage(), 40, 'error');
                 }
 
             } else {
