@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
     RefreshCw, GitBranch, GitCommit, Clock, 
     CheckCircle, AlertCircle, Server, Terminal,
-    ArrowUpCircle, Activity, Database
+    ArrowUpCircle, Activity, Database, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -41,7 +41,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': usePage().props.auth?.csrf_token || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
                 },
             });
 
@@ -58,7 +58,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                 const chunk = decoder.decode(value, { stream: true });
                 buffer += chunk;
                 const lines = buffer.split('\n\n');
-                buffer = lines.pop(); // Keep the last incomplete chunk in the buffer
+                buffer = lines.pop(); 
 
                 for (const line of lines) {
                     if (line.trim().startsWith('data: ')) {
@@ -68,14 +68,13 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                             
                             const data = JSON.parse(jsonStr);
                             setUpdateLogs(prev => {
-                                // Avoid duplicates if possible
                                 if (prev.length > 0 && prev[prev.length - 1].message === data.message) return prev;
                                 return [...prev, data];
                             });
                             
                             if (data.progress) setProgress(data.progress);
                             
-                            if (data.status === 'done' || data.status === 'success' && data.progress === 100) {
+                            if (data.status === 'done' || (data.status === 'success' && data.progress === 100)) {
                                 setTimeout(() => window.location.reload(), 2000);
                             }
                         } catch (e) {
@@ -86,9 +85,8 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
             }
         } catch (error) {
             console.error('Update failed', error);
-            setUpdateLogs(prev => [...prev, { message: 'Connection failed or interrupted. Please check logs manually.', status: 'error' }]);
+            setUpdateLogs(prev => [...prev, { message: 'Connection failed or interrupted.', status: 'error' }]);
         } finally {
-            // Keep the "Updating" state for a moment if successful to show 100%
             if (progress < 100) {
                  setIsUpdating(false);
             }
@@ -161,53 +159,63 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                     <button 
                                         onClick={handleUpdateNow}
                                         disabled={isUpdating}
-                                        className="group flex-1 sm:flex-initial justify-center px-6 md:px-8 py-3 md:py-4 bg-purple-600 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-xl hover:bg-purple-500 transition-all flex items-center space-x-3 shadow-lg shadow-purple-500/20 disabled:opacity-50"
+                                        className={`group flex-1 sm:flex-initial justify-center px-6 md:px-8 py-3 md:py-4 ${isUpdating ? 'bg-purple-800' : 'bg-purple-600 hover:bg-purple-500'} text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-xl transition-all flex items-center space-x-3 shadow-lg shadow-purple-500/20 disabled:opacity-80 disabled:cursor-not-allowed`}
                                     >
-                                        <ArrowUpCircle size={14} className={isUpdating ? 'animate-bounce' : ''} />
-                                        <span>{isUpdating ? 'Updating...' : 'Update_Now'}</span>
+                                        {isUpdating ? (
+                                            <Loader2 size={14} className="animate-spin" />
+                                        ) : (
+                                            <ArrowUpCircle size={14} className="group-hover:translate-y-[-2px] transition-transform" />
+                                        )}
+                                        <span>{isUpdating ? 'Executing_Core_Update...' : 'Update_Now'}</span>
                                     </button>
                                 ) : (
                                     <div className="px-4 py-2 bg-rose-500/10 border border-rose-500/30 rounded-xl text-[10px] font-bold text-rose-400 uppercase tracking-wide">
-                                        Auto-Update Unavailable (Git/Proc_Open Disabled). Please update manually via FTP.
+                                        Git/Proc_Open Restricted.
                                     </div>
                                 )
                             )}
                         </div>
                     </div>
 
-                    {/* LIVE TERMINAL LOGS */}
+                    {/* LIVE TERMINAL LOGS - PLACED DIRECTLY UNDER STATUS */}
                     <AnimatePresence>
                         {isUpdating && (
                             <motion.div 
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                className="mt-8 overflow-hidden"
+                                className="mt-10 relative z-10"
                             >
-                                <div className="bg-[#0c0c0c] border border-white/10 rounded-xl p-4 font-mono text-xs max-h-64 overflow-y-auto custom-scrollbar">
-                                    <div className="flex justify-between items-center mb-2 pb-2 border-b border-white/5">
-                                        <span className="text-slate-500 uppercase tracking-widest text-[10px]">System_Log</span>
-                                        <span className="text-purple-400 font-bold">{progress}%</span>
+                                <div className="bg-black/60 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                                    <div className="px-6 py-3 bg-white/5 border-b border-white/5 flex justify-between items-center">
+                                        <div className="flex items-center space-x-2">
+                                            <Terminal size={12} className="text-purple-400" />
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Live_Deployment_Stream</span>
+                                        </div>
+                                        <span className="text-purple-400 font-mono text-xs font-bold">{progress}%</span>
                                     </div>
-                                    <div className="space-y-1">
-                                        {updateLogs.length === 0 && (
-                                            <div className="text-slate-500 italic">Initializing stream connection...</div>
-                                        )}
-                                        {updateLogs.map((log, i) => (
-                                            <div key={i} className={`flex items-start space-x-2 ${log.status === 'error' ? 'text-rose-400' : log.status === 'success' ? 'text-green-400' : 'text-slate-300'}`}>
-                                                <span className="text-slate-600">[{log.timestamp}]</span>
-                                                <span>{log.message}</span>
-                                            </div>
-                                        ))}
-                                        <div ref={logsEndRef} />
+                                    <div className="p-6 font-mono text-[11px] leading-relaxed max-h-80 overflow-y-auto custom-scrollbar bg-black/40">
+                                        <div className="space-y-1.5">
+                                            {updateLogs.length === 0 && (
+                                                <div className="text-slate-500 italic animate-pulse">Establishing handshake with repository...</div>
+                                            )}
+                                            {updateLogs.map((log, i) => (
+                                                <div key={i} className={`flex items-start space-x-3 ${log.status === 'error' ? 'text-rose-400' : log.status === 'success' ? 'text-green-400' : 'text-slate-300'}`}>
+                                                    <span className="text-slate-600 shrink-0 select-none">[{log.timestamp}]</span>
+                                                    <span className="break-all whitespace-pre-wrap">{log.message}</span>
+                                                </div>
+                                            ))}
+                                            <div ref={logsEndRef} />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden">
-                                    <motion.div 
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${progress}%` }}
-                                        className="h-full bg-purple-500"
-                                    />
+                                    {/* PROGRESS BAR */}
+                                    <div className="w-full bg-white/5 h-1.5 relative overflow-hidden">
+                                        <motion.div 
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${progress}%` }}
+                                            className="h-full bg-gradient-to-r from-purple-600 to-cyan-500 shadow-[0_0_15px_#a855f7]"
+                                        />
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
@@ -217,7 +225,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                         <motion.div 
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className={`mt-8 p-4 rounded-xl border ${flash.updateAvailable ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-green-500/10 border-green-500/30 text-green-400'} flex items-center space-x-3`}
+                            className={`mt-8 p-4 rounded-xl border ${flash.updateAvailable ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-green-500/10 border-green-500/30 text-green-400'} flex items-center space-x-3 relative z-10`}
                         >
                             {flash.updateAvailable ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
                             <span className="text-xs font-bold uppercase tracking-wider">{flash.message}</span>
@@ -226,7 +234,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                 </div>
 
                 {/* DATABASE STATUS */}
-                {(hasLocalMigrations || hasRemoteMigrations) && (
+                {(hasLocalMigrations || hasRemoteMigrations) && !isUpdating && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-amber-500/5 border border-amber-500/20 rounded-[2rem] p-8">
                         <div className="flex items-center space-x-3 mb-6">
                             <Database size={20} className="text-amber-500" />
@@ -270,7 +278,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                 )}
 
                 {/* CHANGED FILES */}
-                {hasChangedFiles && (
+                {hasChangedFiles && !isUpdating && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-black/40 border border-white/5 rounded-[2rem] p-8">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center space-x-3">
@@ -292,96 +300,98 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                     </motion.div>
                 )}
 
-                {/* LOGS & ENV */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-6">
-                        <div className="flex items-center space-x-3 px-2">
-                            <Terminal size={16} className="text-purple-500" />
-                            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white">Changelog_Stream</h4>
-                        </div>
+                {/* LOGS & DIAGNOSTICS */}
+                {!isUpdating && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 space-y-6">
+                            <div className="flex items-center space-x-3 px-2">
+                                <Terminal size={16} className="text-purple-500" />
+                                <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white">Changelog_Stream</h4>
+                            </div>
 
-                        <div className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden">
-                            {commits.map((commit, i) => (
-                                <motion.div 
-                                    key={commit.hash}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    className="p-6 border-b border-white/5 hover:bg-white/5 transition-colors group"
-                                >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="flex items-center space-x-3">
-                                            <GitCommit size={16} className="text-slate-600 group-hover:text-purple-400 transition-colors" />
-                                            <span className="text-xs font-mono text-purple-400/60 group-hover:text-purple-400 transition-colors">{commit.hash}</span>
+                            <div className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden">
+                                {commits.map((commit, i) => (
+                                    <motion.div 
+                                        key={commit.hash}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        className="p-6 border-b border-white/5 hover:bg-white/5 transition-colors group"
+                                    >
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex items-center space-x-3">
+                                                <GitCommit size={16} className="text-slate-600 group-hover:text-purple-400 transition-colors" />
+                                                <span className="text-xs font-mono text-purple-400/60 group-hover:text-purple-400 transition-colors">{commit.hash}</span>
+                                            </div>
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{commit.time}</span>
                                         </div>
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{commit.time}</span>
-                                    </div>
-                                    <p className="text-sm font-bold text-slate-300 group-hover:text-white transition-colors pl-7">{commit.message}</p>
-                                    <div className="pl-7 mt-2 text-[9px] font-black uppercase tracking-widest text-slate-600">
-                                        Authored by: {commit.author}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="flex items-center space-x-3 px-2">
-                            <Server size={16} className="text-cyan-500" />
-                            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white">System_Diagnostics</h4>
-                        </div>
-                        
-                        <div className="bg-black/20 border border-white/5 rounded-2xl p-6 space-y-6">
-                             <div className="space-y-2">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">PHP Runtime</span>
-                                <div className="text-sm font-mono text-white flex justify-between">
-                                    <span>{systemInfo?.php_version || '8.x'}</span>
-                                    <span className="text-white/20 text-[10px]">{systemInfo?.os}</span>
-                                </div>
-                            </div>
-                            <div className="h-px bg-white/5" />
-                            <div className="space-y-2">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Core Framework</span>
-                                <div className="text-sm font-mono text-white">Laravel {systemInfo?.laravel_version}</div>
-                            </div>
-                            <div className="h-px bg-white/5" />
-                             <div className="space-y-2">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Environment</span>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        <div className={`w-2 h-2 rounded-full animate-pulse ${systemInfo?.environment === 'production' ? 'bg-green-500' : 'bg-amber-500'}`} />
-                                        <span className={`text-sm font-bold uppercase ${systemInfo?.environment === 'production' ? 'text-green-500' : 'text-amber-500'}`}>{systemInfo?.environment || 'Unknown'}</span>
-                                    </div>
-                                    {systemInfo?.debug_mode && (
-                                        <span className="text-[8px] font-black text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 uppercase tracking-wider">Debug_Mode</span>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="h-px bg-white/5" />
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">Database</span>
-                                    <span className="text-xs text-white uppercase font-bold">{systemInfo?.database_connection}</span>
-                                </div>
-                                <div>
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">Cache</span>
-                                    <span className="text-xs text-white uppercase font-bold">{systemInfo?.cache_driver}</span>
-                                </div>
+                                        <p className="text-sm font-bold text-slate-300 group-hover:text-white transition-colors pl-7">{commit.message}</p>
+                                        <div className="pl-7 mt-2 text-[9px] font-black uppercase tracking-widest text-slate-600">
+                                            Authored by: {commit.author}
+                                        </div>
+                                    </motion.div>
+                                ))}
                             </div>
                         </div>
 
-                        <div className="bg-cyan-500/5 border border-cyan-500/10 rounded-2xl p-6">
-                            <div className="flex items-center space-x-3 mb-4">
-                                <Activity className="text-cyan-400" size={20} />
-                                <span className="text-xs font-black uppercase tracking-widest text-white">Server_Time</span>
+                        <div className="space-y-6">
+                            <div className="flex items-center space-x-3 px-2">
+                                <Server size={16} className="text-cyan-500" />
+                                <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white">System_Diagnostics</h4>
                             </div>
-                            <p className="text-sm font-mono text-cyan-400">
-                                {systemInfo?.server_time}
-                            </p>
-                            <p className="text-[9px] text-cyan-500/50 mt-1 uppercase tracking-widest">{systemInfo?.timezone}</p>
+                            
+                            <div className="bg-black/20 border border-white/5 rounded-2xl p-6 space-y-6">
+                                <div className="space-y-2">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">PHP Runtime</span>
+                                    <div className="text-sm font-mono text-white flex justify-between">
+                                        <span>{systemInfo?.php_version || '8.x'}</span>
+                                        <span className="text-white/20 text-[10px]">{systemInfo?.os}</span>
+                                    </div>
+                                </div>
+                                <div className="h-px bg-white/5" />
+                                <div className="space-y-2">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Core Framework</span>
+                                    <div className="text-sm font-mono text-white">Laravel {systemInfo?.laravel_version}</div>
+                                </div>
+                                <div className="h-px bg-white/5" />
+                                <div className="space-y-2">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Environment</span>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <div className={`w-2 h-2 rounded-full animate-pulse ${systemInfo?.environment === 'production' ? 'bg-green-500' : 'bg-amber-500'}`} />
+                                            <span className={`text-sm font-bold uppercase ${systemInfo?.environment === 'production' ? 'text-green-500' : 'text-amber-500'}`}>{systemInfo?.environment || 'Unknown'}</span>
+                                        </div>
+                                        {systemInfo?.debug_mode && (
+                                            <span className="text-[8px] font-black text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 uppercase tracking-wider">Debug_Mode</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="h-px bg-white/5" />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">Database</span>
+                                        <span className="text-xs text-white uppercase font-bold">{systemInfo?.database_connection}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">Cache</span>
+                                        <span className="text-xs text-white uppercase font-bold">{systemInfo?.cache_driver}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-cyan-500/5 border border-cyan-500/10 rounded-2xl p-6">
+                                <div className="flex items-center space-x-3 mb-4">
+                                    <Activity className="text-cyan-400" size={20} />
+                                    <span className="text-xs font-black uppercase tracking-widest text-white">Server_Time</span>
+                                </div>
+                                <p className="text-sm font-mono text-cyan-400">
+                                    {systemInfo?.server_time}
+                                </p>
+                                <p className="text-[9px] text-cyan-500/50 mt-1 uppercase tracking-widest">{systemInfo?.timezone}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
             </div>
         </AuthenticatedLayout>
