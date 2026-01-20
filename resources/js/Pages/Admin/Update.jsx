@@ -362,11 +362,13 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                         </div>
 
                         <div className="space-y-6">
-                            <div className="flex items-center space-x-3 px-2">
-                                <Server size={16} className="text-cyan-500" />
-                                <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white">System_Diagnostics</h4>
-                            </div>
-                            
+                                                    <div className="flex items-center space-x-3 px-2">
+                                                        <Server size={16} className="text-cyan-500" />
+                                                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white flex items-center gap-2">
+                                                            System_Diagnostics
+                                                            <Activity size={10} className="text-cyan-500/50 animate-pulse" />
+                                                        </h4>
+                                                    </div>                            
                             <div className="bg-black/20 border border-white/5 rounded-2xl p-6 space-y-6">
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">PHP Runtime</span>
