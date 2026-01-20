@@ -13,6 +13,8 @@ class Project extends Model
     protected $fillable = [
         'user_id',
         'title',
+        'category',
+        'tags',
         'slug',
         'code',
         'settings',
@@ -26,6 +28,7 @@ class Project extends Model
         'code' => 'array',
         'settings' => 'array',
         'is_public' => 'boolean',
+        'tags' => 'array',
     ];
 
     public function user(): BelongsTo

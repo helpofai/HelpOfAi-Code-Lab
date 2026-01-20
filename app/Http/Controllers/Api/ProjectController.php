@@ -26,6 +26,8 @@ class ProjectController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'tags' => 'nullable|array',
             'code' => 'required|array',
             'settings' => 'nullable|array',
             'is_public' => 'boolean',
@@ -47,6 +49,8 @@ class ProjectController extends Controller
         // Save metadata to Database (without heavy code blob)
         $project = Auth::user()->projects()->create([
             'title' => $validated['title'],
+            'category' => $validated['category'] ?? null,
+            'tags' => $validated['tags'] ?? [],
             'slug' => $slug,
             'code' => [], // Keep empty in DB
             'settings' => $validated['settings'] ?? [],
@@ -95,6 +99,8 @@ class ProjectController extends Controller
 
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'tags' => 'nullable|array',
             'code' => 'sometimes|array',
             'settings' => 'nullable|array',
             'is_public' => 'boolean',
@@ -122,6 +128,12 @@ class ProjectController extends Controller
         ];
 
         // Explicitly check if keys exist to allow toggling/clearing
+        if (array_key_exists('category', $validated)) {
+            $updateData['category'] = $validated['category'];
+        }
+        if (array_key_exists('tags', $validated)) {
+            $updateData['tags'] = $validated['tags'];
+        }
         if (array_key_exists('is_public', $validated)) {
             $updateData['is_public'] = $validated['is_public'];
         }

@@ -186,7 +186,21 @@ export default function Editor({ auth, project: initialProject }) {
 
     return (
         <div className="h-screen bg-[#131417] flex flex-col font-sans overflow-hidden">
-            <Head title={title || 'Editor'} />
+            <Head>
+                <title>{projectData?.meta_title || title || 'Editor'} // HOACodeLab</title>
+                <meta name="description" content={projectData?.meta_description || 'View and edit this neural module on HOACodeLab.'} />
+                <meta name="keywords" content={projectData?.meta_keywords || 'code, editor, html, css, js'} />
+                
+                {/* Open Graph */}
+                <meta property="og:title" content={projectData?.meta_title || title || 'Neural Module'} />
+                <meta property="og:description" content={projectData?.meta_description || 'Explore this high-performance code experiment.'} />
+                <meta property="og:type" content="article" />
+                
+                {/* Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={projectData?.meta_title || title || 'Neural Module'} />
+                <meta name="twitter:description" content={projectData?.meta_description || 'Explore this high-performance code experiment.'} />
+            </Head>
             
             <EditorHeader 
                 handleSave={handleSave} 
