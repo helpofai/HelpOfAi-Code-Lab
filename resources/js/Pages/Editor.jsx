@@ -27,8 +27,15 @@ export default function CodeEditor({ auth, project: initialProject }) {
     const [showConsole, setShowConsole] = useState(false);
     const [logs, setLogs] = useState([]);
     const [isFormatting, setIsFormatting] = useState(false);
-    const [collections, setCollections] = useState([]);
     const [newCollectionTitle, setNewCollectionTitle] = useState('');
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         if (initialProject) {
@@ -177,29 +184,29 @@ export default function CodeEditor({ auth, project: initialProject }) {
             <Head title={project ? project.title : 'Neural Lab // Editor'} />
 
             {/* HEADER */}
-            <header className="h-16 bg-[#010101] border-b border-white/5 flex items-center justify-between px-6 z-50">
-                <div className="flex items-center space-x-6">
+            <header className="h-16 bg-[#010101] border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-50 shrink-0">
+                <div className="flex items-center space-x-4 md:space-x-6">
                     <Link href="/dashboard" className="flex items-center space-x-3 group">
                         <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg group-hover:bg-cyan-500/20 transition-all">
                             <Code2 className="text-cyan-400" size={20} />
                         </div>
-                        <span className="font-black tracking-tighter text-white uppercase text-sm">HOACodeLab</span>
+                        <span className="font-black tracking-tighter text-white uppercase text-sm hidden md:inline">HOACodeLab</span>
                     </Link>
-                    <div className="h-6 w-px bg-white/10"></div>
+                    <div className="h-6 w-px bg-white/10 hidden md:block"></div>
                     <div className="flex flex-col">
                         <input 
                             value={title} 
                             onChange={(e) => useProjectStore.getState().setTitle(e.target.value)}
-                            className="bg-transparent border-none p-0 text-white font-bold text-sm focus:ring-0 w-48 placeholder-gray-600"
+                            className="bg-transparent border-none p-0 text-white font-bold text-sm focus:ring-0 w-32 md:w-48 placeholder-gray-600 truncate"
                             placeholder="Untitled_Module..."
                         />
-                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-none mt-1">Node: {auth.user.name}</span>
+                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-none mt-1 hidden md:block">Node: {auth.user.name}</span>
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-3">
-                    <button onClick={formatCode} className="px-4 py-2 bg-[#252830] hover:bg-[#343742] text-white rounded-md text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2">
-                        <Wand2 size={14} className={isFormatting ? 'animate-spin' : ''} /> Format
+                <div className="flex items-center space-x-2 md:space-x-3">
+                    <button onClick={formatCode} className="px-3 md:px-4 py-2 bg-[#252830] hover:bg-[#343742] text-white rounded-md text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2">
+                        <Wand2 size={14} className={isFormatting ? 'animate-spin' : ''} /> <span className="hidden md:inline">Format</span>
                     </button>
                     <button onClick={() => setActiveSidebar('settings')} className="p-2.5 bg-[#252830] hover:bg-[#343742] text-white rounded-md transition-all">
                         <Settings size={16} />
@@ -207,14 +214,14 @@ export default function CodeEditor({ auth, project: initialProject }) {
                     <button 
                         onClick={handleSave} 
                         disabled={isSaving}
-                        className={`px-6 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
+                        className={`px-4 md:px-6 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
                             isOwner || !project ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:bg-white' : 'bg-purple-600 text-white hover:bg-purple-500 shadow-[0_0_20px_rgba(139,92,246,0.3)]'
                         }`}
                     >
                         {isSaving ? (
-                            <Loader2 size={14} className="animate-spin mr-2" />
-                        ) : (isOwner || !project ? <Cloud size={14} className="mr-2" /> : <GitFork size={14} className="mr-2" />)}
-                        {isOwner || !project ? 'Save_Sync' : 'Fork_Module'}
+                            <Loader2 size={14} className="animate-spin md:mr-2" />
+                        ) : (isOwner || !project ? <Cloud size={14} className="md:mr-2" /> : <GitFork size={14} className="md:mr-2" />)}
+                        <span className="hidden md:inline">{isOwner || !project ? 'Save_Sync' : 'Fork_Module'}</span>
                     </button>
                 </div>
             </header>
@@ -222,18 +229,18 @@ export default function CodeEditor({ auth, project: initialProject }) {
             <main className="flex-1 flex flex-col min-h-0 bg-[#131417]">
                 <PanelGroup direction="vertical">
                     <Panel defaultSize={50} minSize={20}>
-                        <PanelGroup direction="horizontal">
+                        <PanelGroup direction={isMobile ? "vertical" : "horizontal"}>
                             {['html', 'css', 'js'].map((type, idx) => (
                                 <React.Fragment key={type}>
                                     <Panel defaultSize={33.33} minSize={10}>
-                                        <div className="h-full flex flex-col border-r border-white/5 bg-[#1d1e22]">
-                                            <div className="px-4 py-2 bg-[#010101] border-b border-white/5 flex items-center justify-between">
+                                        <div className="h-full flex flex-col border-b md:border-b-0 md:border-r border-white/5 bg-[#1d1e22]">
+                                            <div className="px-4 py-2 bg-[#010101] border-b border-white/5 flex items-center justify-between shrink-0">
                                                 <div className="flex items-center space-x-2">
                                                     <span className={`w-2 h-2 rounded-full ${type === 'html' ? 'bg-orange-500' : type === 'css' ? 'bg-blue-500' : 'bg-yellow-400'}`} />
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{type}</span>
                                                 </div>
                                             </div>
-                                            <div className="flex-1 min-h-0">
+                                            <div className="flex-1 min-h-0 relative">
                                                 <Editor
                                                     height="100%"
                                                     theme="vs-dark"
@@ -246,8 +253,12 @@ export default function CodeEditor({ auth, project: initialProject }) {
                                         </div>
                                     </Panel>
                                     {idx < 2 && (
-                                        <PanelResizeHandle className="w-1 bg-black hover:bg-cyan-500/30 transition-colors flex items-center justify-center group cursor-col-resize">
-                                            <GripVertical size={14} className="text-white/10 group-hover:text-cyan-400" />
+                                        <PanelResizeHandle className={`bg-black hover:bg-cyan-500/30 transition-colors flex items-center justify-center group ${isMobile ? 'h-1 cursor-row-resize' : 'w-1 cursor-col-resize'}`}>
+                                            {isMobile ? (
+                                                <GripHorizontal size={14} className="text-white/10 group-hover:text-cyan-400" />
+                                            ) : (
+                                                <GripVertical size={14} className="text-white/10 group-hover:text-cyan-400" />
+                                            )}
                                         </PanelResizeHandle>
                                     )}
                                 </React.Fragment>
@@ -301,32 +312,32 @@ export default function CodeEditor({ auth, project: initialProject }) {
             </main>
 
             {/* EXPANDED FOOTER */}
-            <footer className="h-10 bg-[#010101] border-t border-white/5 flex items-center justify-between px-4 shrink-0">
-                <div className="flex items-center h-full">
+            <footer className="h-10 bg-[#010101] border-t border-white/5 flex items-center justify-between px-4 shrink-0 overflow-x-auto">
+                <div className="flex items-center h-full min-w-max">
                     <button onClick={() => setShowConsole(!showConsole)} className={`flex items-center space-x-2 px-4 h-full transition-all ${showConsole ? 'bg-white/10 text-cyan-400 shadow-[inset_0_2px_0_#06b6d4]' : 'text-slate-500 hover:text-white'}`}>
-                        <Terminal size={12} /> <span className="text-[9px] font-black uppercase tracking-widest">Console</span>
+                        <Terminal size={12} /> <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Console</span>
                     </button>
                     <div className="w-px h-4 bg-white/10 mx-1"></div>
                     <button onClick={() => setActiveSidebar('assets')} className={`flex items-center space-x-2 px-4 h-full transition-all ${activeSidebar === 'assets' ? 'bg-white/10 text-cyan-400 shadow-[inset_0_2px_0_#06b6d4]' : 'text-slate-500 hover:text-white'}`}>
-                        <Package size={12} /> <span className="text-[9px] font-black uppercase tracking-widest">Assets</span>
+                        <Package size={12} /> <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Assets</span>
                     </button>
                     <button onClick={() => setActiveSidebar('comments')} className={`flex items-center space-x-2 px-4 h-full transition-all ${activeSidebar === 'comments' ? 'bg-white/10 text-cyan-400 shadow-[inset_0_2px_0_#06b6d4]' : 'text-slate-500 hover:text-white'}`}>
-                        <MessageSquare size={12} /> <span className="text-[9px] font-black uppercase tracking-widest">Comments</span>
+                        <MessageSquare size={12} /> <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Comments</span>
                     </button>
                 </div>
 
-                <div className="flex items-center h-full space-x-px">
+                <div className="flex items-center h-full space-x-px min-w-max">
                     <button onClick={() => { setActiveModal('collection'); fetchCollections(); }} className="flex items-center space-x-2 px-4 h-full text-slate-500 hover:text-white transition-all border-l border-white/5">
-                        <FolderPlus size={12} /> <span className="text-[9px] font-black uppercase tracking-widest">Collection</span>
+                        <FolderPlus size={12} /> <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Collection</span>
                     </button>
                     <button onClick={handleFork} className="flex items-center space-x-2 px-4 h-full text-slate-500 hover:text-white transition-all border-l border-white/5">
-                        <GitFork size={12} /> <span className="text-[9px] font-black uppercase tracking-widest">Fork</span>
+                        <GitFork size={12} /> <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Fork</span>
                     </button>
                     <button onClick={() => setActiveModal('embed')} className="flex items-center space-x-2 px-4 h-full text-slate-500 hover:text-white transition-all border-l border-white/5">
-                        <Code size={12} /> <span className="text-[9px] font-black uppercase tracking-widest">Embed</span>
+                        <Code size={12} /> <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Embed</span>
                     </button>
                     <button onClick={handleExport} className="flex items-center space-x-2 px-4 h-full text-slate-500 hover:text-white transition-all border-l border-white/5">
-                        <Download size={12} /> <span className="text-[9px] font-black uppercase tracking-widest">Export</span>
+                        <Download size={12} /> <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Export</span>
                     </button>
                     <button onClick={() => setActiveModal('share')} className="flex items-center space-x-2 px-6 h-full bg-cyan-500 text-black font-black uppercase text-[9px] tracking-widest hover:bg-white transition-all">
                         <Share2 size={12} /> <span>Share</span>

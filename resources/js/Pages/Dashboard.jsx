@@ -68,7 +68,7 @@ export default function Dashboard() {
                     
                     <AuthenticatedLayout
                         header={
-                            <div className="flex justify-between items-center w-full">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 md:gap-0">
                                 <div className="flex items-center space-x-4">
                                     <div className="p-2 bg-cyan-500/10 border border-cyan-400/30 rounded-lg">
                                         <Activity className="text-cyan-400" size={20} />
@@ -79,7 +79,7 @@ export default function Dashboard() {
                                     </div>
                                 </div>
                                 
-                                <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-4 w-full md:w-auto justify-between md:justify-end">
                                     <div className={`px-3 py-1 rounded-lg border text-[9px] font-black uppercase tracking-widest ${getRoleColor(auth.user.role)}`}>
                                         {auth.user.role}_ACCESS
                                     </div>
@@ -95,20 +95,20 @@ export default function Dashboard() {
                     >
                         <Head title="Dashboard" />
                         
-                        <div className="relative min-h-full p-8 lg:p-12 overflow-y-auto">
+                        <div className="relative min-h-full p-4 md:p-8 lg:p-12 overflow-y-auto">
                             <div className="max-w-7xl mx-auto relative z-10">
                                 {/* STATS STRIP */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12">
                                     {[
                                         { label: 'CORES_ACTIVE', val: projects.length, icon: Database, color: 'text-cyan-400' },
                                         { label: 'NODE_HEALTH', val: '98%', icon: ShieldCheck, color: 'text-emerald-400' },
                                         { label: 'DATA_FLOW', val: '0.04ms', icon: Zap, color: 'text-amber-400' },
                                         { label: 'USER_AUTH', val: 'VERIFIED', icon: UserCheck, color: 'text-blue-400' }
                                     ].map((s, i) => (
-                                        <div key={i} className="bg-black/40 backdrop-blur-xl border border-white/5 p-6 rounded-2xl">
+                                        <div key={i} className="bg-black/40 backdrop-blur-xl border border-white/5 p-4 md:p-6 rounded-2xl">
                                             <s.icon className={`${s.color} mb-3 opacity-60`} size={18} />
                                             <div className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] mb-1">{s.label}</div>
-                                            <div className="text-xl font-black text-white tracking-tighter">{s.val}</div>
+                                            <div className="text-lg md:text-xl font-black text-white tracking-tighter">{s.val}</div>
                                         </div>
                                     ))}
                                 </div>

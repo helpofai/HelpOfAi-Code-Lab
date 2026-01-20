@@ -76,23 +76,23 @@ export default function Explore() {
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex justify-between items-center w-full">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 md:gap-0">
                     <div className="flex items-center space-x-4">
                         <div className="p-2 bg-purple-500/10 border border-purple-400/30 rounded-lg">
                             <Globe className="text-purple-400" size={20} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-white tracking-tighter uppercase leading-tight italic">Global_Network</h2>
+                            <h2 className="text-lg md:text-xl font-black text-white tracking-tighter uppercase leading-tight italic">Global_Network</h2>
                             <p className="text-[8px] text-white/30 uppercase tracking-[0.4em] font-bold">Public Neural Clusters</p>
                         </div>
                     </div>
                     
-                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
-                        <button onClick={() => setFilter('latest')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${filter === 'latest' ? 'bg-cyan-500 text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}>
-                            <Clock size={12} className="inline mr-2" /> Latest_Cores
+                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 w-full md:w-auto">
+                        <button onClick={() => setFilter('latest')} className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${filter === 'latest' ? 'bg-cyan-500 text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}>
+                            <Clock size={12} className="inline mr-2" /> Latest
                         </button>
-                        <button onClick={() => setFilter('random')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${filter === 'random' ? 'bg-purple-500 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}>
-                            <Shuffle size={12} className="inline mr-2" /> Random_Seeds
+                        <button onClick={() => setFilter('random')} className={`flex-1 md:flex-none px-4 md:px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${filter === 'random' ? 'bg-purple-500 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}>
+                            <Shuffle size={12} className="inline mr-2" /> Random
                         </button>
                     </div>
                 </div>
@@ -100,7 +100,7 @@ export default function Explore() {
         >
             <Head title="Explore Neural Cores" />
             
-            <div className="relative min-h-full p-10 lg:p-16 overflow-y-auto">
+            <div className="relative min-h-full p-4 md:p-10 lg:p-16 overflow-y-auto">
                 <AnimatedGrid />
                 
                 <div className="max-w-screen-2xl mx-auto relative z-10">
@@ -108,13 +108,13 @@ export default function Explore() {
                         {isLoading ? (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-48 space-y-6">
                                 <div className="w-16 h-16 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
-                                <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em] animate-pulse">Syncing_Global_Buffer...</span>
+                                <span className="text-xs font-black text-cyan-500 uppercase tracking-[0.5em] animate-pulse">Syncing_Global_Buffer...</span>
                             </motion.div>
                         ) : (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
                                 {projects.map((project, idx) => (
                                     <motion.div key={project.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                                        className="group relative bg-[#0f172a]/40 border border-white/10 rounded-3xl overflow-hidden hover:border-white/30 transition-all duration-500"
+                                        className="group relative bg-[#0f172a]/40 border border-white/10 rounded-[2rem] md:rounded-3xl overflow-hidden hover:border-white/30 transition-all duration-500"
                                     >
                                         <div className="aspect-[16/10] w-full bg-black relative overflow-hidden border-b border-white/5">
                                             <ProjectThumbnail project={project} />
@@ -123,8 +123,8 @@ export default function Explore() {
                                             </div>
                                         </div>
 
-                                        <div className="p-8">
-                                            <div className="mb-6">
+                                        <div className="p-6 md:p-8">
+                                            <div className="mb-4 md:mb-6">
                                                 <h3 className="text-lg font-black text-white uppercase tracking-tighter truncate group-hover:text-cyan-400 transition-colors italic">{project.title}</h3>
                                                 <div className="flex items-center mt-2 space-x-3 text-[9px] font-bold text-white/20 uppercase tracking-widest">
                                                     <User size={12} className="text-purple-500" />

@@ -1,1 +1,0 @@
-import{c as e}from"./code-xml-CM9DqjRW.js";const o=[["path",{d:"M12 19h8",key:"baeox8"}],["path",{d:"m4 17 6-6-6-6",key:"1yngyt"}]],c=e("terminal",o);const t=[["path",{d:"M18 6 6 18",key:"1bl5f8"}],["path",{d:"m6 6 12 12",key:"d8bk6v"}]],n=e("x",t);export{c as T,n as X};
