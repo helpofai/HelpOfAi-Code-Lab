@@ -6,12 +6,16 @@ const useProjectStore = create((set) => ({
     js: 'console.log("Welcome to HOACodeLab!");',
     title: 'Untitled Project',
     externalLibraries: [],
+    fontSize: 14,
+    wordWrap: 'on',
     
     setHtml: (html) => set({ html }),
     setCss: (css) => set({ css }),
     setJs: (js) => set({ js }),
     setTitle: (title) => set({ title }),
     setExternalLibraries: (libs) => set({ externalLibraries: libs }),
+    setFontSize: (size) => set({ fontSize: size }),
+    setWordWrap: (wrap) => set({ wordWrap: wrap }),
     
     setProject: (project) => set({
         html: project.code?.html || '',
