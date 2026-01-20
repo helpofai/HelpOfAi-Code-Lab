@@ -272,29 +272,33 @@ class UpdateController extends Controller
                         // Append new keys
                         foreach ($exampleKeys as $key => $value) {
                             if (!in_array($key, $existingKeys)) {
-                                $updatedEnvContent .= "\n{$key}={$value}";
+                                $updatedEnvContent = rtrim($updatedEnvContent) . "\n{$key}={$value}\n";
                                 $hasChanges = true;
-                                $this->sendUpdateLog("Added new config: {$key}", 36);
+                                $this->sendUpdateLog("Added new configuration key: {$key}", 36);
                             }
                         }
 
                         // Update APP_VERSION
                         if ($newVersion) {
+                            $this->sendUpdateLog("Detected new version in example: {$newVersion}", 37);
                             $pattern = '/^APP_VERSION=.*$/m';
                             if (preg_match($pattern, $updatedEnvContent)) {
                                 $updatedEnvContent = preg_replace($pattern, "APP_VERSION={$newVersion}", $updatedEnvContent);
                             } else {
-                                $updatedEnvContent .= "\nAPP_VERSION={$newVersion}";
+                                $updatedEnvContent = rtrim($updatedEnvContent) . "\nAPP_VERSION={$newVersion}\n";
                             }
                             $hasChanges = true;
-                            $this->sendUpdateLog("Updated APP_VERSION to {$newVersion}", 38);
                         }
 
                         if ($hasChanges) {
                             File::put($envPath, $updatedEnvContent);
-                            $this->sendUpdateLog("Configuration file updated.", 40, 'success');
+                            $this->sendUpdateLog("Local .env file has been updated.", 39, 'success');
+                            
+                            // CRITICAL: Clear config cache immediately so the next steps see the new version
+                            Process::path(base_path())->run('php artisan config:clear');
+                            $this->sendUpdateLog("Configuration cache cleared.", 40);
                         } else {
-                            $this->sendUpdateLog("Configuration is already up to date.", 40);
+                            $this->sendUpdateLog("No configuration changes needed.", 40);
                         }
                     }
                 } catch (\Exception $e) {
