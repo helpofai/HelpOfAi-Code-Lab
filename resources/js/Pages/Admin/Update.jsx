@@ -36,14 +36,21 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
     const handleUpdateNow = async () => {
         if (!confirm("Are you sure you want to update the system? This might cause brief downtime.")) return;
 
-        console.log("Starting update process...");
+        // Try to get CSRF token from multiple sources
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+                   || usePage().props.auth?.csrf_token;
+
+        if (!token) {
+            alert("Security token missing. Please refresh the page and try again.");
+            return;
+        }
+
+        console.log("Starting update process with token:", token.substring(0, 10) + "...");
         setIsUpdating(true);
         setUpdateLogs([{ message: 'Initializing connection...', timestamp: new Date().toLocaleTimeString(), status: 'info' }]);
         setProgress(5);
 
         try {
-            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            
             const response = await fetch(route('admin.update.start'), {
                 method: 'POST',
                 headers: {
