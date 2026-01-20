@@ -1,0 +1,1 @@
+import{c as e}from"./code-xml-BT3W_Uab.js";const o=[["rect",{width:"18",height:"11",x:"3",y:"11",rx:"2",ry:"2",key:"1w4ew1"}],["path",{d:"M7 11V7a5 5 0 0 1 10 0v4",key:"fwvmzm"}]],s=e("lock",o);const c=[["path",{d:"M5 12h14",key:"1ays0h"}],["path",{d:"M12 5v14",key:"s699le"}]],a=e("plus",c);export{s as L,a as P};
