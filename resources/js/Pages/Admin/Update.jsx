@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Update({ currentVersion, buildId, lastCommitDate, commits, localPendingMigrations, systemInfo }) {
+export default function Update({ currentVersion, buildId, lastCommitDate, commits, localPendingMigrations, systemInfo, gitStatus }) {
     const { flash = {} } = usePage().props;
     const [isChecking, setIsChecking] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -75,6 +75,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
     const hasChangedFiles = flash.changedFiles && flash.changedFiles.length > 0;
     const hasRemoteMigrations = flash.remotePendingMigrations && flash.remotePendingMigrations.length > 0;
     const hasLocalMigrations = localPendingMigrations && localPendingMigrations.length > 0;
+    const latestVersion = flash.latestVersion;
 
     return (
         <AuthenticatedLayout
@@ -101,41 +102,52 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                     <div className="absolute top-0 right-0 p-32 bg-purple-500/10 blur-[100px] rounded-full pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-                        <div>
+                        <div className="w-full">
                             <div className="flex items-center space-x-3 mb-4">
                                 <div className={`w-3 h-3 rounded-full ${flash.updateAvailable ? 'bg-amber-500 animate-pulse' : 'bg-green-500'} shadow-[0_0_10px_currentColor]`} />
                                 <span className="text-[10px] font-black uppercase tracking-widest text-white/50">
                                     Current_Status: {flash.updateAvailable ? 'UPDATE_PENDING' : 'OPTIMAL'}
                                 </span>
                             </div>
-                            <h3 className="text-4xl font-black text-white tracking-tighter mb-2">
-                                NODE_V: <span className="text-purple-400">{currentVersion}</span>
-                                <span className="text-xs text-slate-600 ml-4 font-mono uppercase tracking-widest">Build: {buildId}</span>
-                            </h3>
+                            <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-2">
+                                <h3 className="text-3xl md:text-4xl font-black text-white tracking-tighter">
+                                    VER: <span className="text-purple-400">{currentVersion}</span>
+                                    {latestVersion && latestVersion !== currentVersion && (
+                                        <span className="text-slate-500 ml-2 text-xl">→ <span className="text-amber-400">{latestVersion}</span></span>
+                                    )}
+                                </h3>
+                                <span className="text-[10px] md:text-xs text-slate-600 font-mono uppercase tracking-widest bg-white/5 px-2 py-1 rounded">Build: {buildId}</span>
+                            </div>
                             <p className="text-xs font-mono text-slate-400 flex items-center">
                                 <Clock size={12} className="mr-2" /> Last Sync: {lastCommitDate}
                             </p>
                         </div>
 
-                        <div className="flex space-x-4">
+                        <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3 sm:space-x-4">
                             <button 
                                 onClick={handleCheckUpdate}
                                 disabled={isChecking || isUpdating}
-                                className={`group px-8 py-4 bg-white/5 border border-white/10 text-white font-black uppercase text-xs tracking-widest rounded-xl hover:bg-white/10 transition-all flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed ${isChecking ? 'animate-pulse' : ''}`}
+                                className={`group flex-1 sm:flex-initial justify-center px-6 md:px-8 py-3 md:py-4 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-xl hover:bg-white/10 transition-all flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed ${isChecking ? 'animate-pulse' : ''}`}
                             >
-                                <RefreshCw size={16} className={isChecking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform'} />
+                                <RefreshCw size={14} className={isChecking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform'} />
                                 <span>{isChecking ? 'Syncing...' : 'Check_Updates'}</span>
                             </button>
 
                             {flash.updateAvailable && (
-                                <button 
-                                    onClick={handleUpdateNow}
-                                    disabled={isUpdating}
-                                    className="group px-8 py-4 bg-purple-600 text-white font-black uppercase text-xs tracking-widest rounded-xl hover:bg-purple-500 transition-all flex items-center space-x-3 shadow-lg shadow-purple-500/20 disabled:opacity-50"
-                                >
-                                    <ArrowUpCircle size={16} className={isUpdating ? 'animate-bounce' : ''} />
-                                    <span>{isUpdating ? 'Updating...' : 'Update_Now'}</span>
-                                </button>
+                                gitStatus === 'OK' ? (
+                                    <button 
+                                        onClick={handleUpdateNow}
+                                        disabled={isUpdating}
+                                        className="group flex-1 sm:flex-initial justify-center px-6 md:px-8 py-3 md:py-4 bg-purple-600 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-xl hover:bg-purple-500 transition-all flex items-center space-x-3 shadow-lg shadow-purple-500/20 disabled:opacity-50"
+                                    >
+                                        <ArrowUpCircle size={14} className={isUpdating ? 'animate-bounce' : ''} />
+                                        <span>{isUpdating ? 'Updating...' : 'Update_Now'}</span>
+                                    </button>
+                                ) : (
+                                    <div className="px-4 py-2 bg-rose-500/10 border border-rose-500/30 rounded-xl text-[10px] font-bold text-rose-400 uppercase tracking-wide">
+                                        Auto-Update Unavailable (Git/Proc_Open Disabled). Please update manually via FTP.
+                                    </div>
+                                )
                             )}
                         </div>
                     </div>
