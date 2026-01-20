@@ -1,10 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, usePage } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
     RefreshCw, GitBranch, GitCommit, Clock, 
     CheckCircle, AlertCircle, Server, Terminal,
-    ArrowUpCircle, Activity
+    ArrowUpCircle, Activity, Database
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,6 +14,12 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateLogs, setUpdateLogs] = useState([]);
     const [progress, setProgress] = useState(0);
+    const logsEndRef = useRef(null);
+
+    // Auto-scroll logs
+    useEffect(() => {
+        logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [updateLogs]);
 
     const handleCheckUpdate = () => {
         setIsChecking(true);
@@ -39,36 +45,53 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                 },
             });
 
+            if (!response.ok) throw new Error('Network response was not ok');
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
+            let buffer = '';
 
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n\n');
+                const chunk = decoder.decode(value, { stream: true });
+                buffer += chunk;
+                const lines = buffer.split('\n\n');
+                buffer = lines.pop(); // Keep the last incomplete chunk in the buffer
 
-                lines.forEach(line => {
-                    if (line.startsWith('data: ')) {
+                for (const line of lines) {
+                    if (line.trim().startsWith('data: ')) {
                         try {
-                            const data = JSON.parse(line.substring(6));
-                            setUpdateLogs(prev => [...prev, data]);
+                            const jsonStr = line.replace(/^data: /, '').trim();
+                            if (!jsonStr) continue;
+                            
+                            const data = JSON.parse(jsonStr);
+                            setUpdateLogs(prev => {
+                                // Avoid duplicates if possible
+                                if (prev.length > 0 && prev[prev.length - 1].message === data.message) return prev;
+                                return [...prev, data];
+                            });
+                            
                             if (data.progress) setProgress(data.progress);
-                            if (data.status === 'done') {
+                            
+                            if (data.status === 'done' || data.status === 'success' && data.progress === 100) {
                                 setTimeout(() => window.location.reload(), 2000);
                             }
                         } catch (e) {
-                            console.error('Error parsing stream data', e);
+                            console.warn('Error parsing stream line:', line, e);
                         }
                     }
-                });
+                }
             }
         } catch (error) {
             console.error('Update failed', error);
-            setUpdateLogs(prev => [...prev, { message: 'Connection failed.', status: 'error' }]);
+            setUpdateLogs(prev => [...prev, { message: 'Connection failed or interrupted. Please check logs manually.', status: 'error' }]);
         } finally {
-            setIsUpdating(false);
+            // Keep the "Updating" state for a moment if successful to show 100%
+            if (progress < 100) {
+                 setIsUpdating(false);
+            }
         }
     };
 
@@ -156,7 +179,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                     <AnimatePresence>
                         {isUpdating && (
                             <motion.div 
-                                initial={{ height: 0, opacity: 0 }} 
+                                initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
                                 className="mt-8 overflow-hidden"
@@ -167,19 +190,22 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                         <span className="text-purple-400 font-bold">{progress}%</span>
                                     </div>
                                     <div className="space-y-1">
+                                        {updateLogs.length === 0 && (
+                                            <div className="text-slate-500 italic">Initializing stream connection...</div>
+                                        )}
                                         {updateLogs.map((log, i) => (
                                             <div key={i} className={`flex items-start space-x-2 ${log.status === 'error' ? 'text-rose-400' : log.status === 'success' ? 'text-green-400' : 'text-slate-300'}`}>
                                                 <span className="text-slate-600">[{log.timestamp}]</span>
                                                 <span>{log.message}</span>
                                             </div>
                                         ))}
-                                        <div ref={(el) => el?.scrollIntoView({ behavior: 'smooth' })} />
+                                        <div ref={logsEndRef} />
                                     </div>
                                 </div>
                                 <div className="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden">
                                     <motion.div 
-                                        initial={{ width: 0 }} 
-                                        animate={{ width: `${progress}%` }} 
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${progress}%` }}
                                         className="h-full bg-purple-500"
                                     />
                                 </div>
@@ -353,76 +379,6 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                 {systemInfo?.server_time}
                             </p>
                             <p className="text-[9px] text-cyan-500/50 mt-1 uppercase tracking-widest">{systemInfo?.timezone}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-6">
-                        <div className="flex items-center space-x-3 px-2">
-                            <Terminal size={16} className="text-purple-500" />
-                            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white">Changelog_Stream</h4>
-                        </div>
-
-                        <div className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden">
-                            {commits.map((commit, i) => (
-                                <motion.div 
-                                    key={commit.hash}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    className="p-6 border-b border-white/5 hover:bg-white/5 transition-colors group"
-                                >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="flex items-center space-x-3">
-                                            <GitCommit size={16} className="text-slate-600 group-hover:text-purple-400 transition-colors" />
-                                            <span className="text-xs font-mono text-purple-400/60 group-hover:text-purple-400 transition-colors">{commit.hash}</span>
-                                        </div>
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{commit.time}</span>
-                                    </div>
-                                    <p className="text-sm font-bold text-slate-300 group-hover:text-white transition-colors pl-7">{commit.message}</p>
-                                    <div className="pl-7 mt-2 text-[9px] font-black uppercase tracking-widest text-slate-600">
-                                        Authored by: {commit.author}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="flex items-center space-x-3 px-2">
-                            <Server size={16} className="text-cyan-500" />
-                            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white">Environment</h4>
-                        </div>
-                        
-                        <div className="bg-black/20 border border-white/5 rounded-2xl p-6 space-y-6">
-                             <div className="space-y-2">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">PHP Version</span>
-                                <div className="text-lg font-mono text-white">{window.phpVersion || '8.x'}</div>
-                            </div>
-                            <div className="h-px bg-white/5" />
-                            <div className="space-y-2">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Framework</span>
-                                <div className="text-lg font-mono text-white">Laravel 12.x</div>
-                            </div>
-                            <div className="h-px bg-white/5" />
-                             <div className="space-y-2">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Environment</span>
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                                    <span className="text-sm font-bold text-green-500 uppercase">Production</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-6">
-                            <div className="flex items-center space-x-3 mb-4">
-                                <ArrowUpCircle className="text-purple-400" size={20} />
-                                <span className="text-xs font-black uppercase tracking-widest text-white">Auto_Deploy</span>
-                            </div>
-                            <p className="text-[10px] text-slate-400 leading-relaxed">
-                                Automated deployment pipelines are active. Pushing to 'origin/main' will trigger system rebuilds.
-                            </p>
                         </div>
                     </div>
                 </div>

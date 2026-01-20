@@ -213,6 +213,9 @@ class UpdateController extends Controller
     public function start()
     {
         return response()->stream(function () {
+            if (ob_get_level() > 0) ob_end_flush(); // Close any existing buffers
+            flush();
+
             $this->sendUpdateLog("Starting system update...", 10);
 
             if (!function_exists('proc_open')) {
