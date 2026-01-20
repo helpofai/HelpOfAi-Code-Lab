@@ -212,11 +212,28 @@ class UpdateController extends Controller
 
     public function start()
     {
+        // Set execution time to 5 minutes for slow hosting
+        set_time_limit(300);
+
         return response()->stream(function () {
-            if (ob_get_level() > 0) ob_end_flush(); // Close any existing buffers
+            // Disable all buffering
+            while (ob_get_level() > 0) ob_end_flush();
+            ini_set('output_buffering', 'off');
+            ini_set('zlib.output_compression', false);
+            header('X-Accel-Buffering: no'); // For Nginx
+            header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
+            flush();
+
+            // Send a bit of padding to force some proxy buffers to flush
+            echo ":" . str_repeat(" ", 2048) . "\n\n";
+            flush();
+
+            $this->sendUpdateLog("Establishing secure link with repository...", 5);
             flush();
 
             $this->sendUpdateLog("Starting system update...", 10);
+            flush();
 
             if (!function_exists('proc_open')) {
                 $this->sendUpdateLog("Error: proc_open is disabled. Cannot run update commands.", 100, 'error');

@@ -36,20 +36,26 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
     const handleUpdateNow = async () => {
         if (!confirm("Are you sure you want to update the system? This might cause brief downtime.")) return;
 
+        console.log("Starting update process...");
         setIsUpdating(true);
-        setUpdateLogs([]);
-        setProgress(0);
+        setUpdateLogs([{ message: 'Initializing connection...', timestamp: new Date().toLocaleTimeString(), status: 'info' }]);
+        setProgress(5);
 
         try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            
             const response = await fetch(route('admin.update.start'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                    'X-CSRF-TOKEN': token,
                 },
             });
 
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 100)}`);
+            }
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -57,43 +63,51 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
 
             while (true) {
                 const { value, done } = await reader.read();
-                if (done) break;
+                if (done) {
+                    console.log("Stream reader finished.");
+                    break;
+                }
 
                 const chunk = decoder.decode(value, { stream: true });
                 buffer += chunk;
+                
+                // Process each line in the buffer
                 const lines = buffer.split('\n\n');
-                buffer = lines.pop(); 
+                buffer = lines.pop(); // Keep last part in case it's incomplete
 
                 for (const line of lines) {
-                    if (line.trim().startsWith('data: ')) {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine || trimmedLine.startsWith(':')) continue; // Skip padding/comments
+
+                    if (trimmedLine.startsWith('data: ')) {
                         try {
-                            const jsonStr = line.replace(/^data: /, '').trim();
-                            if (!jsonStr) continue;
-                            
+                            const jsonStr = trimmedLine.replace(/^data: /, '').trim();
                             const data = JSON.parse(jsonStr);
-                            setUpdateLogs(prev => {
-                                if (prev.length > 0 && prev[prev.length - 1].message === data.message) return prev;
-                                return [...prev, data];
-                            });
+                            console.log("Log received:", data.message);
                             
+                            setUpdateLogs(prev => [...prev, data]);
                             if (data.progress) setProgress(data.progress);
                             
                             if (data.status === 'done' || (data.status === 'success' && data.progress === 100)) {
-                                setTimeout(() => window.location.reload(), 2000);
+                                setProgress(100);
+                                setTimeout(() => window.location.reload(), 3000);
                             }
                         } catch (e) {
-                            console.warn('Error parsing stream line:', line, e);
+                            console.error('JSON Parse Error:', e, trimmedLine);
                         }
                     }
                 }
             }
         } catch (error) {
-            console.error('Update failed', error);
-            setUpdateLogs(prev => [...prev, { message: 'Connection failed or interrupted.', status: 'error' }]);
+            console.error('Update Stream Error:', error);
+            setUpdateLogs(prev => [...prev, { 
+                message: `CONNECTION_ERROR: ${error.message}. Check browser console for details.`, 
+                status: 'error',
+                timestamp: new Date().toLocaleTimeString()
+            }]);
         } finally {
-            if (progress < 100) {
-                 setIsUpdating(false);
-            }
+            console.log("Update flow concluded.");
+            // We don't setIsUpdating(false) here to keep the terminal visible if it finished successfully
         }
     };
 
@@ -137,7 +151,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                             <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-2">
                                 <h3 className="text-3xl md:text-4xl font-black text-white tracking-tighter flex items-center gap-3">
                                     VER: <span className="text-purple-400">{currentVersion}</span>
-                                    <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30 uppercase tracking-tighter">Stable</span>
+                                    <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30 uppercase tracking-tighter font-black">Stable</span>
                                     {latestVersion && latestVersion !== currentVersion && (
                                         <span className="text-slate-500 ml-2 text-xl">→ <span className="text-amber-400">{latestVersion}</span></span>
                                     )}
@@ -176,18 +190,18 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                         ) : (
                                             <ArrowUpCircle size={14} className="group-hover:translate-y-[-2px] transition-transform" />
                                         )}
-                                        <span>{isUpdating ? 'Executing_Core_Update...' : 'Update_Now'}</span>
+                                        <span>{isUpdating ? 'Executing_Update...' : 'Update_Now'}</span>
                                     </button>
                                 ) : (
-                                    <div className="px-4 py-2 bg-rose-500/10 border border-rose-500/30 rounded-xl text-[10px] font-bold text-rose-400 uppercase tracking-wide">
-                                        Auto-Update Unavailable (Git/Proc_Open Disabled). Please update manually via FTP.
+                                    <div className="px-4 py-2 bg-rose-500/10 border border-rose-500/30 rounded-xl text-[10px] font-bold text-rose-400 uppercase tracking-wide flex items-center justify-center">
+                                        Git/Proc_Open Restricted.
                                     </div>
                                 )
                             )}
                         </div>
                     </div>
 
-                    {/* LIVE TERMINAL LOGS - PLACED DIRECTLY UNDER STATUS */}
+                    {/* LIVE TERMINAL LOGS */}
                     <AnimatePresence>
                         {isUpdating && (
                             <motion.div 
@@ -206,19 +220,15 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                     </div>
                                     <div className="p-6 font-mono text-[11px] leading-relaxed max-h-80 overflow-y-auto custom-scrollbar bg-black/40">
                                         <div className="space-y-1.5">
-                                            {updateLogs.length === 0 && (
-                                                <div className="text-slate-500 italic animate-pulse">Establishing handshake with repository...</div>
-                                            )}
                                             {updateLogs.map((log, i) => (
                                                 <div key={i} className={`flex items-start space-x-3 ${log.status === 'error' ? 'text-rose-400' : log.status === 'success' ? 'text-green-400' : 'text-slate-300'}`}>
-                                                    <span className="text-slate-600 shrink-0 select-none">[{log.timestamp}]</span>
+                                                    <span className="text-slate-600 shrink-0 select-none">[{log.timestamp || '--:--'}]</span>
                                                     <span className="break-all whitespace-pre-wrap">{log.message}</span>
                                                 </div>
                                             ))}
                                             <div ref={logsEndRef} />
                                         </div>
                                     </div>
-                                    {/* PROGRESS BAR */}
                                     <div className="w-full bg-white/5 h-1.5 relative overflow-hidden">
                                         <motion.div 
                                             initial={{ width: 0 }}
