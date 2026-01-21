@@ -374,6 +374,39 @@ class UpdateController extends Controller
         ]);
     }
 
+    public function migrate()
+    {
+        set_time_limit(300);
+
+        return response()->stream(function () {
+            while (ob_get_level() > 0) ob_end_flush();
+            ini_set('output_buffering', 'off');
+            ini_set('zlib.output_compression', false);
+            header('X-Accel-Buffering: no');
+            header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
+            flush();
+
+            $this->sendUpdateLog("Initializing database migration protocol...", 10);
+            flush();
+
+            try {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                $output = \Illuminate\Support\Facades\Artisan::output();
+                
+                $this->sendUpdateLog($output);
+                $this->sendUpdateLog("Schema update executed successfully.", 100, 'success');
+                $this->sendUpdateLog("System optimal.", 100, 'done');
+            } catch (\Exception $e) {
+                $this->sendUpdateLog("Migration failed: " . $e->getMessage(), 100, 'error');
+            }
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
+
     private function sendUpdateLog($message, $progress = null, $status = 'info')
     {
         $data = [

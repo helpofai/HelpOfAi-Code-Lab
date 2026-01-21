@@ -118,6 +118,54 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
         }
     };
 
+    const handleMigrate = async () => {
+        if (!confirm("Execute database schema update? This action is irreversible.")) return;
+
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+                   || usePage().props.auth?.csrf_token;
+
+        if (!token) return alert("Security token missing.");
+
+        setIsUpdating(true);
+        setUpdateLogs([{ message: 'Initializing schema migration protocol...', timestamp: new Date().toLocaleTimeString(), status: 'info' }]);
+        setProgress(10);
+
+        try {
+            const response = await fetch(route('admin.update.migrate'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n\n');
+                buffer = lines.pop();
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(trimmed.replace(/^data: /, ''));
+                            setUpdateLogs(prev => [...prev, data]);
+                            if (data.progress) setProgress(data.progress);
+                            if (data.status === 'done') setTimeout(() => window.location.reload(), 2000);
+                        } catch (e) {}
+                    }
+                }
+            }
+        } catch (error) {
+            setUpdateLogs(prev => [...prev, { message: `MIGRATION_ERROR: ${error.message}`, status: 'error', timestamp: new Date().toLocaleTimeString() }]);
+        }
+    };
+
     const hasChangedFiles = flash.changedFiles && flash.changedFiles.length > 0;
     const hasRemoteMigrations = flash.remotePendingMigrations && flash.remotePendingMigrations.length > 0;
     const hasLocalMigrations = localPendingMigrations && localPendingMigrations.length > 0;
@@ -270,7 +318,19 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-white/40">Local Pending Migrations</div>
+                                <div className="flex justify-between items-center">
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-white/40">Local Pending Migrations</div>
+                                    {hasLocalMigrations && (
+                                        <button 
+                                            onClick={handleMigrate}
+                                            disabled={isUpdating}
+                                            className="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-black uppercase text-[9px] tracking-widest rounded transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 flex items-center gap-2"
+                                        >
+                                            {isUpdating ? <Loader2 size={10} className="animate-spin" /> : <Database size={10} />}
+                                            Execute_Schema_Update
+                                        </button>
+                                    )}
+                                </div>
                                 {hasLocalMigrations ? (
                                     <ul className="space-y-2">
                                         {localPendingMigrations.map(m => (

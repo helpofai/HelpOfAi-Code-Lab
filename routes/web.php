@@ -59,6 +59,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/admin/update', [\App\Http\Controllers\Admin\UpdateController::class, 'index'])->name('admin.update');
     Route::post('/admin/update/check', [\App\Http\Controllers\Admin\UpdateController::class, 'check'])->name('admin.update.check');
     Route::post('/admin/update/start', [\App\Http\Controllers\Admin\UpdateController::class, 'start'])->name('admin.update.start');
+    Route::post('/admin/update/migrate', [\App\Http\Controllers\Admin\UpdateController::class, 'migrate'])->name('admin.update.migrate');
 
     Route::get('/admin/support', [\App\Http\Controllers\Admin\SupportController::class, 'index'])->name('admin.support');
     Route::get('/admin/support/{ticket}', [\App\Http\Controllers\Admin\SupportController::class, 'show'])->name('admin.support.show');
