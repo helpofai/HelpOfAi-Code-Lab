@@ -63,6 +63,20 @@ export default function UserManagement() {
         }
     };
 
+    const handleTogglePro = async (id) => {
+        setUpdatingId(id);
+        try {
+            const res = await axios.post(`/api/admin/users/${id}/toggle-pro`);
+            const user = users.find(u => u.id === id);
+            const isPro = user.role === 'paid-user';
+            setUsers(users.map(u => u.id === id ? { ...u, role: isPro ? 'user' : 'paid-user' } : u));
+        } catch (e) {
+            alert('Pro status toggle failed.');
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
     const handleDeleteUser = async (id) => {
         if (!confirm('EXTERMINATE NODE: Permanent removal. Continue?')) return;
         try {
@@ -193,6 +207,10 @@ export default function UserManagement() {
                                                             <button onClick={() => { setEditingUser(user); setFormData({ name: user.name, email: user.email, role: user.role }); setShowModal('edit'); }}
                                                                 className="p-2.5 bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 rounded-xl hover:bg-cyan-500 hover:text-white transition-all" title="Edit Node"
                                                             ><Edit size={16} /></button>
+                                                            <button onClick={() => handleTogglePro(user.id)} disabled={user.role === 'admin' || updatingId === user.id}
+                                                                className={`p-2.5 border rounded-xl transition-all ${user.role === 'paid-user' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-black' : 'bg-slate-500/10 text-slate-500 border-slate-500/20 hover:bg-amber-500/20 hover:text-amber-500'}`}
+                                                                title={user.role === 'paid-user' ? 'Revoke Pro' : 'Grant Pro'}
+                                                            ><Crown size={16} /></button>
                                                             <button onClick={() => handleToggleBlock(user.id)} disabled={user.id === auth.user.id}
                                                                 className={`p-2.5 border rounded-xl transition-all ${user.is_blocked ? 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500 hover:text-white' : 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-white'}`}
                                                                 title={user.is_blocked ? 'Unblock' : 'Block'}

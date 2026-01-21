@@ -22,6 +22,10 @@ class Project extends Model
         'meta_title',
         'meta_description',
         'meta_keywords',
+        'og_image',
+        'canonical_url',
+        'category',
+        'tags'
     ];
 
     protected $casts = [

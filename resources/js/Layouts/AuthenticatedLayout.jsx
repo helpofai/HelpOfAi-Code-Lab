@@ -14,7 +14,9 @@ import {
     Globe,
     Users,
     Terminal,
-    LifeBuoy
+    LifeBuoy,
+    FileText,
+    Crown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -30,6 +32,7 @@ export default function AuthenticatedLayout({ header, children }) {
     const userItems = [
         { name: 'Dashboard', icon: LayoutDashboard, href: route('dashboard'), active: route().current('dashboard') },
         { name: 'Explore', icon: Globe, href: route('explore'), active: route().current('explore') },
+        { name: 'Blog', icon: FileText, href: route('blog.index'), active: route().current('blog.index') },
         { name: 'Editor', icon: Code2, href: route('editor'), active: route().current('editor') },
         { name: 'My Projects', icon: Database, href: route('my-projects'), active: route().current('my-projects') },
         { name: 'Support', icon: LifeBuoy, href: route('support.index'), active: route().current('support.index') },
@@ -38,6 +41,8 @@ export default function AuthenticatedLayout({ header, children }) {
     const adminItems = [
         { name: 'Admin Command', icon: Shield, href: route('admin.dashboard'), active: route().current('admin.dashboard') },
         { name: 'User Matrix', icon: Users, href: route('admin.users'), active: route().current('admin.users') },
+        { name: 'Subscription Control', icon: Crown, href: route('admin.subscriptions'), active: route().current('admin.subscriptions') },
+        { name: 'Transmission Log', icon: FileText, href: route('admin.blog.index'), active: route().current('admin.blog.index') },
         { name: 'Support Queue', icon: LifeBuoy, href: route('admin.support'), active: route().current('admin.support') },
         { name: 'Front Management', icon: LayoutDashboard, href: route('admin.front-management'), active: route().current('admin.front-management') },
         { name: 'System Update', icon: Terminal, href: route('admin.update'), active: route().current('admin.update') },

@@ -23,6 +23,7 @@ class User extends Authenticatable
             'password',
             'role',
             'is_blocked',
+            'pro_expires_at',
         ];
     
         /**
@@ -36,6 +37,15 @@ class User extends Authenticatable
         public function isAdmin(): bool
         {
             return $this->role === self::ROLE_ADMIN;
+        }
+
+        public function isPro(): bool
+        {
+            if ($this->isAdmin()) return true;
+            if ($this->role === self::ROLE_PAID_USER) {
+                return is_null($this->pro_expires_at) || $this->pro_expires_at->isFuture();
+            }
+            return false;
         }
     
         public function isPaid(): bool
@@ -64,6 +74,7 @@ class User extends Authenticatable
                 'email_verified_at' => 'datetime',
                 'password' => 'hashed',
                 'is_blocked' => 'boolean',
+                'pro_expires_at' => 'datetime',
             ];
         }
     /**
@@ -80,5 +91,13 @@ class User extends Authenticatable
     public function supportTickets(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(SupportTicket::class);
+    }
+
+    /**
+     * Get the posts for the user.
+     */
+    public function posts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Post::class);
     }
 }

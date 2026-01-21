@@ -16,7 +16,7 @@ import EditorModals from '@/Components/Editor/EditorModals';
 import ConsolePanel from '@/Components/Editor/ConsolePanel';
 
 export default function Editor({ auth, project: initialProject }) {
-    const { html, css, js, setHtml, setCss, setJs, setProject, title, externalLibraries } = useProjectStore();
+    const { html, css, js, setHtml, setCss, setJs, setProject, title, isPrivate, externalLibraries } = useProjectStore();
     const [previewContent, setPreviewContent] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [activeSidebar, setActiveSidebar] = useState(null);
@@ -138,7 +138,7 @@ export default function Editor({ auth, project: initialProject }) {
 
         setIsSaving(true);
         try {
-            const data = { title, code: { html, css, js }, settings: { externalLibraries }, is_public: true };
+            const data = { title, code: { html, css, js }, settings: { externalLibraries }, is_public: !isPrivate, is_private: isPrivate };
             const endpoint = projectData?.id ? `/api/projects/${projectData.id}` : '/api/projects';
             const method = projectData?.id ? 'put' : 'post';
             const res = await axios[method](endpoint, data);
@@ -153,7 +153,7 @@ export default function Editor({ auth, project: initialProject }) {
     const handleFork = async () => {
         if (!projectData?.id) return alert('Initialize module before forking.');
         try {
-            const data = { title: `${title} (Fork)`, code: { html, css, js }, settings: { externalLibraries }, is_public: true };
+            const data = { title: `${title} (Fork)`, code: { html, css, js }, settings: { externalLibraries }, is_public: !isPrivate, is_private: isPrivate };
             const res = await axios.post('/api/projects', data);
             window.location.href = `/editor/${res.data.slug}`;
         } catch(e) {}

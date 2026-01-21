@@ -1,14 +1,19 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, PlusCircle } from 'lucide-react';
+import { X, Trash2, PlusCircle, Lock, Unlock, Crown } from 'lucide-react';
+import { usePage, Link } from '@inertiajs/react';
 import useProjectStore from '@/Stores/useProjectStore';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 
 export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
+    const { auth } = usePage().props;
+    const isPro = auth.user?.role === 'admin' || auth.user?.role === 'paid-user';
+
     const { 
         externalLibraries, setExternalLibraries, 
         fontSize, setFontSize, 
-        wordWrap, setWordWrap 
+        wordWrap, setWordWrap,
+        isPrivate, setIsPrivate
     } = useProjectStore();
 
     return (
@@ -78,6 +83,41 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                                             <div className="flex bg-[var(--bg-main)] p-1 rounded border border-[var(--border)]">
                                                 <button onClick={() => setWordWrap('on')} className={`flex-1 py-2 text-[9px] font-bold uppercase rounded transition-all ${wordWrap === 'on' ? 'bg-[var(--bg-elevated)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>On</button>
                                                 <button onClick={() => setWordWrap('off')} className={`flex-1 py-2 text-[9px] font-bold uppercase rounded transition-all ${wordWrap === 'off' ? 'bg-[var(--bg-elevated)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>Off</button>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-6 border-t border-[var(--border)] space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-[9px] font-black text-cyan-500 uppercase tracking-[0.2em] italic">Privacy_Shield</label>
+                                                {!isPro && (
+                                                    <Link href="#" className="flex items-center gap-1 text-[8px] font-black text-amber-500 uppercase bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                                                        <Crown size={8} /> Upgrade
+                                                    </Link>
+                                                )}
+                                            </div>
+                                            
+                                            <div className={`p-4 rounded-xl border transition-all ${isPrivate ? 'bg-rose-500/5 border-rose-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center gap-3">
+                                                        {isPrivate ? <Lock size={14} className="text-rose-500" /> : <Unlock size={14} className="text-emerald-500" />}
+                                                        <span className="text-[10px] font-bold uppercase tracking-widest">{isPrivate ? 'Private_Core' : 'Public_Stream'}</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => isPro && setIsPrivate(!isPrivate)}
+                                                        disabled={!isPro}
+                                                        className={`relative w-10 h-5 rounded-full transition-colors ${!isPro ? 'bg-slate-800 opacity-50 cursor-not-allowed' : (isPrivate ? 'bg-rose-500' : 'bg-slate-700')}`}
+                                                    >
+                                                        <motion.div 
+                                                            animate={{ x: isPrivate ? 20 : 2 }}
+                                                            className="absolute top-1 w-3 h-3 bg-white rounded-full"
+                                                        />
+                                                    </button>
+                                                </div>
+                                                <p className="text-[8px] leading-relaxed text-[var(--text-muted)] font-medium uppercase tracking-tighter italic">
+                                                    {isPrivate 
+                                                        ? 'Restricted: This node is hidden from the explore grid and search protocols.' 
+                                                        : 'Open: This node is visible to the entire community matrix.'}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>

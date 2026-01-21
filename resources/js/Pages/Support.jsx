@@ -83,6 +83,15 @@ export default function Support({ auth, tickets: initialTickets }) {
         }
     };
 
+    const getPriorityStyles = (priority) => {
+        switch(priority) {
+            case 'high': return 'text-rose-500';
+            case 'medium': return 'text-amber-500';
+            case 'low': return 'text-emerald-500';
+            default: return 'text-cyan-500';
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
             <ProBackground />
@@ -118,7 +127,10 @@ export default function Support({ auth, tickets: initialTickets }) {
                                         <span className="text-[8px] font-mono text-[var(--text-muted)]">{new Date(ticket.created_at).toLocaleDateString()}</span>
                                     </div>
                                     <h3 className="text-sm font-bold uppercase truncate">{ticket.subject}</h3>
-                                    <p className="text-[10px] text-[var(--text-muted)] mt-1 truncate">{ticket.messages[0]?.message || 'No messages'}</p>
+                                    <div className="flex justify-between items-end mt-1">
+                                        <p className="text-[10px] text-[var(--text-muted)] truncate max-w-[70%]">{ticket.messages[0]?.message || 'No messages'}</p>
+                                        <span className={`text-[8px] font-black uppercase tracking-widest ${getPriorityStyles(ticket.priority)}`}>{ticket.priority}</span>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -137,7 +149,7 @@ export default function Support({ auth, tickets: initialTickets }) {
                                             <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
                                                 <span className="uppercase tracking-widest">ID: #{activeTicket.id}</span>
                                                 <span>•</span>
-                                                <span className="uppercase tracking-widest">{activeTicket.priority} Priority</span>
+                                                <span className={`uppercase tracking-widest font-bold ${getPriorityStyles(activeTicket.priority)}`}>{activeTicket.priority} Priority</span>
                                             </div>
                                         </div>
                                     </div>

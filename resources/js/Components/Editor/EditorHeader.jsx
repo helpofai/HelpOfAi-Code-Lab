@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Code2, Settings, Wand2, Cloud, GitFork, Loader2 } from 'lucide-react';
+import { Code2, Settings, Wand2, Cloud, GitFork, Loader2, PanelBottom, PanelRight, PanelTop } from 'lucide-react';
 import useProjectStore from '@/Stores/useProjectStore';
 
 export default function EditorHeader({ handleSave, isSaving, isOwner, formatCode, isFormatting, setActiveSidebar }) {
     const { auth } = usePage().props;
-    const { title, setTitle } = useProjectStore();
+    const { title, setTitle, layout, setLayout } = useProjectStore();
 
     return (
         <header className="h-16 bg-[var(--bg-surface)] border-b border-[var(--border)] flex items-center justify-between px-4 shrink-0 relative z-50 transition-colors duration-300">
@@ -30,28 +30,55 @@ export default function EditorHeader({ handleSave, isSaving, isOwner, formatCode
                 </div>
             </div>
 
-            <div className="flex items-center gap-3">
-                <button 
-                    onClick={formatCode}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white border border-white/5 rounded text-[10px] font-bold uppercase tracking-widest transition-all"
-                >
-                    <Wand2 size={12} className={isFormatting ? 'animate-spin' : ''} />
-                    <span className="hidden md:block">Format</span>
-                </button>
-                <button 
-                    onClick={() => setActiveSidebar('settings')}
-                    className="p-2 bg-white/5 hover:bg-white/10 text-white border border-white/5 rounded transition-all"
-                >
-                    <Settings size={14} />
-                </button>
-                <button 
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="btn-primary"
-                >
-                    {isSaving ? <Loader2 size={12} className="animate-spin inline mr-2" /> : (isOwner ? <Cloud size={12} className="inline mr-2" /> : <GitFork size={12} className="inline mr-2" />)}
-                    <span>{isOwner ? 'Save' : 'Fork'}</span>
-                </button>
+            <div className="flex items-center gap-6">
+                {/* Layout Controls */}
+                <div className="hidden lg:flex items-center bg-black/20 p-1 rounded-lg border border-white/5 gap-1">
+                    <button 
+                        onClick={() => setLayout('bottom')}
+                        className={`p-1.5 rounded transition-all ${layout === 'bottom' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                        title="Bottom Preview"
+                    >
+                        <PanelBottom size={14} />
+                    </button>
+                    <button 
+                        onClick={() => setLayout('right')}
+                        className={`p-1.5 rounded transition-all ${layout === 'right' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                        title="Right Preview"
+                    >
+                        <PanelRight size={14} />
+                    </button>
+                    <button 
+                        onClick={() => setLayout('top')}
+                        className={`p-1.5 rounded transition-all ${layout === 'top' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                        title="Top Preview"
+                    >
+                        <PanelTop size={14} />
+                    </button>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={formatCode}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-elevated)] hover:bg-[var(--bg-main)] text-[var(--text-main)] border border-[var(--border)] rounded text-[10px] font-bold uppercase tracking-widest transition-all"
+                    >
+                        <Wand2 size={12} className={isFormatting ? 'animate-spin' : ''} />
+                        <span className="hidden md:block">Format</span>
+                    </button>
+                    <button 
+                        onClick={() => setActiveSidebar('settings')}
+                        className="p-2 bg-[var(--bg-elevated)] hover:bg-[var(--bg-main)] text-[var(--text-main)] border border-[var(--border)] rounded transition-all"
+                    >
+                        <Settings size={14} />
+                    </button>
+                    <button 
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="btn-primary"
+                    >
+                        {isSaving ? <Loader2 size={12} className="animate-spin inline mr-2" /> : (isOwner ? <Cloud size={12} className="inline mr-2" /> : <GitFork size={12} className="inline mr-2" />)}
+                        <span>{isOwner ? 'Save' : 'Fork'}</span>
+                    </button>
+                </div>
             </div>
         </header>
     );

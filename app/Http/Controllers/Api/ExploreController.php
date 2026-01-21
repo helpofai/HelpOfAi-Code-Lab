@@ -81,11 +81,24 @@ class ExploreController extends Controller
      */
     public function featured()
     {
-        return Project::where('is_public', true)
+        $projects = Project::where('is_public', true)
             ->with('user:id,name')
             ->orderBy('updated_at', 'desc')
             ->limit(3)
             ->get();
+
+        foreach ($projects as $project) {
+            if (\Illuminate\Support\Facades\Storage::disk('local')->exists("projects/{$project->slug}.json")) {
+                $fileData = json_decode(\Illuminate\Support\Facades\Storage::disk('local')->get("projects/{$project->slug}.json"), true);
+                $project->code = [
+                    'html' => $fileData['html'] ?? '',
+                    'css' => $fileData['css'] ?? '',
+                    'js' => $fileData['js'] ?? '',
+                ];
+            }
+        }
+
+        return $projects;
     }
 
     /**

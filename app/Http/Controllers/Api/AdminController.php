@@ -101,6 +101,24 @@ class AdminController extends Controller
     }
 
     /**
+     * Toggle Pro status for a user.
+     */
+    public function togglePro(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json(['message' => 'Admin already has permanent Pro clearance.'], 403);
+        }
+
+        $isPro = $user->role === 'paid-user';
+        $user->update([
+            'role' => $isPro ? 'user' : 'paid-user',
+            'pro_expires_at' => $isPro ? null : now()->addYear()
+        ]);
+
+        return response()->json(['message' => $isPro ? 'Pro clearance revoked.' : 'Pro clearance granted.']);
+    }
+
+    /**
      * Update user role.
      */
     public function updateRole(Request $request, User $user)

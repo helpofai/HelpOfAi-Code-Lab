@@ -3,8 +3,19 @@ import Editor, { useMonaco } from '@monaco-editor/react';
 
 const EditorLoader = () => <div className="h-full w-full bg-[#1e1e1e]" />;
 
-export default function MonacoWrapper({ language, value, onChange, fontSize, wordWrap }) {
+export default function MonacoWrapper({ language, value, onChange, fontSize, wordWrap, onCursorChange }) {
     
+    const handleEditorDidMount = (editor, monaco) => {
+        if (onCursorChange) {
+            editor.onDidChangeCursorPosition((e) => {
+                onCursorChange({
+                    line: e.position.lineNumber,
+                    column: e.position.column
+                });
+            });
+        }
+    };
+
     const options = useMemo(() => ({
         minimap: { enabled: false },
         fontSize: fontSize || 14,
@@ -26,6 +37,7 @@ export default function MonacoWrapper({ language, value, onChange, fontSize, wor
             defaultLanguage={language === 'js' ? 'javascript' : language}
             value={value}
             onChange={onChange}
+            onMount={handleEditorDidMount}
             options={options}
             loading={<EditorLoader />}
             keepCurrentModel={true}

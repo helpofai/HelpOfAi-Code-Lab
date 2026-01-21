@@ -24,6 +24,8 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'category' => 'nullable|string|max:255',
@@ -31,7 +33,14 @@ class ProjectController extends Controller
             'code' => 'required|array',
             'settings' => 'nullable|array',
             'is_public' => 'boolean',
+            'is_private' => 'boolean',
         ]);
+
+        // SaaS Logic: Only Pro users can create private projects
+        $isPrivate = $validated['is_private'] ?? false;
+        if ($isPrivate && !$user->isPro()) {
+            return response()->json(['message' => 'Private projects are restricted to Pro clearance.'], 403);
+        }
 
         $slug = Str::slug($validated['title']) . '-' . Str::random(6);
         
@@ -47,7 +56,7 @@ class ProjectController extends Controller
         Storage::disk('local')->put("projects/{$slug}.json", $jsonContent);
 
         // Save metadata to Database (without heavy code blob)
-        $project = Auth::user()->projects()->create([
+        $project = $user->projects()->create([
             'title' => $validated['title'],
             'category' => $validated['category'] ?? null,
             'tags' => $validated['tags'] ?? [],
@@ -55,6 +64,7 @@ class ProjectController extends Controller
             'code' => [], // Keep empty in DB
             'settings' => $validated['settings'] ?? [],
             'is_public' => $validated['is_public'] ?? true,
+            'is_private' => $isPrivate,
         ]);
 
         return response()->json($project, 201);
@@ -104,10 +114,16 @@ class ProjectController extends Controller
             'code' => 'sometimes|array',
             'settings' => 'nullable|array',
             'is_public' => 'boolean',
+            'is_private' => 'boolean',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:255',
         ]);
+
+        // SaaS Logic: Gating private projects
+        if (isset($validated['is_private']) && $validated['is_private'] && !Auth::user()->isPro()) {
+            return response()->json(['message' => 'Private visibility restricted to Pro accounts.'], 403);
+        }
 
         // Update File System if code is provided
         if (isset($validated['code'])) {
@@ -136,6 +152,9 @@ class ProjectController extends Controller
         }
         if (array_key_exists('is_public', $validated)) {
             $updateData['is_public'] = $validated['is_public'];
+        }
+        if (array_key_exists('is_private', $validated)) {
+            $updateData['is_private'] = $validated['is_private'];
         }
         if (array_key_exists('meta_title', $validated)) {
             $updateData['meta_title'] = $validated['meta_title'];

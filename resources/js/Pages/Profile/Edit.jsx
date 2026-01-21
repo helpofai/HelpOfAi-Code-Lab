@@ -5,10 +5,11 @@ import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
-import { User, Shield, AlertTriangle, Fingerprint } from 'lucide-react';
+import { User, Shield, AlertTriangle, Fingerprint, Crown, Zap, CreditCard } from 'lucide-react';
 
 export default function Edit({ mustVerifyEmail, status }) {
     const user = usePage().props.auth.user;
+    const isPro = user.role === 'admin' || user.role === 'paid-user';
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 font-sans">
@@ -58,6 +59,40 @@ export default function Edit({ mustVerifyEmail, status }) {
                                             </div>
                                             <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">{user.role || 'User'}</span>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* SaaS Plans */}
+                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
+                                <div className="flex items-center gap-3 mb-8">
+                                    <Crown size={20} className="text-amber-500" />
+                                    <h3 className="text-sm font-black uppercase tracking-widest">Access_Protocols</h3>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className={`p-5 rounded-2xl border transition-all ${!isPro ? 'border-cyan-500/50 bg-cyan-500/5' : 'border-[var(--border)] opacity-50'}`}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-cyan-500">Initiate</span>
+                                            {!isPro && <span className="text-[8px] font-black text-cyan-500 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">Current</span>}
+                                        </div>
+                                        <h4 className="text-lg font-black italic">Free_Tier</h4>
+                                        <p className="text-[9px] text-[var(--text-muted)] uppercase mt-2">10 Neural Cores • Community Access</p>
+                                    </div>
+
+                                    <div className={`p-5 rounded-2xl border transition-all ${isPro ? 'border-amber-500/50 bg-amber-500/5' : 'border-[var(--border)] hover:border-amber-500/30'}`}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">Operator</span>
+                                            {isPro && <span className="text-[8px] font-black text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">Active</span>}
+                                        </div>
+                                        <h4 className="text-lg font-black italic">Pro_Link</h4>
+                                        <p className="text-[9px] text-[var(--text-muted)] uppercase mt-2">Unlimited Cores • Private Nodes • SSH Access</p>
+                                        
+                                        {!isPro && (
+                                            <button className="w-full mt-6 py-3 bg-amber-500 text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-white transition-all shadow-lg shadow-amber-500/20">
+                                                Upgrade_Clearance
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
