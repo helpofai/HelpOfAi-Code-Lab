@@ -8,7 +8,7 @@ import {
     UserCheck, AlertTriangle, UserMinus,
     ChevronDown, Save, Loader2, Check,
     Plus, Edit, Lock, Unlock, X, UserPlus,
-    Mail, ShieldAlert, Cpu, ShieldCheck
+    Mail, ShieldAlert, Cpu, ShieldCheck, Crown
 } from 'lucide-react';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import TextInput from '@/Components/TextInput';
