@@ -7,6 +7,7 @@ const useProjectStore = create((set) => ({
     title: 'Untitled Project',
     isPrivate: false,
     layout: 'bottom', // 'bottom', 'right', 'top'
+    google_drive_file_id: null,
     externalLibraries: [],
     fontSize: 14,
     wordWrap: 'on',
@@ -17,6 +18,7 @@ const useProjectStore = create((set) => ({
     setTitle: (title) => set({ title }),
     setIsPrivate: (isPrivate) => set({ isPrivate }),
     setLayout: (layout) => set({ layout }),
+    setGoogleDriveFileId: (id) => set({ google_drive_file_id: id }),
     setExternalLibraries: (libs) => set({ externalLibraries: libs }),
     setFontSize: (size) => set({ fontSize: size }),
     setWordWrap: (wrap) => set({ wordWrap: wrap }),

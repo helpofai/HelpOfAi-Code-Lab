@@ -90,6 +90,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Personal Google Drive Config
+    Route::post('/api/google-drive/config', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate([
+            'google_client_id' => 'required|string',
+            'google_client_secret' => 'required|string',
+        ]);
+        
+        $user = auth()->user();
+        $user->personal_google_client_id = $validated['google_client_id'];
+        $user->personal_google_client_secret = $validated['google_client_secret'];
+        $user->save();
+        
+        return back()->with('success', 'Config_Stored');
+    })->name('google-drive.save-config');
 });
 
 require __DIR__.'/auth.php';

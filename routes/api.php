@@ -37,7 +37,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
 
     Route::post('/media/upload', [\App\Http\Controllers\Api\MediaController::class, 'upload']);
+
+    // Google Drive Sync
+    Route::get('/google-drive/auth', [\App\Http\Controllers\Api\GoogleDriveController::class, 'auth']);
+    Route::get('/google-drive/list', [\App\Http\Controllers\Api\GoogleDriveController::class, 'list']);
+    Route::get('/google-drive/fetch/{fileId}', [\App\Http\Controllers\Api\GoogleDriveController::class, 'fetch']);
+    Route::post('/google-drive/save', [\App\Http\Controllers\Api\GoogleDriveController::class, 'save']);
+    Route::post('/google-drive/disconnect', [\App\Http\Controllers\Api\GoogleDriveController::class, 'disconnect']);
+    Route::delete('/google-drive/delete/{fileId}', [\App\Http\Controllers\Api\GoogleDriveController::class, 'destroy']);
 });
+
+Route::get('/google-drive/callback', [\App\Http\Controllers\Api\GoogleDriveController::class, 'callback'])->middleware(['web', 'auth']);
 
 // Public route for viewing projects
 Route::get('projects/{slug}', [ProjectController::class, 'show']);

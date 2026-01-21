@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, Package, FolderPlus, GitFork, Code, Download, Share2 } from 'lucide-react';
+import { Terminal, Package, FolderPlus, GitFork, Code, Download, Share2, Cloud } from 'lucide-react';
 
 export default function EditorFooter({ 
     showConsole, 
@@ -26,6 +26,13 @@ export default function EditorFooter({
                     className={`flex items-center gap-2 px-4 h-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeSidebar === 'assets' ? 'bg-cyan-500 text-white dark:text-black shadow-lg' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-elevated)]'}`}
                 >
                     <Package size={14} /> Assets
+                </button>
+                <div className="w-px h-4 bg-[var(--border)] mx-1"></div>
+                <button 
+                    onClick={() => setActiveSidebar('cloud')} 
+                    className={`flex items-center gap-2 px-4 h-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeSidebar === 'cloud' ? 'bg-cyan-500 text-white dark:text-black shadow-lg' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-elevated)]'}`}
+                >
+                    <Cloud size={14} /> Cloud
                 </button>
             </div>
 
