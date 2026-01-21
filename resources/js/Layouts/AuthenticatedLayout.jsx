@@ -13,10 +13,13 @@ import {
     Activity,
     Globe,
     Users,
-    Terminal
+    Terminal,
+    LifeBuoy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
+import NotificationDropdown from '@/Components/Visuals/NotificationDropdown';
+import Dropdown from '@/Components/Dropdown';
 
 export default function AuthenticatedLayout({ header, children }) {
     const { auth } = usePage().props;
@@ -29,11 +32,13 @@ export default function AuthenticatedLayout({ header, children }) {
         { name: 'Explore', icon: Globe, href: route('explore'), active: route().current('explore') },
         { name: 'Editor', icon: Code2, href: route('editor'), active: route().current('editor') },
         { name: 'My Projects', icon: Database, href: route('my-projects'), active: route().current('my-projects') },
+        { name: 'Support', icon: LifeBuoy, href: route('support.index'), active: route().current('support.index') },
     ];
 
     const adminItems = [
         { name: 'Admin Command', icon: Shield, href: route('admin.dashboard'), active: route().current('admin.dashboard') },
         { name: 'User Matrix', icon: Users, href: route('admin.users'), active: route().current('admin.users') },
+        { name: 'Support Queue', icon: LifeBuoy, href: route('admin.support'), active: route().current('admin.support') },
         { name: 'Front Management', icon: LayoutDashboard, href: route('admin.front-management'), active: route().current('admin.front-management') },
         { name: 'System Update', icon: Terminal, href: route('admin.update'), active: route().current('admin.update') },
     ];
@@ -95,11 +100,6 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
 
                 <div className="p-4 border-t border-[var(--border)] shrink-0 space-y-4">
-                    {isSidebarOpen && (
-                        <div className="px-2">
-                            <ThemeSwitcher />
-                        </div>
-                    )}
                     <div className="flex items-center gap-2">
                         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="flex-1 flex justify-center p-2 hover:bg-[var(--bg-elevated)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border)]">
                             {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
@@ -114,11 +114,38 @@ export default function AuthenticatedLayout({ header, children }) {
             </motion.aside>
 
             <div className="flex-1 flex flex-col min-w-0 relative h-screen">
-                {header && (
-                    <header className="hidden lg:block h-20 border-b border-[var(--border)] bg-[var(--bg-main)] sticky top-0 z-30 px-10 shrink-0">
-                        <div className="h-full flex items-center">{header}</div>
-                    </header>
-                )}
+                <header className="hidden lg:flex h-20 border-b border-[var(--border)] bg-[var(--bg-main)] sticky top-0 z-30 px-10 shrink-0 items-center justify-between">
+                    <div>{header}</div>
+                    <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2 pr-6 border-r border-[var(--border)]">
+                            <ThemeSwitcher />
+                            <NotificationDropdown />
+                        </div>
+                        <Dropdown>
+                            <Dropdown.Trigger>
+                                <button className="flex items-center gap-3 group focus:outline-none">
+                                    <div className="text-right hidden xl:block">
+                                        <p className="text-[10px] font-black uppercase text-[var(--text-main)] leading-none">{user.name}</p>
+                                        <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase mt-1">Uplink_Active</p>
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-all shadow-lg overflow-hidden">
+                                        <Users size={18} />
+                                    </div>
+                                </button>
+                            </Dropdown.Trigger>
+                            <Dropdown.Content align="right" width="48">
+                                <Dropdown.Link href={route('dashboard')}>Dashboard</Dropdown.Link>
+                                <Dropdown.Link href={route('my-projects')}>My Projects</Dropdown.Link>
+                                <Dropdown.Link href={route('explore')}>Explore</Dropdown.Link>
+                                <div className="border-t border-[var(--border)] my-1" />
+                                <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                <Dropdown.Link href={route('support.index')}>Support</Dropdown.Link>
+                                <div className="border-t border-[var(--border)] my-1" />
+                                <Dropdown.Link href={route('logout')} method="post" as="button" className="text-rose-500 hover:bg-rose-500/10">Log Out</Dropdown.Link>
+                            </Dropdown.Content>
+                        </Dropdown>
+                    </div>
+                </header>
 
                 <header className="lg:hidden h-16 bg-[var(--bg-surface)] border-b border-[var(--border)] px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
                     <Link href="/" className="flex items-center gap-3">
@@ -155,8 +182,9 @@ export default function AuthenticatedLayout({ header, children }) {
                                 ))}
                             </nav>
                             
-                            <div className="mb-6">
+                            <div className="mb-6 flex items-center justify-between gap-4">
                                 <ThemeSwitcher />
+                                <NotificationDropdown />
                             </div>
 
                             <Link href={route('logout')} method="post" as="button" className="flex items-center gap-4 p-4 text-rose-500 font-bold uppercase tracking-widest mt-auto border border-rose-500/20 rounded">

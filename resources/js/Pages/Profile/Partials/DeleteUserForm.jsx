@@ -40,7 +40,6 @@ export default function DeleteUserForm({ className = '' }) {
 
     const closeModal = () => {
         setConfirmingUserDeletion(false);
-
         clearErrors();
         reset();
     };
@@ -48,33 +47,27 @@ export default function DeleteUserForm({ className = '' }) {
     return (
         <section className={`space-y-6 ${className}`}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">
-                    Delete Account
+                <h2 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)]">
+                    Terminate_Node
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-600">
-                    Once your account is deleted, all of its resources and data
-                    will be permanently deleted. Before deleting your account,
-                    please download any data or information that you wish to
-                    retain.
+                <p className="mt-1 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                    Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.
                 </p>
             </header>
 
             <DangerButton onClick={confirmUserDeletion}>
-                Delete Account
+                Terminate_Account
             </DangerButton>
 
             <Modal show={confirmingUserDeletion} onClose={closeModal}>
                 <form onSubmit={deleteUser} className="p-6">
-                    <h2 className="text-lg font-medium text-gray-900">
+                    <h2 className="text-lg font-medium text-[var(--text-main)]">
                         Are you sure you want to delete your account?
                     </h2>
 
-                    <p className="mt-1 text-sm text-gray-600">
-                        Once your account is deleted, all of its resources and
-                        data will be permanently deleted. Please enter your
-                        password to confirm you would like to permanently delete
-                        your account.
+                    <p className="mt-1 text-sm text-[var(--text-muted)]">
+                        Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.
                     </p>
 
                     <div className="mt-6">
@@ -93,7 +86,7 @@ export default function DeleteUserForm({ className = '' }) {
                             onChange={(e) =>
                                 setData('password', e.target.value)
                             }
-                            className="mt-1 block w-3/4"
+                            className="mt-1 block w-3/4 bg-[var(--bg-elevated)]"
                             isFocused
                             placeholder="Password"
                         />

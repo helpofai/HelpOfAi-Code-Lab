@@ -73,4 +73,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Project::class);
     }
+
+    /**
+     * Get the support tickets for the user.
+     */
+    public function supportTickets(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
 }

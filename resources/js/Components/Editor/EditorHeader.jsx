@@ -8,7 +8,7 @@ export default function EditorHeader({ handleSave, isSaving, isOwner, formatCode
     const { title, setTitle } = useProjectStore();
 
     return (
-        <header className="h-16 bg-[#0a0a0a] border-b border-white/[0.03] flex items-center justify-between px-4 shrink-0 relative z-50">
+        <header className="h-16 bg-[var(--bg-surface)] border-b border-[var(--border)] flex items-center justify-between px-4 shrink-0 relative z-50 transition-colors duration-300">
             <div className="flex items-center gap-4">
                 <Link href="/dashboard" className="flex items-center gap-2 group">
                     <div className="p-2 bg-cyan-500/10 border border-cyan-500/20 rounded">

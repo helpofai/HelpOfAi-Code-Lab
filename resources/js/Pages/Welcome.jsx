@@ -7,11 +7,13 @@ import {
     Layers, Share2, Server, Github, Shield,
     User, Clock, Box, Rocket, Monitor, Workflow,
     CheckCircle2, AppWindow, Command, Braces,
-    Layout, Smartphone, Terminal, Eye, Sparkles, Lock
+    Layout, Smartphone, Terminal, Eye, Sparkles, Lock,
+    Activity, Heart
 } from 'lucide-react';
 import axios from 'axios';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 import ProBackground from '@/Components/Visuals/ProBackground';
+import NotificationDropdown from '@/Components/Visuals/NotificationDropdown';
 
 // Professional Product Mockup Component
 const EditorShowcase = () => (
@@ -103,7 +105,10 @@ export default function Welcome({ auth, siteSettings }) {
                     <div className="flex items-center gap-4">
                         <ThemeSwitcher />
                         {auth.user ? (
-                            <Link href={route('dashboard')} className="px-6 py-2 border border-[var(--border)] rounded font-black text-[10px] uppercase tracking-widest hover:bg-[var(--text-main)] hover:text-[var(--bg-main)] transition-all italic">Terminal_Access</Link>
+                            <div className="flex items-center gap-4">
+                                <NotificationDropdown />
+                                <Link href={route('dashboard')} className="px-6 py-2 border border-[var(--border)] rounded font-black text-[10px] uppercase tracking-widest hover:bg-[var(--text-main)] hover:text-[var(--bg-main)] transition-all italic">Terminal_Access</Link>
+                            </div>
                         ) : (
                             <>
                                 <Link href={route('login')} className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">Entry</Link>
@@ -154,6 +159,68 @@ export default function Welcome({ auth, siteSettings }) {
                                 <div className="text-3xl font-black text-[var(--text-main)] tracking-tighter italic">{s.v}</div>
                             </div>
                         ))}
+                    </div>
+                </section>
+
+                {/* COMMUNITY TRANSMISSIONS */}
+                <section className="py-32 px-6 border-b border-[var(--border)]">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex justify-between items-end mb-16">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-cyan-500">
+                                    <Activity size={16} />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Live_Feed</span>
+                                </div>
+                                <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Community_Transmissions</h2>
+                            </div>
+                            <Link href={route('explore')} className="hidden md:flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] hover:text-cyan-500 transition-colors group">
+                                View_All_Signals <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {featured.length > 0 ? featured.slice(0, 3).map((project) => (
+                                <Link href={route('editor', { slug: project.slug })} key={project.id} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all hover:-translate-y-1 block">
+                                    <div className="aspect-video bg-[var(--bg-elevated)] relative overflow-hidden flex items-center justify-center group-hover:bg-black transition-colors">
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <Code2 size={32} className="text-[var(--text-muted)] opacity-20 group-hover:text-cyan-500 group-hover:opacity-100 transition-all" />
+                                    </div>
+                                    <div className="p-6 space-y-4">
+                                        <div className="flex justify-between items-start">
+                                            <h3 className="text-lg font-bold text-[var(--text-main)] uppercase tracking-tight truncate">{project.title}</h3>
+                                            <div className="px-2 py-1 rounded bg-[var(--bg-main)] border border-[var(--border)] text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                                                WEB
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4 text-[10px] text-[var(--text-muted)] font-mono">
+                                            <span className="flex items-center gap-1"><User size={10} /> {project.user?.name || 'Unknown'}</span>
+                                            <span className="flex items-center gap-1"><Clock size={10} /> {new Date(project.created_at).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            )) : [1, 2, 3].map((i) => (
+                                <div key={i} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all hover:-translate-y-1">
+                                    <div className="aspect-video bg-[var(--bg-elevated)] relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] opacity-20 font-mono text-xs">
+                                            SIGNAL_LOST...
+                                        </div>
+                                    </div>
+                                    <div className="p-6 space-y-4">
+                                        <div className="flex justify-between items-start">
+                                            <h3 className="text-lg font-bold text-[var(--text-main)] uppercase tracking-tight">System_Node_{i}</h3>
+                                            <div className="px-2 py-1 rounded bg-[var(--bg-main)] border border-[var(--border)] text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                                                N/A
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4 text-[10px] text-[var(--text-muted)] font-mono">
+                                            <span className="flex items-center gap-1"><Eye size={10} /> 0</span>
+                                            <span className="flex items-center gap-1"><Heart size={10} /> 0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </section>
 
@@ -227,6 +294,57 @@ export default function Welcome({ auth, siteSettings }) {
                     </div>
                 </section>
 
+                {/* PRICING */}
+                <section className="py-32 px-6 border-y border-[var(--border)] bg-[var(--bg-surface)]">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-20 space-y-4">
+                            <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Access_Protocols</h2>
+                            <p className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-[0.2em]">Select your clearance level</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                            {/* Free Tier */}
+                            <div className="p-10 border border-[var(--border)] rounded-3xl bg-[var(--bg-main)] relative overflow-hidden hover:border-cyan-500/20 transition-colors">
+                                <div className="space-y-2 mb-8">
+                                    <div className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.3em]">Initiate</div>
+                                    <div className="text-4xl font-black text-[var(--text-main)] italic">Free_Tier</div>
+                                </div>
+                                <ul className="space-y-4 mb-10">
+                                    {['Unlimited Public Projects', 'Basic Asset Library', 'Community Support', '720p Preview', 'Standard Rate Limits'].map((item, i) => (
+                                        <li key={i} className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                                            <CheckCircle2 size={14} className="text-cyan-500" /> {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <Link href={route('register')} className="w-full py-4 flex items-center justify-center border border-[var(--border)] rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-[var(--text-main)] hover:text-[var(--bg-main)] transition-all">
+                                    Request_Access
+                                </Link>
+                            </div>
+
+                            {/* Pro Tier */}
+                            <div className="p-10 border border-cyan-500/30 rounded-3xl bg-[var(--bg-elevated)] relative overflow-hidden group hover:border-cyan-500 transition-colors shadow-2xl">
+                                <div className="absolute top-0 right-0 p-4">
+                                    <Sparkles className="text-cyan-500 animate-pulse" size={24} />
+                                </div>
+                                <div className="space-y-2 mb-8">
+                                    <div className="text-xs font-black text-cyan-500 uppercase tracking-[0.3em]">Operator</div>
+                                    <div className="text-4xl font-black text-[var(--text-main)] italic">Pro_Link</div>
+                                </div>
+                                <ul className="space-y-4 mb-10">
+                                    {['Private Projects', 'Priority Rendering', 'Collaboration Tools', '4K Preview Export', 'Asset Hosting', 'API Access'].map((item, i) => (
+                                        <li key={i} className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-[var(--text-main)]">
+                                            <CheckCircle2 size={14} className="text-cyan-500" /> {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button className="w-full py-4 flex items-center justify-center bg-cyan-500 text-white dark:text-black rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+                                    Upgrade_Uplink
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* CTA */}
                 <section className="py-64 px-6 text-center">
                     <div className="max-w-4xl mx-auto space-y-16">
@@ -245,43 +363,75 @@ export default function Welcome({ auth, siteSettings }) {
             </main>
 
             {/* FOOTER */}
-            <footer className="py-32 bg-[var(--bg-main)] border-t border-[var(--border)] px-6">
+            <footer className="py-24 bg-[var(--bg-main)] border-t border-[var(--border)] px-6">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
-                        <div className="md:col-span-2 space-y-10 text-left">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24">
+                        {/* Brand Column */}
+                        <div className="lg:col-span-4 space-y-8">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-[var(--text-main)] text-[var(--bg-main)] rounded"><Code2 size={24} /></div>
-                                <span className="text-3xl font-black tracking-tighter text-[var(--text-main)] uppercase italic">HOACodeLab</span>
+                                <span className="text-2xl font-black tracking-tighter text-[var(--text-main)] uppercase italic">HOACodeLab</span>
                             </div>
-                            <p className="text-sm text-[var(--text-muted)] font-bold uppercase tracking-widest max-w-md leading-loose italic opacity-60">
+                            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest max-w-xs leading-loose italic opacity-80">
                                 The primary neural link for the next generation of software engineers. 
                                 Secure. Scalable. Optimized.
                             </p>
-                            <div className="flex gap-6 italic">
-                                <a href="#" className="text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-black tracking-widest uppercase">Github_</a>
-                                <a href="#" className="text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-black tracking-widest uppercase">Discord_</a>
+                            <div className="flex gap-4">
+                                {[Github, Share2, Globe].map((Icon, i) => (
+                                    <a key={i} href="#" className="p-3 border border-[var(--border)] rounded-full text-[var(--text-muted)] hover:text-cyan-500 hover:border-cyan-500/30 transition-all">
+                                        <Icon size={16} />
+                                    </a>
+                                ))}
                             </div>
                         </div>
-                        <div className="space-y-10 text-left">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Protocols</h4>
-                            <ul className="space-y-6 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
-                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Documentation</a></li>
-                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">API_Matrix</a></li>
-                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Security_Log</a></li>
+
+                        {/* Links Columns */}
+                        <div className="lg:col-span-2 space-y-8">
+                            <h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Platform</h4>
+                            <ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Features</a></li>
+                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Pricing</a></li>
+                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Changelog</a></li>
+                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Roadmap</a></li>
                             </ul>
                         </div>
-                        <div className="space-y-10 text-left">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Sector_Link</h4>
-                            <ul className="space-y-6 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
-                                <li><Link href={route('explore')} className="hover:text-[var(--text-main)] transition-colors">Grid_Exploration</Link></li>
-                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Neural_Cloud</a></li>
-                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Lab_Status</a></li>
+
+                        <div className="lg:col-span-2 space-y-8">
+                            <h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Community</h4>
+                            <ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                                <li><Link href={route('explore')} className="hover:text-[var(--text-main)] transition-colors">Explore</Link></li>
+                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Discord</a></li>
+                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Events</a></li>
+                                <li><a href="#" className="hover:text-[var(--text-main)] transition-colors">Blog</a></li>
                             </ul>
+                        </div>
+
+                        {/* Newsletter Column */}
+                        <div className="lg:col-span-4 space-y-8">
+                            <h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Neural_Update</h4>
+                            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest leading-loose">
+                                Subscribe for weekly system patches and new feature injections.
+                            </p>
+                            <form className="flex gap-2">
+                                <input 
+                                    type="email" 
+                                    placeholder="USER@NET.LINK" 
+                                    className="flex-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded px-4 py-3 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-cyan-500 transition-colors"
+                                />
+                                <button className="px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] font-black uppercase text-[10px] tracking-widest rounded hover:bg-cyan-500 hover:text-white transition-colors">
+                                    Join
+                                </button>
+                            </form>
                         </div>
                     </div>
-                    <div className="pt-16 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center text-[9px] font-black text-slate-800 uppercase tracking-[0.6em]">
+
+                    <div className="pt-12 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-6 text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em]">
                         <span>© 2026 HOACodeLab // Sector_7G_Uplink</span>
-                        <div className="flex items-center gap-4 mt-8 md:mt-0 px-6 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-full text-[var(--text-muted)]">
+                        <div className="flex gap-8">
+                            <a href="#" className="hover:text-[var(--text-main)] transition-colors">Privacy_Protocol</a>
+                            <a href="#" className="hover:text-[var(--text-main)] transition-colors">Terms_Of_Service</a>
+                        </div>
+                        <div className="flex items-center gap-3 px-4 py-1.5 bg-[var(--bg-surface)] border border-[var(--border)] rounded-full">
                             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                             <span>Systems_Operational</span>
                         </div>

@@ -30,6 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('projects', ProjectController::class)->except(['show']);
     Route::apiResource('collections', CollectionController::class);
     Route::post('collections/{collection}/add', [CollectionController::class, 'addProject']);
+
+    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::put('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::put('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
 });
 
 // Public route for viewing projects

@@ -15,7 +15,29 @@ class AdminController extends Controller
      */
     public function stats()
     {
-        // ... (previous stats code)
+        $usersTotal = User::count();
+        $projectsTotal = Project::count();
+        
+        $roles = User::select('role', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('role')
+            ->pluck('total', 'role');
+
+        $latestUsers = User::latest()->take(5)->get();
+
+        return response()->json([
+            'users' => [
+                'total' => $usersTotal,
+                'roles' => $roles,
+                'latest' => $latestUsers
+            ],
+            'projects' => [
+                'total' => $projectsTotal,
+                'file_sync' => $projectsTotal, // Mock metric
+            ],
+            'system' => [
+                'uptime' => '99.9%'
+            ]
+        ]);
     }
 
     /**

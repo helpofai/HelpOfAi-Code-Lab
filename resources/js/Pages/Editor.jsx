@@ -186,11 +186,14 @@ export default function Editor({ auth, project: initialProject }) {
         setCollections([...collections, res.data]);
     };
 
+    const pageTitle = (projectData?.meta_title || title || 'Editor') + ' // HOACodeLab';
+    const pageDescription = projectData?.meta_description || 'Prototyping node on HOACodeLab.';
+
     return (
-        <div className="h-screen bg-[#050505] flex flex-col font-sans overflow-hidden">
+        <div className="h-screen bg-[var(--bg-main)] flex flex-col font-sans overflow-hidden transition-colors duration-300">
             <Head>
-                <title>{projectData?.meta_title || title || 'Editor'} // HOACodeLab</title>
-                <meta name="description" content={projectData?.meta_description || 'Prototyping node on HOACodeLab.'} />
+                <title>{pageTitle}</title>
+                <meta name="description" content={pageDescription} />
             </Head>
             
             <EditorHeader 
