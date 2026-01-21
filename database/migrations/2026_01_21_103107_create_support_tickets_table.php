@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('support_tickets', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('subject');
-            $table->text('message');
-            $table->enum('status', ['open', 'in_progress', 'closed'])->default('open');
-            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('support_tickets')) {
+            Schema::create('support_tickets', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->string('subject');
+                $table->text('message');
+                $table->enum('status', ['open', 'in_progress', 'closed'])->default('open');
+                $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

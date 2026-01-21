@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('support_messages', function (Blueprint $table) {
-            $table->string('attachment_path')->nullable()->after('message');
+            if (!Schema::hasColumn('support_messages', 'attachment_path')) {
+                $table->string('attachment_path')->nullable()->after('message');
+            }
         });
     }
 
