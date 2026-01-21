@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, Package, MessageSquare, FolderPlus, GitFork, Code, Download, Share2 } from 'lucide-react';
+import { Terminal, Package, Settings, FolderPlus, GitFork, Code, Download, Share2 } from 'lucide-react';
 
 export default function EditorFooter({ 
     showConsole, 
@@ -12,66 +12,37 @@ export default function EditorFooter({
     fetchCollections
 }) {
     return (
-        <footer className="h-10 bg-[#010101] border-t border-white/5 flex items-center justify-between px-4 shrink-0 overflow-x-auto">
-            <div className="flex items-center h-full min-w-max">
+        <footer className="h-10 bg-[#050505] border-t border-white/[0.03] flex items-center justify-between px-4 shrink-0">
+            <div className="flex items-center h-full">
                 <button 
                     onClick={() => setShowConsole(!showConsole)} 
-                    className={`flex items-center space-x-2 px-4 h-full transition-all ${showConsole ? 'bg-white/10 text-cyan-400 shadow-[inset_0_2px_0_#06b6d4]' : 'text-slate-500 hover:text-white'}`}
+                    className={`flex items-center gap-2 px-4 h-full text-[10px] font-bold uppercase tracking-widest transition-all ${showConsole ? 'bg-cyan-500 text-black shadow-lg' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
                 >
-                    <Terminal size={12} /> 
-                    <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Console</span>
+                    <Terminal size={14} /> Console
                 </button>
-                <div className="w-px h-4 bg-white/10 mx-1"></div>
+                <div className="w-px h-4 bg-white/5 mx-1"></div>
                 <button 
                     onClick={() => setActiveSidebar('assets')} 
-                    className={`flex items-center space-x-2 px-4 h-full transition-all ${activeSidebar === 'assets' ? 'bg-white/10 text-cyan-400 shadow-[inset_0_2px_0_#06b6d4]' : 'text-slate-500 hover:text-white'}`}
+                    className={`flex items-center gap-2 px-4 h-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeSidebar === 'assets' ? 'bg-cyan-500 text-black shadow-lg' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
                 >
-                    <Package size={12} /> 
-                    <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Assets</span>
-                </button>
-                <button 
-                    onClick={() => setActiveSidebar('settings')} 
-                    className={`flex items-center space-x-2 px-4 h-full transition-all ${activeSidebar === 'settings' ? 'bg-white/10 text-cyan-400 shadow-[inset_0_2px_0_#06b6d4]' : 'text-slate-500 hover:text-white'}`}
-                >
-                    <MessageSquare size={12} /> 
-                    <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Settings</span>
+                    <Package size={14} /> Assets
                 </button>
             </div>
 
-            <div className="flex items-center h-full space-x-px min-w-max">
-                <button 
-                    onClick={() => { setActiveModal('collection'); fetchCollections(); }} 
-                    className="flex items-center space-x-2 px-4 h-full text-slate-500 hover:text-white transition-all border-l border-white/5"
-                >
-                    <FolderPlus size={12} /> 
-                    <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Collection</span>
-                </button>
-                <button 
-                    onClick={handleFork} 
-                    className="flex items-center space-x-2 px-4 h-full text-slate-500 hover:text-white transition-all border-l border-white/5"
-                >
-                    <GitFork size={12} /> 
-                    <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Fork</span>
-                </button>
-                <button 
-                    onClick={() => setActiveModal('embed')} 
-                    className="flex items-center space-x-2 px-4 h-full text-slate-500 hover:text-white transition-all border-l border-white/5"
-                >
-                    <Code size={12} /> 
-                    <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Embed</span>
-                </button>
-                <button 
-                    onClick={handleExport} 
-                    className="flex items-center space-x-2 px-4 h-full text-slate-500 hover:text-white transition-all border-l border-white/5"
-                >
-                    <Download size={12} /> 
-                    <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Export</span>
-                </button>
-                <button 
-                    onClick={() => setActiveModal('share')} 
-                    className="flex items-center space-x-2 px-6 h-full bg-cyan-500 text-black font-black uppercase text-[9px] tracking-widest hover:bg-white transition-all"
-                >
-                    <Share2 size={12} /> <span>Share</span>
+            <div className="flex items-center h-full gap-1">
+                {[
+                    { label: 'Collection', icon: FolderPlus, act: () => { setActiveModal('collection'); fetchCollections(); } },
+                    { label: 'Fork', icon: GitFork, act: handleFork },
+                    { label: 'Embed', icon: Code, act: () => setActiveModal('embed') },
+                    { label: 'Export', icon: Download, act: handleExport },
+                ].map((item) => (
+                    <button key={item.label} onClick={item.act} className="flex items-center gap-2 px-3 h-full text-[9px] font-bold uppercase tracking-widest text-slate-500 hover:text-white hover:bg-white/5 transition-all">
+                        <item.icon size={12} /> <span className="hidden md:block">{item.label}</span>
+                    </button>
+                ))}
+                <div className="w-px h-4 bg-white/5 mx-2"></div>
+                <button onClick={() => setActiveModal('share')} className="h-full px-6 flex items-center gap-2 bg-[#111] hover:bg-white hover:text-black text-cyan-400 font-bold uppercase text-[10px] tracking-widest transition-all">
+                    <Share2 size={12} /> Share
                 </button>
             </div>
         </footer>

@@ -38,7 +38,7 @@ export default function Editor({ auth, project: initialProject }) {
     // Format Code
     const formatCode = async () => {
         setIsFormatting(true);
-        setLogs(prev => [...prev, { type: 'LOG', content: '>>> Initializing Prettier_Core...', id: Date.now() }]);
+        setLogs(prev => [...prev, { type: 'LOG', content: 'Initializing synthesis...', id: Date.now() }]);
         try {
             const options = { 
                 printWidth: 80, 
@@ -56,10 +56,10 @@ export default function Editor({ auth, project: initialProject }) {
             setCss(formattedCss);
             setJs(formattedJs);
             
-            setLogs(prev => [...prev, { type: 'LOG', content: '>>> Synthesis_Complete: Syntax optimized.', id: Date.now() }]);
+            setLogs(prev => [...prev, { type: 'LOG', content: 'Optimization complete.', id: Date.now() }]);
         } catch (err) { 
             console.error(err);
-            setLogs(prev => [...prev, { type: 'ERR', content: `SYNTAX_ERROR: ${err.message}`, id: Date.now() }]);
+            setLogs(prev => [...prev, { type: 'ERR', content: `Error: ${err.message}`, id: Date.now() }]);
         } finally { 
             setIsFormatting(false); 
         }
@@ -68,7 +68,8 @@ export default function Editor({ auth, project: initialProject }) {
     // Live Preview Logic (Debounced)
     const srcDoc = useMemo(() => {
         const libs = externalLibraries.map(lib => lib.endsWith('.css') ? `<link rel="stylesheet" href="${lib}">` : `<script src="${lib}"></script>`).join('\n');
-        return `
+        return (
+            `
             <!DOCTYPE html>
             <html>
             <head>
@@ -102,7 +103,8 @@ export default function Editor({ auth, project: initialProject }) {
             </head>
             <body>${html}<script>${js}</script></body>
             </html>
-        `;
+        `
+        );
     }, [html, css, js, externalLibraries]);
 
     useEffect(() => {
@@ -124,7 +126,7 @@ export default function Editor({ auth, project: initialProject }) {
 
     const handleSave = async () => {
         if (!auth.user) {
-            if (confirm('Unauthorized access. Initialize identity link (Login) to persist this module?')) {
+            if (confirm('Authentication required. Redirect to login?')) {
                 window.location.href = route('login');
             }
             return;
@@ -142,14 +144,14 @@ export default function Editor({ auth, project: initialProject }) {
             const res = await axios[method](endpoint, data);
             setProjectData(res.data);
             if (!projectData?.id) window.history.pushState({}, '', `/editor/${res.data.slug}`);
-            setLogs(prev => [...prev, { type: 'LOG', content: '>>> Neural_Sync: Successfully persisted to cloud.', id: Date.now() }]);
+            setLogs(prev => [...prev, { type: 'LOG', content: 'Cloud sync successful.', id: Date.now() }]);
         } catch (e) {
-            setLogs(prev => [...prev, { type: 'ERR', content: '>>> SYNC_FAILED: Unauthorized or Network Error.', id: Date.now() }]);
+            setLogs(prev => [...prev, { type: 'ERR', content: 'Sync failed. Verify connection.', id: Date.now() }]);
         } finally { setIsSaving(false); }
     };
 
     const handleFork = async () => {
-        if (!projectData?.id) return alert('Save core before forking.');
+        if (!projectData?.id) return alert('Initialize module before forking.');
         try {
             const data = { title: `${title} (Fork)`, code: { html, css, js }, settings: { externalLibraries }, is_public: true };
             const res = await axios.post('/api/projects', data);
@@ -172,9 +174,9 @@ export default function Editor({ auth, project: initialProject }) {
     };
 
     const addToCollection = async (id) => {
-        if (!projectData?.id) return alert('Save core first.');
+        if (!projectData?.id) return alert('Initialize core first.');
         await axios.post(`/api/collections/${id}/add`, { project_id: projectData.id });
-        alert('Linked to collection.');
+        alert('Module linked.');
         setActiveModal(null);
     };
 
@@ -185,21 +187,10 @@ export default function Editor({ auth, project: initialProject }) {
     };
 
     return (
-        <div className="h-screen bg-[#131417] flex flex-col font-sans overflow-hidden">
+        <div className="h-screen bg-[#050505] flex flex-col font-sans overflow-hidden">
             <Head>
                 <title>{projectData?.meta_title || title || 'Editor'} // HOACodeLab</title>
-                <meta name="description" content={projectData?.meta_description || 'View and edit this neural module on HOACodeLab.'} />
-                <meta name="keywords" content={projectData?.meta_keywords || 'code, editor, html, css, js'} />
-                
-                {/* Open Graph */}
-                <meta property="og:title" content={projectData?.meta_title || title || 'Neural Module'} />
-                <meta property="og:description" content={projectData?.meta_description || 'Explore this high-performance code experiment.'} />
-                <meta property="og:type" content="article" />
-                
-                {/* Twitter */}
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={projectData?.meta_title || title || 'Neural Module'} />
-                <meta name="twitter:description" content={projectData?.meta_description || 'Explore this high-performance code experiment.'} />
+                <meta name="description" content={projectData?.meta_description || 'Prototyping node on HOACodeLab.'} />
             </Head>
             
             <EditorHeader 
@@ -220,7 +211,7 @@ export default function Editor({ auth, project: initialProject }) {
                     {showConsole && (
                         <>
                             <PanelResizeHandle className="h-1 bg-black hover:bg-cyan-500/30 flex items-center justify-center">
-                                <div className="w-8 h-1 bg-white/10 rounded-full" />
+                                <div className="w-8 h-px bg-white/10" />
                             </PanelResizeHandle>
                             <Panel defaultSize={30} minSize={10}>
                                 <ConsolePanel logs={logs} setLogs={setLogs} />
