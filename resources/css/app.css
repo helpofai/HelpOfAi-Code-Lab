@@ -2,19 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-    --bg-main: #050505;
-    --bg-surface: #0a0a0a;
-    --bg-elevated: #111111;
-    --accent: #22d3ee;
-    --accent-dim: rgba(34, 211, 238, 0.1);
-    --border: rgba(255, 255, 255, 0.05);
-}
-
 @layer base {
+    :root {
+        --bg-main: #ffffff;
+        --bg-surface: #f8fafc;
+        --bg-elevated: #f1f5f9;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --border: rgba(0, 0, 0, 0.05);
+        --accent: #06b6d4;
+        --accent-dim: rgba(6, 182, 212, 0.1);
+        --glass: rgba(255, 255, 255, 0.7);
+    }
+
+    .dark {
+        --bg-main: #050505;
+        --bg-surface: #0a0a0a;
+        --bg-elevated: #111111;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --border: rgba(255, 255, 255, 0.05);
+        --accent: #22d3ee;
+        --accent-dim: rgba(34, 211, 238, 0.1);
+        --glass: rgba(0, 0, 0, 0.4);
+    }
+
     body {
         background-color: var(--bg-main);
-        color: #e2e8f0;
+        color: var(--text-main);
+        transition: background-color 0.3s ease, color 0.3s ease;
         -webkit-font-smoothing: antialiased;
     }
 
@@ -29,25 +45,30 @@
     }
 
     ::-webkit-scrollbar-thumb {
-        background: #222;
+        background: #888;
         border-radius: 10px;
     }
 
-    ::-webkit-scrollbar-thumb:hover {
+    .dark ::-webkit-scrollbar-thumb {
         background: #333;
     }
 }
 
 @layer components {
     .glass-panel {
-        @apply bg-black/40 border border-white/5 backdrop-blur-md;
+        @apply border border-[var(--border)] backdrop-blur-md;
+        background-color: var(--glass);
     }
     
     .btn-primary {
-        @apply px-6 py-2 bg-cyan-500 text-black font-bold uppercase text-[10px] tracking-widest rounded hover:bg-white transition-all active:scale-95;
+        @apply px-6 py-2 bg-cyan-500 text-white font-bold uppercase text-[10px] tracking-widest rounded hover:bg-cyan-400 transition-all active:scale-95 shadow-lg shadow-cyan-500/20;
+    }
+
+    .dark .btn-primary {
+        @apply text-black bg-cyan-400 hover:bg-white;
     }
 
     .btn-secondary {
-        @apply px-6 py-2 bg-white/5 border border-white/10 text-white font-bold uppercase text-[10px] tracking-widest rounded hover:bg-white/10 transition-all active:scale-95;
+        @apply px-6 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-main)] font-bold uppercase text-[10px] tracking-widest rounded hover:bg-white/10 transition-all active:scale-95;
     }
 }

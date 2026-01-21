@@ -15,7 +15,7 @@ import {
     Users,
     Terminal
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 
 export default function AuthenticatedLayout({ header, children }) {
     const { auth } = usePage().props;
@@ -94,6 +94,11 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
 
                 <div className="p-4 border-t border-white/5 shrink-0 space-y-4">
+                    {isSidebarOpen && (
+                        <div className="px-2">
+                            <ThemeSwitcher />
+                        </div>
+                    )}
                     <div className="flex items-center gap-2">
                         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="flex-1 flex justify-center p-2 hover:bg-white/5 rounded transition-colors text-slate-500 hover:text-white border border-white/5">
                             {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}

@@ -7,8 +7,10 @@ import {
     Layers, Share2, Server, Github, Shield,
     User, Clock, Box, Rocket, Monitor, Workflow,
     CheckCircle2, AppWindow, Command, Braces,
-    Layout, Smartphone, Terminal, Eye, Sparkles
+    Layout, Smartphone, Terminal, Eye, Sparkles, Lock
 } from 'lucide-react';
+import ProBackground from '@/Components/Visuals/ProBackground';
+import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 import axios from 'axios';
 
 // Professional Product Mockup Component
@@ -104,6 +106,7 @@ export default function Welcome({ auth, siteSettings }) {
                     </div>
                     
                     <div className="flex items-center gap-4">
+                        <ThemeSwitcher />
                         {auth.user ? (
                             <Link href={route('dashboard')} className="px-6 py-2 border border-white/10 rounded font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all italic">Terminal_Access</Link>
                         ) : (
