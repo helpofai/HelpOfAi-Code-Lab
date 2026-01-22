@@ -16,7 +16,7 @@ import EditorModals from '@/Components/Editor/EditorModals';
 import ConsolePanel from '@/Components/Editor/ConsolePanel';
 
 export default function Editor({ auth, project: initialProject }) {
-    const { html, css, js, setHtml, setCss, setJs, setProject, title, isPrivate, externalLibraries } = useProjectStore();
+    const { html, css, js, setHtml, setCss, setJs, setProject, title, isPrivate, externalLibraries, google_drive_file_id, setGoogleDriveFileId } = useProjectStore();
     const [previewContent, setPreviewContent] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [activeSidebar, setActiveSidebar] = useState(null);
@@ -32,6 +32,9 @@ export default function Editor({ auth, project: initialProject }) {
         if (initialProject) {
             setProject(initialProject);
             setProjectData(initialProject);
+            if (initialProject.code?.google_drive_file_id) {
+                setGoogleDriveFileId(initialProject.code.google_drive_file_id);
+            }
         }
     }, [initialProject]);
 
@@ -124,6 +127,31 @@ export default function Editor({ auth, project: initialProject }) {
         return projectData.user_id === auth.user.id;
     }, [auth.user, projectData]);
 
+    const handleCloudSave = async () => {
+        if (!auth.user?.google_drive_token) return alert('Cloud Link Inactive. Connect via Cloud Sync page.');
+        
+        setIsSaving(true);
+        setLogs(prev => [...prev, { type: 'LOG', content: 'Initiating Cloud Uplink...', id: Date.now() }]);
+        
+        try {
+            const res = await axios.post('/api/google-drive/save', {
+                title,
+                code: { html, css, js },
+                drive_file_id: google_drive_file_id
+            });
+            
+            if (res.data.id) {
+                setGoogleDriveFileId(res.data.id);
+                setLogs(prev => [...prev, { type: 'LOG', content: 'Cloud Node Synced: ' + res.data.id, id: Date.now() }]);
+            }
+        } catch (e) {
+            console.error(e);
+            setLogs(prev => [...prev, { type: 'ERR', content: 'Cloud Uplink Failed.', id: Date.now() }]);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const handleSave = async () => {
         if (!auth.user) {
             if (confirm('Authentication required. Redirect to login?')) {
@@ -198,6 +226,7 @@ export default function Editor({ auth, project: initialProject }) {
             
             <EditorHeader 
                 handleSave={handleSave} 
+                handleCloudSave={handleCloudSave}
                 isSaving={isSaving} 
                 isOwner={isOwner}
                 isFormatting={isFormatting}

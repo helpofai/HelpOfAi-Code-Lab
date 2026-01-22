@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Code2, Settings, Wand2, Cloud, GitFork, Loader2, PanelBottom, PanelRight, PanelTop } from 'lucide-react';
+import { Code2, Settings, Wand2, Cloud, GitFork, Loader2, PanelBottom, PanelRight, PanelTop, CloudUpload } from 'lucide-react';
 import useProjectStore from '@/Stores/useProjectStore';
 
-export default function EditorHeader({ handleSave, isSaving, isOwner, formatCode, isFormatting, setActiveSidebar }) {
+export default function EditorHeader({ handleSave, handleCloudSave, isSaving, isOwner, formatCode, isFormatting, setActiveSidebar }) {
     const { auth } = usePage().props;
     const { title, setTitle, layout, setLayout } = useProjectStore();
 
@@ -70,6 +70,17 @@ export default function EditorHeader({ handleSave, isSaving, isOwner, formatCode
                     >
                         <Settings size={14} />
                     </button>
+                    {auth.user?.google_drive_token && (
+                        <button 
+                            onClick={handleCloudSave}
+                            disabled={isSaving}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white border border-emerald-500/20 rounded text-[10px] font-bold uppercase tracking-widest transition-all"
+                            title="Save to Google Drive"
+                        >
+                             {isSaving ? <Loader2 size={12} className="animate-spin inline" /> : <CloudUpload size={14} />}
+                             <span className="hidden md:block">Push Cloud</span>
+                        </button>
+                    )}
                     <button 
                         onClick={handleSave}
                         disabled={isSaving}

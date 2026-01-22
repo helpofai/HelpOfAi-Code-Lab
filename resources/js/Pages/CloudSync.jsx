@@ -8,7 +8,7 @@ import {
     Search, Terminal, Database, Shield, RefreshCw,
     CloudOff, AlertTriangle, FileJson, Download,
     Cpu, Activity, Settings, Book, Key, Terminal as TerminalIcon,
-    Save, Lock, CheckCircle2, FolderPlus, Link as LinkIcon
+    Save, Lock, CheckCircle2, FolderPlus, Link as LinkIcon, Code2
 } from 'lucide-react';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import TextInput from '@/Components/TextInput';
@@ -232,9 +232,9 @@ export default function Explore() {
                                                                         onClick={() => importToLocal(file.id)}
                                                                         disabled={importingId === file.id}
                                                                         className="p-3 bg-cyan-500/10 rounded-xl text-cyan-500 hover:bg-cyan-500 hover:text-black transition-all"
-                                                                        title="Import to Local Grid"
+                                                                        title="Load Remote Node"
                                                                     >
-                                                                        <Download size={16} className={importingId === file.id ? 'animate-bounce' : ''} />
+                                                                        <Code2 size={16} className={importingId === file.id ? 'animate-spin' : ''} />
                                                                     </button>
                                                                     <a href={file.webViewLink} target="_blank" className="p-3 bg-white/5 rounded-xl text-[var(--text-muted)] hover:text-white transition-all"><ExternalLink size={16} /></a>
                                                                     <button onClick={() => deleteDriveFile(file.id)} className="p-3 bg-rose-500/10 rounded-xl text-rose-500/50 hover:bg-rose-500 hover:text-white transition-all"><Trash2 size={16} /></button>
