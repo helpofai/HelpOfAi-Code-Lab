@@ -337,8 +337,40 @@ class UpdateController extends Controller
                 }
 
             } else {
-                $this->sendUpdateLog("Git pull failed: " . $pull->errorOutput(), 40, 'error');
+                $this->sendUpdateLog("Git pull failed: " . $fetch->errorOutput(), 40, 'error');
                 return; // Stop if pull fails
+            }
+
+            // 1.6 Install PHP Dependencies
+            $this->sendUpdateLog("Installing PHP dependencies...", 42);
+            $composer = Process::path(base_path())->run('composer install --no-dev --optimize-autoloader');
+            if ($composer->successful()) {
+                $this->sendUpdateLog("PHP dependencies installed.", 45, 'success');
+            } else {
+                $this->sendUpdateLog("Composer install warning: " . $composer->errorOutput(), 45, 'warning');
+            }
+
+            // 1.7 Build Frontend Assets
+            $this->sendUpdateLog("Building frontend assets (this may take time)...", 46);
+            if (file_exists(base_path('package.json'))) {
+                // Check if npm is available
+                $npmCheck = Process::run('npm -v');
+                if ($npmCheck->successful()) {
+                    $npmInstall = Process::path(base_path())->run('npm install');
+                    if ($npmInstall->successful()) {
+                        $this->sendUpdateLog("Node modules installed.", 47);
+                        $npmBuild = Process::path(base_path())->run('npm run build');
+                        if ($npmBuild->successful()) {
+                            $this->sendUpdateLog("Assets compiled successfully.", 49, 'success');
+                        } else {
+                            $this->sendUpdateLog("Asset build failed: " . $npmBuild->errorOutput(), 49, 'error');
+                        }
+                    } else {
+                        $this->sendUpdateLog("npm install failed: " . $npmInstall->errorOutput(), 49, 'error');
+                    }
+                } else {
+                    $this->sendUpdateLog("Node.js/npm not found. Skipping build.", 49, 'warning');
+                }
             }
 
             // 2. Migrate
