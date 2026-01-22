@@ -465,39 +465,6 @@ class UpdateController extends Controller
     }
 
     public function migrate()
-            $this->sendUpdateLog("Running database migrations...", 50);
-            $migrate = Process::path(base_path())->run('php artisan migrate --force');
-            if ($migrate->successful()) {
-                $this->sendUpdateLog($migrate->output());
-                $this->sendUpdateLog("Database migrated.", 70, 'success');
-            } else {
-                $this->sendUpdateLog("Migration failed: " . $migrate->errorOutput(), 70, 'error');
-            }
-
-            // 3. Optimize Clear
-            $this->sendUpdateLog("Clearing system caches...", 80);
-            $optimize = Process::path(base_path())->run('php artisan optimize:clear');
-            $this->sendUpdateLog($optimize->output());
-
-            // 4. Reload Config Cache (Production)
-            if (app()->environment('production')) {
-                $this->sendUpdateLog("Caching configuration...", 90);
-                Process::path(base_path())->run('php artisan config:cache');
-                Process::path(base_path())->run('php artisan route:cache');
-                Process::path(base_path())->run('php artisan view:cache');
-            }
-
-            $this->sendUpdateLog("System update completed successfully.", 100, 'success');
-            $this->sendUpdateLog("Refresing session...", 100, 'done');
-
-        }, 200, [
-            'Content-Type' => 'text/event-stream',
-            'Cache-Control' => 'no-cache',
-            'X-Accel-Buffering' => 'no',
-        ]);
-    }
-
-    public function migrate()
     {
         set_time_limit(300);
 
