@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/google-drive/delete/{fileId}', [\App\Http\Controllers\Api\GoogleDriveController::class, 'destroy']);
 });
 
-Route::get('/google-drive/callback', [\App\Http\Controllers\Api\GoogleDriveController::class, 'callback'])->middleware(['web', 'auth']);
+Route::get('/google-drive/callback', [\App\Http\Controllers\Api\GoogleDriveController::class, 'callback'])->middleware(['web', 'auth'])->name('google-drive.callback');
 
 // Public route for viewing projects
 Route::get('projects/{slug}', [ProjectController::class, 'show']);

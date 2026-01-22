@@ -44,6 +44,10 @@ Route::get('/explore', function () {
     return Inertia::render('Explore');
 })->name('explore');
 
+Route::get('/cloud-sync', function () {
+    return Inertia::render('CloudSync');
+})->middleware(['auth', 'verified'])->name('cloud-sync');
+
 Route::get('/blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
 

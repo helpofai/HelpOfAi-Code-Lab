@@ -22,7 +22,7 @@ class GoogleDriveController extends Controller
         $client = new GoogleClient();
         $client->setClientId($user->personal_google_client_id);
         $client->setClientSecret($user->personal_google_client_secret);
-        $client->setRedirectUri(env('GOOGLE_REDIRECT_URI')); // System callback remains fixed
+        $client->setRedirectUri(route('google-drive.callback')); // System callback remains fixed
         $client->addScope(GoogleDrive::DRIVE_FILE);
         $client->setAccessType('offline');
         $client->setPrompt('select_account consent');
