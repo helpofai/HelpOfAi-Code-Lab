@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
     RefreshCw, GitBranch, GitCommit, Clock, 
     CheckCircle, AlertCircle, Server, Terminal,
-    ArrowUpCircle, Activity, Database, Loader2
+    ArrowUpCircle, Activity, Database, Loader2,
+    Box, Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -166,6 +167,73 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
         }
     };
 
+    const handleInstallDependencies = async () => {
+        if (!confirm("Install PHP dependencies (Composer)? This may take a few minutes.")) return;
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || usePage().props.auth?.csrf_token;
+        if (!token) return alert("Security token missing.");
+
+        setIsUpdating(true);
+        setUpdateLogs([{ message: 'Initializing Composer...', timestamp: new Date().toLocaleTimeString(), status: 'info' }]);
+        setProgress(10);
+
+        try {
+            const response = await fetch(route('admin.update.dependencies'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+            });
+            await processStream(response);
+        } catch (error) {
+            setUpdateLogs(prev => [...prev, { message: `ERROR: ${error.message}`, status: 'error', timestamp: new Date().toLocaleTimeString() }]);
+        }
+    };
+
+    const handleBuildAssets = async () => {
+        if (!confirm("Build Frontend Assets (NPM)? This is resource intensive.")) return;
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || usePage().props.auth?.csrf_token;
+        if (!token) return alert("Security token missing.");
+
+        setIsUpdating(true);
+        setUpdateLogs([{ message: 'Initializing Asset Compiler...', timestamp: new Date().toLocaleTimeString(), status: 'info' }]);
+        setProgress(10);
+
+        try {
+            const response = await fetch(route('admin.update.assets'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+            });
+            await processStream(response);
+        } catch (error) {
+            setUpdateLogs(prev => [...prev, { message: `ERROR: ${error.message}`, status: 'error', timestamp: new Date().toLocaleTimeString() }]);
+        }
+    };
+
+    const processStream = async (response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n\n');
+            buffer = lines.pop();
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('data: ')) {
+                    try {
+                        const data = JSON.parse(trimmed.replace(/^data: /, ''));
+                        setUpdateLogs(prev => [...prev, data]);
+                        if (data.progress) setProgress(data.progress);
+                        if (data.status === 'done') setTimeout(() => window.location.reload(), 2000);
+                    } catch (e) {}
+                }
+            }
+        }
+    };
+
     const hasChangedFiles = flash.changedFiles && flash.changedFiles.length > 0;
     const hasRemoteMigrations = flash.remotePendingMigrations && flash.remotePendingMigrations.length > 0;
     const hasLocalMigrations = localPendingMigrations && localPendingMigrations.length > 0;
@@ -307,6 +375,46 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                         </motion.div>
                     )}
                 </div>
+
+                {/* MANUAL OPERATIONS */}
+                {!isUpdating && (
+                    <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-8">
+                        <div className="flex items-center space-x-3 mb-6">
+                            <Terminal size={20} className="text-slate-400" />
+                            <h4 className="text-sm font-black uppercase tracking-widest text-slate-400">Manual_Operations</h4>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="bg-black/20 p-6 rounded-2xl border border-white/5 space-y-4">
+                                <div>
+                                    <h5 className="text-xs font-bold text-white uppercase tracking-wider">Dependency Manager</h5>
+                                    <p className="text-[10px] text-slate-500 mt-1">Install PHP libraries via Composer.</p>
+                                </div>
+                                <button 
+                                    onClick={handleInstallDependencies}
+                                    disabled={isUpdating}
+                                    className="w-full px-4 py-2 bg-sky-500/10 hover:bg-sky-500 hover:text-white border border-sky-500/20 text-sky-500 font-bold uppercase text-[9px] tracking-widest rounded transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Box size={12} />
+                                    Update_Dependencies
+                                </button>
+                            </div>
+                            <div className="bg-black/20 p-6 rounded-2xl border border-white/5 space-y-4">
+                                <div>
+                                    <h5 className="text-xs font-bold text-white uppercase tracking-wider">Asset Compiler</h5>
+                                    <p className="text-[10px] text-slate-500 mt-1">Build frontend assets via NPM.</p>
+                                </div>
+                                <button 
+                                    onClick={handleBuildAssets}
+                                    disabled={isUpdating}
+                                    className="w-full px-4 py-2 bg-pink-500/10 hover:bg-pink-500 hover:text-white border border-pink-500/20 text-pink-500 font-bold uppercase text-[9px] tracking-widest rounded transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Layers size={12} />
+                                    Build_Assets
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* DATABASE STATUS */}
                 {(hasLocalMigrations || hasRemoteMigrations) && !isUpdating && (

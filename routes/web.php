@@ -67,6 +67,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/admin/update/check', [\App\Http\Controllers\Admin\UpdateController::class, 'check'])->name('admin.update.check');
     Route::post('/admin/update/start', [\App\Http\Controllers\Admin\UpdateController::class, 'start'])->name('admin.update.start');
     Route::post('/admin/update/migrate', [\App\Http\Controllers\Admin\UpdateController::class, 'migrate'])->name('admin.update.migrate');
+    Route::post('/admin/update/dependencies', [\App\Http\Controllers\Admin\UpdateController::class, 'installDependencies'])->name('admin.update.dependencies');
+    Route::post('/admin/update/assets', [\App\Http\Controllers\Admin\UpdateController::class, 'buildAssets'])->name('admin.update.assets');
 
     Route::get('/admin/blog', [\App\Http\Controllers\Admin\PostController::class, 'index'])->name('admin.blog.index');
     Route::get('/admin/blog/create', [\App\Http\Controllers\Admin\PostController::class, 'create'])->name('admin.blog.create');

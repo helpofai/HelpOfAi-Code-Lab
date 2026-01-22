@@ -341,39 +341,130 @@ class UpdateController extends Controller
                 return; // Stop if pull fails
             }
 
-            // 1.6 Install PHP Dependencies
-            $this->sendUpdateLog("Installing PHP dependencies...", 42);
-            $composer = Process::path(base_path())->run('composer install --no-dev --optimize-autoloader');
-            if ($composer->successful()) {
-                $this->sendUpdateLog("PHP dependencies installed.", 45, 'success');
-            } else {
-                $this->sendUpdateLog("Composer install warning: " . $composer->errorOutput(), 45, 'warning');
-            }
-
-            // 1.7 Build Frontend Assets
-            $this->sendUpdateLog("Building frontend assets (this may take time)...", 46);
-            if (file_exists(base_path('package.json'))) {
-                // Check if npm is available
-                $npmCheck = Process::run('npm -v');
-                if ($npmCheck->successful()) {
-                    $npmInstall = Process::path(base_path())->run('npm install');
-                    if ($npmInstall->successful()) {
-                        $this->sendUpdateLog("Node modules installed.", 47);
-                        $npmBuild = Process::path(base_path())->run('npm run build');
-                        if ($npmBuild->successful()) {
-                            $this->sendUpdateLog("Assets compiled successfully.", 49, 'success');
-                        } else {
-                            $this->sendUpdateLog("Asset build failed: " . $npmBuild->errorOutput(), 49, 'error');
-                        }
-                    } else {
-                        $this->sendUpdateLog("npm install failed: " . $npmInstall->errorOutput(), 49, 'error');
-                    }
-                } else {
-                    $this->sendUpdateLog("Node.js/npm not found. Skipping build.", 49, 'warning');
-                }
-            }
-
             // 2. Migrate
+            $this->sendUpdateLog("Running database migrations...", 50);
+            $migrate = Process::path(base_path())->run('php artisan migrate --force');
+            if ($migrate->successful()) {
+                $this->sendUpdateLog($migrate->output());
+                $this->sendUpdateLog("Database migrated.", 70, 'success');
+            } else {
+                $this->sendUpdateLog("Migration failed: " . $migrate->errorOutput(), 70, 'error');
+            }
+
+            // 3. Optimize Clear
+            $this->sendUpdateLog("Clearing system caches...", 80);
+            $optimize = Process::path(base_path())->run('php artisan optimize:clear');
+            $this->sendUpdateLog($optimize->output());
+
+            // 4. Reload Config Cache (Production)
+            if (app()->environment('production')) {
+                $this->sendUpdateLog("Caching configuration...", 90);
+                Process::path(base_path())->run('php artisan config:cache');
+                Process::path(base_path())->run('php artisan route:cache');
+                Process::path(base_path())->run('php artisan view:cache');
+            }
+
+            $this->sendUpdateLog("System update completed successfully.", 100, 'success');
+            $this->sendUpdateLog("Refresing session...", 100, 'done');
+
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
+
+    public function installDependencies()
+    {
+        set_time_limit(600); // 10 minutes
+
+        return response()->stream(function () {
+            while (ob_get_level() > 0) ob_end_flush();
+            ini_set('output_buffering', 'off');
+            ini_set('zlib.output_compression', false);
+            header('X-Accel-Buffering: no');
+            header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
+            flush();
+
+            $this->sendUpdateLog("Initializing Composer Dependency Manager...", 10);
+            flush();
+
+            if (!function_exists('proc_open')) {
+                $this->sendUpdateLog("Error: proc_open is disabled.", 100, 'error');
+                return;
+            }
+
+            $this->sendUpdateLog("Installing PHP dependencies (this may take time)...", 30);
+            $composer = Process::path(base_path())->run('composer install --no-dev --optimize-autoloader');
+            
+            if ($composer->successful()) {
+                $this->sendUpdateLog($composer->output());
+                $this->sendUpdateLog("Dependencies installed successfully.", 100, 'success');
+                $this->sendUpdateLog("Process complete.", 100, 'done');
+            } else {
+                $this->sendUpdateLog("Composer failed: " . $composer->errorOutput(), 100, 'error');
+            }
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
+
+    public function buildAssets()
+    {
+        set_time_limit(900); // 15 minutes
+
+        return response()->stream(function () {
+            while (ob_get_level() > 0) ob_end_flush();
+            ini_set('output_buffering', 'off');
+            ini_set('zlib.output_compression', false);
+            header('X-Accel-Buffering: no');
+            header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
+            flush();
+
+            $this->sendUpdateLog("Initializing Node.js Asset Compiler...", 10);
+            flush();
+
+            if (!file_exists(base_path('package.json'))) {
+                $this->sendUpdateLog("Error: package.json not found.", 100, 'error');
+                return;
+            }
+
+            // Check npm
+            $npmCheck = Process::run('npm -v');
+            if (!$npmCheck->successful()) {
+                $this->sendUpdateLog("Error: npm is not available on this server.", 100, 'error');
+                return;
+            }
+
+            $this->sendUpdateLog("Installing Node modules...", 30);
+            $npmInstall = Process::path(base_path())->run('npm install');
+            
+            if ($npmInstall->successful()) {
+                $this->sendUpdateLog("Modules installed. Compiling assets (Vite)...", 60);
+                $npmBuild = Process::path(base_path())->run('npm run build');
+                
+                if ($npmBuild->successful()) {
+                    $this->sendUpdateLog($npmBuild->output());
+                    $this->sendUpdateLog("Assets compiled successfully.", 100, 'success');
+                    $this->sendUpdateLog("Process complete.", 100, 'done');
+                } else {
+                    $this->sendUpdateLog("Build failed: " . $npmBuild->errorOutput(), 100, 'error');
+                }
+            } else {
+                $this->sendUpdateLog("npm install failed: " . $npmInstall->errorOutput(), 100, 'error');
+            }
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
+
+    public function migrate()
             $this->sendUpdateLog("Running database migrations...", 50);
             $migrate = Process::path(base_path())->run('php artisan migrate --force');
             if ($migrate->successful()) {
