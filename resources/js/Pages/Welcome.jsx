@@ -245,7 +245,7 @@ export default function Welcome({ auth, siteSettings }) {
                 </section>
             </main>
 
-            <footer className="py-24 bg-[var(--bg-main)] border-t border-[var(--border)] px-6 text-left">
+            <footer className="py-24 bg-[var(--bg-main)] border-t border-[var(--border)] px-6 text-left relative z-10">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24">
                         <div className="lg:col-span-4 space-y-8">
