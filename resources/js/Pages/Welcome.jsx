@@ -238,8 +238,8 @@ export default function Welcome({ auth, siteSettings }) {
                 <section className="py-64 px-6 text-center">
                     <div className="max-w-4xl mx-auto space-y-16">
                         <Rocket className="text-cyan-500 mx-auto animate-bounce" size={48} />
-                        <h2 className="text-6xl md:text-9xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Join_The_Grid</h2>
-                        <Link href={route('register')} className="px-16 py-6 bg-[var(--text-main)] text-[var(--bg-main)] font-black uppercase text-xs tracking-[0.5em] rounded hover:bg-cyan-500 hover:text-white transition-all shadow-2xl active:scale-95 inline-block italic">Initialize_Uplink</Link>
+                        <h2 className="text-6xl md:text-9xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Start Coding Today</h2>
+                        <Link href={route('register')} className="px-16 py-6 bg-[var(--text-main)] text-[var(--bg-main)] font-black uppercase text-xs tracking-[0.5em] rounded hover:bg-cyan-500 hover:text-white transition-all shadow-2xl active:scale-95 inline-block italic">Sign Up Free</Link>
                     </div>
                 </section>
             </main>
@@ -256,11 +256,11 @@ export default function Welcome({ auth, siteSettings }) {
                         </div>
                         <div className="lg:col-span-2 space-y-8"><h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Platform</h4><ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]"><li>Features</li><li>Pricing</li><li>Changelog</li></ul></div>
                         <div className="lg:col-span-2 space-y-8"><h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Community</h4><ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]"><li>Discord</li><li>Blog</li></ul></div>
-                        <div className="lg:col-span-4 space-y-8"><h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Neural_Update</h4><p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Subscribe for system patches.</p><form className="flex gap-2"><input type="email" placeholder="USER@NET.LINK" className="flex-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded px-4 py-3 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-cyan-500" /><button className="px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] font-black uppercase text-[10px] tracking-widest rounded hover:bg-cyan-500 hover:text-white transition-colors">Join</button></form></div>
+                        <div className="lg:col-span-4 space-y-8"><h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Newsletter</h4><p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Subscribe for system patches.</p><form className="flex gap-2"><input type="email" placeholder="USER@NET.LINK" className="flex-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded px-4 py-3 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-cyan-500" /><button className="px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] font-black uppercase text-[10px] tracking-widest rounded hover:bg-cyan-500 hover:text-white transition-colors">Join</button></form></div>
                     </div>
                     <div className="pt-12 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-6 text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em]">
-                        <span>© 2026 HOACodeLab // Sector_7G_Uplink</span>
-                        <div className="flex items-center gap-3 px-4 py-1.5 bg-[var(--bg-surface)] border border-[var(--border)] rounded-full"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /><span>Systems_Operational</span></div>
+                        <span>© 2026 HOACodeLab // All Rights Reserved</span>
+                        <div className="flex items-center gap-3 px-4 py-1.5 bg-[var(--bg-surface)] border border-[var(--border)] rounded-full"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /><span>Systems Operational</span></div>
                     </div>
                 </div>
             </footer>
