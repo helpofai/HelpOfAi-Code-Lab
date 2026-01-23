@@ -25,7 +25,7 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <GuestLayout>
-            <Head title="Log in // Protocol" />
+            <Head title="Log In" />
 
             {status && (
                 <div className="mb-6 p-4 text-[10px] font-bold uppercase tracking-widest text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
@@ -35,7 +35,7 @@ export default function Login({ status, canResetPassword }) {
 
             <form onSubmit={submit} className="space-y-6">
                 <div className="space-y-2">
-                    <InputLabel htmlFor="email" value="User_Identifier" />
+                    <InputLabel htmlFor="email" value="Email Address" />
                     <div className="relative group">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" size={16} />
                         <TextInput
@@ -47,14 +47,14 @@ export default function Login({ status, canResetPassword }) {
                             autoComplete="username"
                             isFocused={true}
                             onChange={(e) => setData('email', e.target.value)}
-                            placeholder="agent@hoacodelab.com"
+                            placeholder="name@example.com"
                         />
                     </div>
                     <InputError message={errors.email} />
                 </div>
 
                 <div className="space-y-2">
-                    <InputLabel htmlFor="password" value="Security_Key" />
+                    <InputLabel htmlFor="password" value="Password" />
                     <div className="relative group">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" size={16} />
                         <TextInput
@@ -80,7 +80,7 @@ export default function Login({ status, canResetPassword }) {
                             className="rounded bg-[var(--bg-main)] border-[var(--border)] text-cyan-600 focus:ring-cyan-500"
                         />
                         <span className="ms-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-cyan-500 transition-colors select-none">
-                            Persist_Session
+                            Remember Me
                         </span>
                     </label>
                     
@@ -89,7 +89,7 @@ export default function Login({ status, canResetPassword }) {
                             href={route('password.request')}
                             className="text-[9px] font-bold text-slate-500 uppercase tracking-widest hover:text-cyan-500 transition-colors"
                         >
-                            Recover_Key?
+                            Forgot Password?
                         </Link>
                     )}
                 </div>
@@ -98,14 +98,14 @@ export default function Login({ status, canResetPassword }) {
                     <PrimaryButton className="w-full justify-center py-4 text-[10px] tracking-[0.2em] relative overflow-hidden group" disabled={processing}>
                         <span className="relative z-10 flex items-center gap-3">
                             {processing && <Loader2 className="animate-spin" size={14} />}
-                            Authenticate_Access <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            Log In <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                         </span>
                     </PrimaryButton>
                 </div>
                 
                 <div className="text-center pt-4 border-t border-[var(--border)]">
                     <Link href={route('register')} className="text-[9px] font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors">
-                        New Unit? <span className="text-cyan-500">Initialize_Registration</span>
+                        No account? <span className="text-cyan-500">Create an account</span>
                     </Link>
                 </div>
             </form>

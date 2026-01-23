@@ -24,11 +24,11 @@ export default function Register() {
 
     return (
         <GuestLayout>
-            <Head title="Init_Protocol" />
+            <Head title="Register" />
 
             <form onSubmit={submit} className="space-y-6">
                 <div className="space-y-2">
-                    <InputLabel htmlFor="name" value="Designation" />
+                    <InputLabel htmlFor="name" value="Name" />
                     <div className="relative group">
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" size={16} />
                         <TextInput
@@ -40,14 +40,14 @@ export default function Register() {
                             isFocused={true}
                             onChange={(e) => setData('name', e.target.value)}
                             required
-                            placeholder="Agent Name"
+                            placeholder="Full Name"
                         />
                     </div>
                     <InputError message={errors.name} />
                 </div>
 
                 <div className="space-y-2">
-                    <InputLabel htmlFor="email" value="Communication_Link" />
+                    <InputLabel htmlFor="email" value="Email Address" />
                     <div className="relative group">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" size={16} />
                         <TextInput
@@ -59,14 +59,14 @@ export default function Register() {
                             autoComplete="username"
                             onChange={(e) => setData('email', e.target.value)}
                             required
-                            placeholder="unit@hoacodelab.com"
+                            placeholder="name@example.com"
                         />
                     </div>
                     <InputError message={errors.email} />
                 </div>
 
                 <div className="space-y-2">
-                    <InputLabel htmlFor="password" value="Access_Cipher" />
+                    <InputLabel htmlFor="password" value="Password" />
                     <div className="relative group">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" size={16} />
                         <TextInput
@@ -85,7 +85,7 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-2">
-                    <InputLabel htmlFor="password_confirmation" value="Verify_Cipher" />
+                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
                     <div className="relative group">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" size={16} />
                         <TextInput
@@ -107,14 +107,14 @@ export default function Register() {
                     <PrimaryButton className="w-full justify-center py-4 text-[10px] tracking-[0.2em] relative overflow-hidden group" disabled={processing}>
                         <span className="relative z-10 flex items-center gap-3">
                             {processing && <Loader2 className="animate-spin" size={14} />}
-                            Initialize_Uplink <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            Register <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                         </span>
                     </PrimaryButton>
                 </div>
 
                 <div className="text-center pt-4 border-t border-[var(--border)]">
                     <Link href={route('login')} className="text-[9px] font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors">
-                        Already Operational? <span className="text-cyan-500">Access_Portal</span>
+                        Already have an account? <span className="text-cyan-500">Log In</span>
                     </Link>
                 </div>
             </form>

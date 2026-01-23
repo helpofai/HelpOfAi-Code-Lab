@@ -110,8 +110,8 @@ export default function Explore() {
                                 <Cloud className="text-cyan-500" size={20} />
                             </div>
                             <div>
-                                <h2 className="text-lg font-black text-[var(--text-main)] uppercase italic leading-none">Cloud_Hub</h2>
-                                <p className="text-[8px] text-cyan-500 font-bold uppercase tracking-[0.4em] mt-1">Advanced Distributed Control</p>
+                                <h2 className="text-lg font-black text-[var(--text-main)] uppercase italic leading-none">Cloud Sync</h2>
+                                <p className="text-[8px] text-cyan-500 font-bold uppercase tracking-[0.4em] mt-1">Google Drive Integration</p>
                             </div>
                         </div>
 
@@ -144,7 +144,7 @@ export default function Explore() {
                             <div className="lg:col-span-1 space-y-8">
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 text-purple-500 font-black text-[10px] uppercase tracking-widest italic">
-                                        <LinkIcon size={14} /> Link_Parameters
+                                        <LinkIcon size={14} /> Connection Settings
                                     </div>
                                     <form onSubmit={submitConfig} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[2rem] p-8 space-y-6 shadow-xl relative overflow-hidden group">
                                         <div className="absolute top-0 left-0 w-1 h-full bg-purple-500/20 group-hover:bg-purple-500 transition-all" />
@@ -158,7 +158,7 @@ export default function Explore() {
                                                 <TextInput type="password" value={data.google_client_secret} onChange={e => setData('google_client_secret', e.target.value)} className="bg-[var(--bg-elevated)] font-mono text-[10px]" />
                                             </div>
                                         </div>
-                                        <PrimaryButton disabled={processing} className="w-full justify-center py-4 text-[10px] tracking-[0.2em]">Commit_Ciphers</PrimaryButton>
+                                        <PrimaryButton disabled={processing} className="w-full justify-center py-4 text-[10px] tracking-[0.2em]">Save Settings</PrimaryButton>
                                     </form>
                                 </div>
 
@@ -166,7 +166,7 @@ export default function Explore() {
                                     <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/20 group-hover:bg-emerald-500 transition-all" />
                                     <div className="flex items-center gap-3 text-emerald-500">
                                         <Shield size={16} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Uplink_Health</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Connection Status</span>
                                     </div>
                                     <div className="space-y-4 text-[9px] font-bold uppercase tracking-widest">
                                         <div className="flex justify-between">
@@ -174,14 +174,14 @@ export default function Explore() {
                                             <span className={auth.user.google_drive_token ? 'text-emerald-500' : 'text-rose-500'}>{auth.user.google_drive_token ? 'ACTIVE' : 'OFFLINE'}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-[var(--text-muted)]">Root_Node:</span>
+                                            <span className="text-[var(--text-muted)]">Root Folder:</span>
                                             <span className="text-cyan-500 truncate ml-4">ID_{auth.user.google_drive_folder_id || 'N/A'}</span>
                                         </div>
                                     </div>
                                     {!auth.user.google_drive_token ? (
-                                        <button onClick={handleGoogleAuth} className="w-full py-4 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-cyan-500 transition-all italic">Initialize_Satellite</button>
+                                        <button onClick={handleGoogleAuth} className="w-full py-4 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-cyan-500 transition-all italic">Connect Google Drive</button>
                                     ) : (
-                                        <button onClick={disconnectDrive} className="w-full py-3 bg-rose-500/10 border border-rose-500/20 rounded text-[9px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-500 hover:text-white transition-all">Emergency_Disconnect</button>
+                                        <button onClick={disconnectDrive} className="w-full py-3 bg-rose-500/10 border border-rose-500/20 rounded text-[9px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-500 hover:text-white transition-all">Disconnect</button>
                                     )}
                                 </div>
                             </div>
@@ -192,7 +192,7 @@ export default function Explore() {
                                     <div className="p-8 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg-elevated)]">
                                         <div className="flex items-center gap-3">
                                             <Database size={16} className="text-cyan-500" />
-                                            <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[var(--text-main)] italic">Distributed_Node_Array</h3>
+                                            <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[var(--text-main)] italic">Cloud Files</h3>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <div className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded text-[8px] font-black text-cyan-500 uppercase tracking-widest">Folder: /HOACodeLab_Nodes</div>
@@ -203,17 +203,17 @@ export default function Explore() {
                                         <table className="w-full text-left">
                                             <thead className="bg-[var(--bg-main)]/50 border-b border-[var(--border)] text-[8px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">
                                                 <tr>
-                                                    <th className="px-8 py-5">Remote_Node</th>
+                                                    <th className="px-8 py-5">File Name</th>
                                                     <th className="px-8 py-5 text-right">Operations</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-[var(--border)]">
                                                 {isLoading ? (
-                                                    <tr><td colSpan="2" className="px-8 py-32 text-center text-[10px] font-black uppercase tracking-widest animate-pulse text-cyan-500 italic">Intercepting_Satellite_Signals...</td></tr>
+                                                    <tr><td colSpan="2" className="px-8 py-32 text-center text-[10px] font-black uppercase tracking-widest animate-pulse text-cyan-500 italic">Loading Files...</td></tr>
                                                 ) : !auth.user.google_drive_token ? (
-                                                    <tr><td colSpan="2" className="px-8 py-32 text-center opacity-40 italic space-y-4"><CloudOff size={48} className="mx-auto mb-4" /><span className="text-[10px] font-black uppercase tracking-widest block">Uplink_Required_to_Scan_Grid</span></td></tr>
+                                                    <tr><td colSpan="2" className="px-8 py-32 text-center opacity-40 italic space-y-4"><CloudOff size={48} className="mx-auto mb-4" /><span className="text-[10px] font-black uppercase tracking-widest block">Connect Google Drive to view files.</span></td></tr>
                                                 ) : filteredFiles.length === 0 ? (
-                                                    <tr><td colSpan="2" className="px-8 py-32 text-center text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] italic">Node_Buffer_Empty: Root folder initialization complete.</td></tr>
+                                                    <tr><td colSpan="2" className="px-8 py-32 text-center text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] italic">No files found.</td></tr>
                                                 ) : (
                                                     filteredFiles.map((file) => (
                                                         <tr key={file.id} className="hover:bg-white/[0.02] transition-colors group">
@@ -256,9 +256,9 @@ export default function Explore() {
                                 <div className="text-center space-y-4">
                                     <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-cyan-500/5 border border-cyan-500/10 rounded-full">
                                         <Zap size={12} className="text-cyan-500" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 italic">Satellite Onboarding Protocol</span>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 italic">Setup Instructions</span>
                                     </div>
-                                    <h3 className="text-4xl font-black uppercase italic tracking-tighter">Zero_Config_Cloud_Link</h3>
+                                    <h3 className="text-4xl font-black uppercase italic tracking-tighter">Easy Setup Guide</h3>
                                     <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-[0.2em]">Follow the signal path to establish your decentralized node.</p>
                                 </div>
 
@@ -273,8 +273,8 @@ export default function Explore() {
                                         </div>
                                         <div className="flex-1 space-y-4">
                                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                <h4 className="text-lg font-black uppercase italic tracking-tight text-white">01. Initialize_Google_Node</h4>
-                                                <span className="text-[8px] font-black uppercase px-2 py-1 bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 rounded-md">Action: Cloud_Console</span>
+                                                <h4 className="text-lg font-black uppercase italic tracking-tight text-white">01. Enable Google Drive API</h4>
+                                                <span className="text-[8px] font-black uppercase px-2 py-1 bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 rounded-md">Google Cloud Console</span>
                                             </div>
                                             <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 text-[10px] font-bold uppercase tracking-widest leading-loose text-[var(--text-muted)] italic">
                                                 Open the <a href="https://console.cloud.google.com" target="_blank" className="text-cyan-400 underline">Google_Cloud_Dashboard</a> and create a project. In the <span className="text-white">Library</span>, enable the <span className="text-white underline">Google_Drive_API</span>. This grants the kernel permission to interact with satellite storage.
@@ -289,19 +289,19 @@ export default function Explore() {
                                         </div>
                                         <div className="flex-1 space-y-4 text-left">
                                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
-                                                <h4 className="text-lg font-black uppercase italic tracking-tight text-white">02. Security_Handshake</h4>
-                                                <span className="text-[8px] font-black uppercase px-2 py-1 bg-purple-500/10 text-purple-500 border border-purple-500/20 rounded-md text-left">Action: Credentials_Generation</span>
+                                                <h4 className="text-lg font-black uppercase italic tracking-tight text-white">02. Create Credentials</h4>
+                                                <span className="text-[8px] font-black uppercase px-2 py-1 bg-purple-500/10 text-purple-500 border border-purple-500/20 rounded-md text-left">OAuth Client ID</span>
                                             </div>
                                             <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 space-y-6">
                                                 <p className="text-[10px] font-bold uppercase tracking-widest leading-loose text-[var(--text-muted)] italic">
-                                                    Create an <span className="text-white font-black">OAuth_2.0_Client_ID</span> (Web Application). Inject the following URI into the <span className="text-white">Authorized_Redirect_URIs</span> field:
+                                                    Create an <span className="text-white font-black">OAuth_2.0_Client_ID</span> (Web Application). Inject the following URI into the <span className="text-white">Authorized Redirect URIs</span> field:
                                                 </p>
                                                 <div className="group relative">
                                                     <code className="block bg-black px-4 py-3 rounded-xl text-emerald-500 lowercase text-[11px] font-mono border border-white/5 break-all leading-normal group-hover:border-emerald-500/30 transition-all">
                                                         {window.location.origin}/api/google-drive/callback
                                                     </code>
                                                     <div className="absolute top-1/2 -right-2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <span className="bg-emerald-500 text-black text-[8px] font-black px-2 py-1 rounded shadow-xl uppercase">System_Callback_URI</span>
+                                                        <span className="bg-emerald-500 text-black text-[8px] font-black px-2 py-1 rounded shadow-xl uppercase">Callback URL</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -315,14 +315,14 @@ export default function Explore() {
                                         </div>
                                         <div className="flex-1 space-y-4">
                                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                <h4 className="text-lg font-black uppercase italic tracking-tight text-white">03. Establish_Primary_Link</h4>
-                                                <span className="text-[8px] font-black uppercase px-2 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md">Action: Uplink_Finalization</span>
+                                                <h4 className="text-lg font-black uppercase italic tracking-tight text-white">03. Connect Account</h4>
+                                                <span className="text-[8px] font-black uppercase px-2 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md">Final Step</span>
                                             </div>
                                             <div className="bg-black border border-white/5 rounded-2xl p-8 space-y-6 text-left">
                                                 <div className="flex items-start gap-4">
                                                     <CheckCircle2 className="text-emerald-500 shrink-0" size={16} />
                                                     <p className="text-[10px] font-bold uppercase tracking-[0.1em] leading-relaxed text-slate-400 italic">
-                                                        Commit your Client ID and Secret in the <span className="text-white">Uplink_Configuration</span> panel. Click <span className="text-cyan-500">'Initialize Link'</span> to perform the handshake. 
+                                                        Commit your Client ID and Secret in the <span className="text-white">Connection Settings</span> panel. Click <span className="text-cyan-500">'Connect Google Drive'</span> to perform the handshake. 
                                                         The platform will autonomousely create a <span className="text-white">/HOACodeLab_Nodes</span> directory in your Drive root.
                                                     </p>
                                                 </div>

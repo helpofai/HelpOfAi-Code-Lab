@@ -57,8 +57,8 @@ export default function Dashboard() {
                                 <Activity className="text-cyan-500" size={20} />
                             </div>
                             <div>
-                                <h2 className="text-lg font-black text-[var(--text-main)] uppercase italic leading-none">Command_Center</h2>
-                                <p className="text-[8px] text-cyan-500 font-bold uppercase tracking-[0.4em] mt-1">Laboratory Node Active</p>
+                                <h2 className="text-lg font-black text-[var(--text-main)] uppercase italic leading-none">Dashboard</h2>
+                                <p className="text-[8px] text-cyan-500 font-bold uppercase tracking-[0.4em] mt-1">System Active</p>
                             </div>
                         </div>
                         
@@ -67,7 +67,7 @@ export default function Dashboard() {
                                 {auth.user.role}_ACCESS
                             </div>
                             <Link href={route('editor')} className="btn-primary flex items-center gap-2">
-                                <Plus size={14} strokeWidth={3} /> New_Core
+                                <Plus size={14} strokeWidth={3} /> New Project
                             </Link>
                         </div>
                     </div>
@@ -84,17 +84,17 @@ export default function Dashboard() {
                                 Welcome, <span className="text-cyan-500">{auth.user.name.split(' ')[0]}</span>
                             </h1>
                             <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-bold">
-                                Sector Uplink Stable. Monitoring {projects.length} Active Cores.
+                                System Operational. Monitoring {projects.length} Active Projects.
                             </p>
                         </div>
 
                         {/* Stats Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                             {[
-                                { label: 'Total_Cores', val: projects.length, icon: Database, color: 'text-cyan-500' },
-                                { label: 'Global_Sync', val: 'OK', icon: Globe, color: 'text-emerald-500' },
-                                { label: 'Security', val: 'Level_A', icon: ShieldCheck, color: 'text-rose-500' },
-                                { label: 'Latency', val: '0.02ms', icon: Zap, color: 'text-amber-500' }
+                                { label: 'Total Projects', val: projects.length, icon: Database, color: 'text-cyan-500' },
+                                { label: 'Sync Status', val: 'OK', icon: Globe, color: 'text-emerald-500' },
+                                { label: 'Security', val: 'Secure', icon: ShieldCheck, color: 'text-rose-500' },
+                                { label: 'Performance', val: '0.02ms', icon: Zap, color: 'text-amber-500' }
                             ].map((s, i) => (
                                 <div key={i} className="bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded hover:border-cyan-500/30 transition-colors shadow-xl text-left">
                                     <s.icon className={`${s.color} mb-4 opacity-60`} size={20} />
@@ -109,7 +109,7 @@ export default function Dashboard() {
                             <div className="lg:col-span-2 space-y-6">
                                 <div className="flex items-center gap-3 px-2">
                                     <Terminal size={16} className="text-cyan-500" />
-                                    <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-muted)]">Recent_Core_Activity</h3>
+                                    <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-muted)]">Recent Activity</h3>
                                 </div>
 
                                 <div className="space-y-2">
@@ -119,8 +119,8 @@ export default function Dashboard() {
                                         </div>
                                     ) : projects.length === 0 ? (
                                         <div className="p-12 text-center bg-[var(--bg-surface)] rounded border border-dashed border-[var(--border)] space-y-6">
-                                            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">No neural modules found in sector.</p>
-                                            <Link href={route('editor')} className="btn-secondary inline-block">Initialize_Module_01</Link>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">No projects found.</p>
+                                            <Link href={route('editor')} className="btn-secondary inline-block">Create First Project</Link>
                                         </div>
                                     ) : (
                                         projects.slice(0, 5).map((project, idx) => (
@@ -160,19 +160,19 @@ export default function Dashboard() {
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 px-2">
                                         <Zap size={16} className="text-amber-500" />
-                                        <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-muted)]">Quick_Access</h3>
+                                        <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-muted)]">Quick Access</h3>
                                     </div>
                                     <div className="grid grid-cols-1 gap-2">
                                         <Link href={route('editor')} className="flex items-center justify-between p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all group">
-                                            <span className="text-[10px] font-bold uppercase tracking-widest">New Synthesis</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest">New Project</span>
                                             <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                         </Link>
                                         <Link href={route('cloud-sync')} className="flex items-center justify-between p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all group">
-                                            <span className="text-[10px] font-bold uppercase tracking-widest">Global Archives</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest">Cloud Sync</span>
                                             <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                         </Link>
                                         <Link href={route('profile.edit')} className="flex items-center justify-between p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded hover:border-blue-500/30 hover:bg-blue-500/5 transition-all group">
-                                            <span className="text-[10px] font-bold uppercase tracking-widest">Node Settings</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest">Profile Settings</span>
                                             <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                         </Link>
                                     </div>
@@ -182,11 +182,11 @@ export default function Dashboard() {
                                     <div className="absolute top-0 right-0 p-2 text-[6px] text-[var(--text-muted)] font-mono opacity-20 uppercase">Status_Ok</div>
                                     <div className="flex items-center gap-3 mb-6">
                                         <UserCheck className="text-cyan-500" size={16} />
-                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Node_Pulse</h4>
+                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">System Status</h4>
                                     </div>
                                     <div className="space-y-4">
                                         {[
-                                            { l: 'Auth_Status', v: 'Verified', c: 'text-emerald-500' },
+                                            { l: 'Auth Status', v: 'Verified', c: 'text-emerald-500' },
                                             { l: 'Network', v: 'Stable', c: 'text-cyan-500' },
                                             { l: 'Uptime', v: '99.9%', c: 'text-amber-500' }
                                         ].map((stat, i) => (

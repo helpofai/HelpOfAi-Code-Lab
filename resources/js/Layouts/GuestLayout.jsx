@@ -24,7 +24,7 @@ export default function GuestLayout({ children }) {
                     </Link>
                     <div className="mt-8 text-center space-y-2">
                         <h1 className="text-3xl font-black italic uppercase tracking-tighter">HOACodeLab</h1>
-                        <p className="text-[10px] text-cyan-500 font-bold uppercase tracking-[0.5em]">Secure_Protocol_Active</p>
+                        <p className="text-[10px] text-cyan-500 font-bold uppercase tracking-[0.5em]">Secure Platform</p>
                     </div>
                 </motion.div>
 
@@ -41,8 +41,8 @@ export default function GuestLayout({ children }) {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} transition={{ delay: 0.5 }}
                     className="mt-12 flex justify-between items-center px-6 text-[8px] font-bold uppercase tracking-[0.4em] text-[var(--text-muted)]"
                 >
-                    <div className="flex items-center gap-3"><Fingerprint size={12}/> <span>Ident_Check_Stable</span></div>
-                    <div className="flex items-center gap-3"><span>Node_833B</span> <Cpu size={12}/></div>
+                    <div className="flex items-center gap-3"><Fingerprint size={12}/> <span>System Secure</span></div>
+                    <div className="flex items-center gap-3"><span>v1.4.8</span> <Cpu size={12}/></div>
                 </motion.div>
             </div>
         </div>

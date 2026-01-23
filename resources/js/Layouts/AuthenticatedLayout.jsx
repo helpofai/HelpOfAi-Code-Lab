@@ -139,7 +139,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <button className="flex items-center gap-3 group focus:outline-none">
                                     <div className="text-right hidden xl:block">
                                         <p className="text-[10px] font-black uppercase text-[var(--text-main)] leading-none">{user.name}</p>
-                                        <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase mt-1">Uplink_Active</p>
+                                        <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase mt-1">Online</p>
                                     </div>
                                     <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-all shadow-lg overflow-hidden">
                                         <Users size={18} />

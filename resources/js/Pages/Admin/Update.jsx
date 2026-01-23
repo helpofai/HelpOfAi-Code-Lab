@@ -268,7 +268,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                             <div className="flex items-center space-x-3 mb-4">
                                 <div className={`w-3 h-3 rounded-full ${flash.updateAvailable ? 'bg-amber-500 animate-pulse' : 'bg-green-500'} shadow-[0_0_10px_currentColor]`} />
                                 <span className="text-[10px] font-black uppercase tracking-widest text-white/50">
-                                    Current_Status: {flash.updateAvailable ? 'UPDATE_PENDING' : 'OPTIMAL'}
+                                    Current Status: {flash.updateAvailable ? 'Update Available' : 'Up to Date'}
                                 </span>
                             </div>
                             <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-2">
@@ -294,7 +294,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                     className={`group flex-1 sm:flex-initial justify-center px-6 md:px-8 py-3 md:py-4 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-xl hover:bg-white/10 transition-all flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed ${isChecking ? 'animate-pulse' : ''}`}
                                 >
                                     <RefreshCw size={14} className={isChecking ? 'animate-spin' : 'group-hover:rotate-180 transition-transform'} />
-                                    <span>{isChecking ? 'Syncing...' : 'Check_Updates'}</span>
+                                    <span>{isChecking ? 'Syncing...' : 'Check for Updates'}</span>
                                 </button>
                                 {lastCheckedTime && (
                                     <span className="text-[9px] text-slate-500 text-center font-mono">Last checked: {lastCheckedTime}</span>
@@ -313,7 +313,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                         ) : (
                                             <ArrowUpCircle size={14} className="group-hover:translate-y-[-2px] transition-transform" />
                                         )}
-                                        <span>{isUpdating ? 'Executing_Update...' : 'Update_Now'}</span>
+                                        <span>{isUpdating ? 'Updating...' : 'Update Now'}</span>
                                     </button>
                                 ) : (
                                     <div className="px-4 py-2 bg-rose-500/10 border border-rose-500/30 rounded-xl text-[10px] font-bold text-rose-400 uppercase tracking-wide flex items-center justify-center">
@@ -337,7 +337,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                     <div className="px-6 py-3 bg-white/5 border-b border-white/5 flex justify-between items-center">
                                         <div className="flex items-center space-x-2">
                                             <Terminal size={12} className="text-purple-400" />
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Live_Deployment_Stream</span>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Update Log</span>
                                         </div>
                                         <span className="text-purple-400 font-mono text-xs font-bold">{progress}%</span>
                                     </div>
@@ -381,7 +381,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                     <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-8">
                         <div className="flex items-center space-x-3 mb-6">
                             <Terminal size={20} className="text-slate-400" />
-                            <h4 className="text-sm font-black uppercase tracking-widest text-slate-400">Manual_Operations</h4>
+                            <h4 className="text-sm font-black uppercase tracking-widest text-slate-400">Advanced</h4>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="bg-black/20 p-6 rounded-2xl border border-white/5 space-y-4">
@@ -395,7 +395,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                     className="w-full px-4 py-2 bg-sky-500/10 hover:bg-sky-500 hover:text-white border border-sky-500/20 text-sky-500 font-bold uppercase text-[9px] tracking-widest rounded transition-all flex items-center justify-center gap-2"
                                 >
                                     <Box size={12} />
-                                    Update_Dependencies
+                                    Update PHP Libs
                                 </button>
                             </div>
                             <div className="bg-black/20 p-6 rounded-2xl border border-white/5 space-y-4">
@@ -409,7 +409,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                     className="w-full px-4 py-2 bg-pink-500/10 hover:bg-pink-500 hover:text-white border border-pink-500/20 text-pink-500 font-bold uppercase text-[9px] tracking-widest rounded transition-all flex items-center justify-center gap-2"
                                 >
                                     <Layers size={12} />
-                                    Build_Assets
+                                    Build Assets
                                 </button>
                             </div>
                         </div>
@@ -421,7 +421,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-amber-500/5 border border-amber-500/20 rounded-[2rem] p-8">
                         <div className="flex items-center space-x-3 mb-6">
                             <Database size={20} className="text-amber-500" />
-                            <h4 className="text-sm font-black uppercase tracking-widest text-amber-500">Database_Schema_Alert</h4>
+                            <h4 className="text-sm font-black uppercase tracking-widest text-amber-500">Database Status</h4>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -435,7 +435,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                             className="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-black uppercase text-[9px] tracking-widest rounded transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 flex items-center gap-2"
                                         >
                                             {isUpdating ? <Loader2 size={10} className="animate-spin" /> : <Database size={10} />}
-                                            Execute_Schema_Update
+                                            Run Migrations
                                         </button>
                                     )}
                                 </div>
@@ -478,7 +478,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center space-x-3">
                                 <GitBranch size={20} className="text-cyan-500" />
-                                <h4 className="text-sm font-black uppercase tracking-widest text-cyan-500">Incoming_File_Manifest</h4>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-cyan-500">Changed Files</h4>
                             </div>
                             <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{flash.changedFiles.length} Files Modified</span>
                         </div>
@@ -501,7 +501,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                         <div className="lg:col-span-2 space-y-6">
                             <div className="flex items-center space-x-3 px-2">
                                 <Terminal size={16} className="text-purple-500" />
-                                <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white">Changelog_Stream</h4>
+                                <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white">Changelog</h4>
                             </div>
 
                             <div className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden">
@@ -533,7 +533,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                                                     <div className="flex items-center space-x-3 px-2">
                                                         <Server size={16} className="text-cyan-500" />
                                                         <h4 className="text-xs font-black uppercase tracking-[0.3em] text-white flex items-center gap-2">
-                                                            System_Diagnostics
+                                                            System Info
                                                             <Activity size={10} className="text-cyan-500/50 animate-pulse" />
                                                         </h4>
                                                     </div>                            
@@ -579,7 +579,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                             <div className="bg-cyan-500/5 border border-cyan-500/10 rounded-2xl p-6">
                                 <div className="flex items-center space-x-3 mb-4">
                                     <Activity className="text-cyan-400" size={20} />
-                                    <span className="text-xs font-black uppercase tracking-widest text-white">Server_Time</span>
+                                    <span className="text-xs font-black uppercase tracking-widest text-white">Server Time</span>
                                 </div>
                                 <p className="text-sm font-mono text-cyan-400">
                                     {systemInfo?.server_time}

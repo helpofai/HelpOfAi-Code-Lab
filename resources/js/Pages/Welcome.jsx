@@ -85,8 +85,8 @@ export default function Welcome({ auth, siteSettings }) {
                             <span className="text-xl font-black tracking-tighter text-[var(--text-main)] uppercase italic">HOACodeLab</span>
                         </Link>
                         <div className="hidden lg:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                            <a href="#features" className="hover:text-cyan-500 transition-colors">Core_Engine</a>
-                            <a href="#about" className="hover:text-cyan-500 transition-colors">About_Node</a>
+                            <a href="#features" className="hover:text-cyan-500 transition-colors">Features</a>
+                            <a href="#about" className="hover:text-cyan-500 transition-colors">About</a>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -94,12 +94,12 @@ export default function Welcome({ auth, siteSettings }) {
                         {auth.user ? (
                             <div className="flex items-center gap-4">
                                 <NotificationDropdown />
-                                <Link href={route('dashboard')} className="px-6 py-2 border border-[var(--border)] rounded font-black text-[10px] uppercase tracking-widest hover:bg-[var(--text-main)] hover:text-[var(--bg-main)] transition-all italic">Terminal_Access</Link>
+                                <Link href={route('dashboard')} className="px-6 py-2 border border-[var(--border)] rounded font-black text-[10px] uppercase tracking-widest hover:bg-[var(--text-main)] hover:text-[var(--bg-main)] transition-all italic">Dashboard</Link>
                             </div>
                         ) : (
                             <>
-                                <Link href={route('login')} className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">Entry</Link>
-                                <Link href={route('register')} className="btn-primary">Get_Clearance</Link>
+                                <Link href={route('login')} className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">Login</Link>
+                                <Link href={route('register')} className="btn-primary">Get Started</Link>
                             </>
                         )}
                     </div>
@@ -112,9 +112,9 @@ export default function Welcome({ auth, siteSettings }) {
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
                             <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-cyan-500/5 border border-cyan-500/10 rounded-full mb-10">
                                 <Sparkles size={12} className="text-cyan-500" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 italic">v1.4.5 Neural Build</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 italic">v1.4.8 Stable Build</span>
                             </div>
-                            <h1 className="text-6xl md:text-9xl font-black text-[var(--text-main)] tracking-tighter uppercase italic leading-[0.8] mb-12">Synthesis <br/> <span className="text-[var(--text-muted)]">Laboratory</span></h1>
+                            <h1 className="text-6xl md:text-9xl font-black text-[var(--text-main)] tracking-tighter uppercase italic leading-[0.8] mb-12">Modern <br/> <span className="text-[var(--text-muted)]">Code Editor</span></h1>
                             <p className="text-[var(--text-muted)] text-sm md:text-lg max-w-2xl mx-auto font-bold uppercase tracking-[0.3em] leading-relaxed mb-20 opacity-80 italic">High-performance development substrate for modern web creators.</p>
                         </motion.div>
                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }}>
@@ -126,10 +126,10 @@ export default function Welcome({ auth, siteSettings }) {
                 <section className="py-16 border-y border-[var(--border)] bg-[var(--bg-surface)]">
                     <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12">
                         {[
-                            { l: 'Uplinks_Active', v: globalStats.users, i: User },
-                            { l: 'Neural_Cores', v: globalStats.projects, i: Database },
-                            { l: 'Network_SLA', v: '99.9%', i: Shield },
-                            { l: 'Sync_Rate', v: '0.04ms', i: Zap }
+                            { l: 'Active Users', v: globalStats.users, i: User },
+                            { l: 'Projects Created', v: globalStats.projects, i: Database },
+                            { l: 'Uptime', v: '99.9%', i: Shield },
+                            { l: 'Performance', v: '0.04ms', i: Zap }
                         ].map((s, i) => (
                             <div key={i} className="flex flex-col gap-2 border-l border-[var(--border)] pl-8 first:border-0">
                                 <div className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em] flex items-center gap-3"><s.i size={14} className="text-cyan-500/40" /> {s.l}</div>
@@ -143,8 +143,8 @@ export default function Welcome({ auth, siteSettings }) {
                     <div className="max-w-7xl mx-auto">
                         <div className="flex justify-between items-end mb-16">
                             <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-cyan-500"><Activity size={16} /><span className="text-[10px] font-black uppercase tracking-[0.3em]">Live_Feed</span></div>
-                                <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Community_Transmissions</h2>
+                                <div className="flex items-center gap-2 text-cyan-500"><Activity size={16} /><span className="text-[10px] font-black uppercase tracking-[0.3em]">Live Feed</span></div>
+                                <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Featured Projects</h2>
                             </div>
                         </div>
 
@@ -160,7 +160,7 @@ export default function Welcome({ auth, siteSettings }) {
                                             </div>
                                             <div className="absolute top-4 right-4">
                                                 <div className="flex items-center gap-1.5 px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg">
-                                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[8px] font-black text-white uppercase tracking-widest text-shadow-sm">Live_View</span>
+                                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[8px] font-black text-white uppercase tracking-widest text-shadow-sm">Live Preview</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -189,9 +189,9 @@ export default function Welcome({ auth, siteSettings }) {
                 <section id="features" className="py-48 px-6 bg-[var(--bg-main)] text-left">
                     <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">
                         {[
-                            { t: 'Pure_Cloud', d: 'Every line of code executed securely in your neural browser instance.', i: Globe },
-                            { t: 'Atomic_Sync', d: 'Changes reflected instantly. Pixel-perfect rendering.', i: Zap },
-                            { t: 'Secure_Vault', d: 'Encrypted storage for your modules.', i: Lock }
+                            { t: 'Cloud Based', d: 'Every line of code executed securely in your neural browser instance.', i: Globe },
+                            { t: 'Instant Sync', d: 'Changes reflected instantly. Pixel-perfect rendering.', i: Zap },
+                            { t: 'Secure Storage', d: 'Encrypted storage for your modules.', i: Lock }
                         ].map((p, i) => (
                             <div key={i} className="space-y-8 group">
                                 <div className="w-16 h-1 bg-[var(--border)] group-hover:w-24 group-hover:bg-cyan-500 transition-all duration-500" />
@@ -206,30 +206,30 @@ export default function Welcome({ auth, siteSettings }) {
                 <section className="py-32 px-6 border-y border-[var(--border)] bg-[var(--bg-surface)]">
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-20 space-y-4">
-                            <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Access_Protocols</h2>
-                            <p className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-[0.2em]">Select your clearance level</p>
+                            <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Pricing Plans</h2>
+                            <p className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-[0.2em]">Choose your plan</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                             <div className="p-10 border border-[var(--border)] rounded-3xl bg-[var(--bg-main)] text-left">
-                                <div className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.3em] mb-2">Initiate</div>
-                                <div className="text-4xl font-black text-[var(--text-main)] italic mb-8">Free_Tier</div>
+                                <div className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.3em] mb-2">Starter</div>
+                                <div className="text-4xl font-black text-[var(--text-main)] italic mb-8">Free</div>
                                 <ul className="space-y-4 mb-10 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
                                     {['Unlimited Public Projects', 'Basic Asset Library', 'Community Support'].map((item, i) => (
                                         <li key={i} className="flex items-center gap-3"><CheckCircle2 size={14} className="text-cyan-500" /> {item}</li>
                                     ))}
                                 </ul>
-                                <Link href={route('register')} className="w-full py-4 flex items-center justify-center border border-[var(--border)] rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-[var(--text-main)] hover:text-[var(--bg-main)] transition-all">Request_Access</Link>
+                                <Link href={route('register')} className="w-full py-4 flex items-center justify-center border border-[var(--border)] rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-[var(--text-main)] hover:text-[var(--bg-main)] transition-all">Get Started</Link>
                             </div>
                             <div className="p-10 border border-cyan-500/30 rounded-3xl bg-[var(--bg-elevated)] text-left shadow-2xl relative">
                                 <Sparkles className="absolute top-6 right-6 text-cyan-500" size={24} />
-                                <div className="text-xs font-black text-cyan-500 uppercase tracking-[0.3em] mb-2">Operator</div>
-                                <div className="text-4xl font-black text-[var(--text-main)] italic mb-8">Pro_Link</div>
+                                <div className="text-xs font-black text-cyan-500 uppercase tracking-[0.3em] mb-2">Pro</div>
+                                <div className="text-4xl font-black text-[var(--text-main)] italic mb-8">Pro</div>
                                 <ul className="space-y-4 mb-10 text-xs font-bold uppercase tracking-widest text-[var(--text-main)]">
                                     {['Private Projects', 'Priority Rendering', 'Collaboration Tools'].map((item, i) => (
                                         <li key={i} className="flex items-center gap-3"><CheckCircle2 size={14} className="text-cyan-500" /> {item}</li>
                                     ))}
                                 </ul>
-                                <button className="w-full py-4 bg-cyan-500 text-black font-black uppercase text-xs rounded-xl shadow-lg shadow-cyan-500/20">Upgrade_Uplink</button>
+                                <button className="w-full py-4 bg-cyan-500 text-black font-black uppercase text-xs rounded-xl shadow-lg shadow-cyan-500/20">Upgrade Now</button>
                             </div>
                         </div>
                     </div>

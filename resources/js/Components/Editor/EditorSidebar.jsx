@@ -80,7 +80,7 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                             {activeSidebar === 'cloud' && (
                                 <div className="space-y-8 text-left">
                                     <div className="space-y-4">
-                                        <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-500 italic">Cloud_Synchronization</h4>
+                                        <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-500 italic">Cloud Sync</h4>
                                         
                                         {!auth.user.google_drive_token ? (
                                             <div className="p-6 bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl space-y-6 text-center italic">
@@ -93,7 +93,7 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                                                     disabled={isLinking}
                                                     className="w-full py-3 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-cyan-500 transition-colors shadow-xl"
                                                 >
-                                                    {isLinking ? 'Initializing...' : 'Link_Google_Drive'}
+                                                    {isLinking ? 'Initializing...' : 'Link Google Drive'}
                                                 </button>
                                             </div>
                                         ) : (
@@ -102,7 +102,7 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                                                     <div className="flex items-center gap-3">
                                                         <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><Cloud size={14} /></div>
                                                         <div className="space-y-0.5">
-                                                            <p className="text-[9px] font-black uppercase tracking-widest">Link_Operational</p>
+                                                            <p className="text-[9px] font-black uppercase tracking-widest">Connected</p>
                                                             <p className="text-[8px] text-emerald-500/60 uppercase font-bold italic">Authenticated</p>
                                                         </div>
                                                     </div>
@@ -115,14 +115,14 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                                                     className="w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[var(--bg-main)] hover:border-cyan-500/30 transition-all text-cyan-400 group"
                                                 >
                                                     <RefreshCw size={14} className={isSyncing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'} />
-                                                    {isSyncing ? 'Syncing_Node...' : 'Commit_to_Cloud'}
+                                                    {isSyncing ? 'Syncing...' : 'Push to Cloud'}
                                                 </button>
 
                                                 {google_drive_file_id && (
                                                     <div className="pt-4 border-t border-[var(--border)]">
-                                                        <div className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2 italic">Remote_ID: {google_drive_file_id}</div>
+                                                        <div className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2 italic">File ID: {google_drive_file_id}</div>
                                                         <div className="flex gap-2">
-                                                            <button className="flex-1 py-2 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-white transition-colors italic">Fetch_Remote</button>
+                                                            <button className="flex-1 py-2 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-white transition-colors italic">Pull Latest</button>
                                                             <button className="px-3 py-2 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-500 hover:bg-rose-500 hover:text-white transition-all"><Trash2 size={12}/></button>
                                                         </div>
                                                     </div>
@@ -134,11 +134,11 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                                     <div className="space-y-4 pt-8 border-t border-[var(--border)] italic">
                                         <div className="flex items-center gap-2 text-slate-600">
                                             <Server size={12} />
-                                            <span className="text-[9px] font-black uppercase tracking-widest">Active_Edge_Nodes</span>
+                                            <span className="text-[9px] font-black uppercase tracking-widest">Remote Files</span>
                                         </div>
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between p-3 bg-cyan-500/5 border border-cyan-500/10 rounded-lg text-[9px] font-bold uppercase tracking-widest text-cyan-500 opacity-50 grayscale cursor-not-allowed">
-                                                <span>GitHub_Gist</span>
+                                                <span>GitHub Gist</span>
                                                 <div className="px-1.5 py-0.5 border border-cyan-500/20 rounded bg-cyan-500/10 text-[7px]">Soon</div>
                                             </div>
                                             <div className="flex items-center justify-between p-3 bg-purple-500/5 border border-purple-500/10 rounded-lg text-[9px] font-bold uppercase tracking-widest text-purple-500 opacity-50 grayscale cursor-not-allowed">
@@ -153,7 +153,7 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                             {activeSidebar === 'assets' && (
                                 <div className="space-y-8">
                                     <div className="space-y-4">
-                                        <h4 className="text-[9px] font-bold uppercase tracking-widest text-cyan-500 mb-4 italic text-left">External_Modules</h4>
+                                        <h4 className="text-[9px] font-bold uppercase tracking-widest text-cyan-500 mb-4 italic text-left">Libraries</h4>
                                         {externalLibraries.map((lib, idx) => (
                                             <div key={idx} className="flex items-center justify-between p-3 bg-[var(--bg-main)] border border-[var(--border)] rounded group text-left">
                                                 <span className="text-[9px] font-bold text-[var(--text-muted)] truncate flex-1 pr-4">{lib}</span>
@@ -164,7 +164,7 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                                             const url = prompt('Module URL:');
                                             if(url) setExternalLibraries([...externalLibraries, url]);
                                         }} className="w-full py-3 border border-dashed border-[var(--border)] rounded text-[9px] font-bold uppercase text-[var(--text-muted)] hover:text-cyan-500 hover:border-cyan-500/30 transition-all flex items-center justify-center">
-                                            <PlusCircle size={12} className="mr-2" /> Add_Source
+                                            <PlusCircle size={12} className="mr-2" /> Add Library
                                         </button>
                                     </div>
                                 </div>
@@ -174,12 +174,12 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                                 <div className="space-y-10 text-left">
                                     <div className="space-y-6">
                                         <div className="space-y-3">
-                                            <label className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">Interface_Theme</label>
+                                            <label className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">Theme</label>
                                             <ThemeSwitcher />
                                         </div>
 
                                         <div className="space-y-3">
-                                            <label className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">Font_Size ({fontSize}px)</label>
+                                            <label className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">Font Size ({fontSize}px)</label>
                                             <input 
                                                 type="range" min="10" max="24" value={fontSize} 
                                                 onChange={(e) => setFontSize(parseInt(e.target.value))}
@@ -188,7 +188,7 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                                         </div>
 
                                         <div className="space-y-3">
-                                            <label className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">Word_Wrap</label>
+                                            <label className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">Word Wrap</label>
                                             <div className="flex bg-[var(--bg-main)] p-1 rounded border border-[var(--border)]">
                                                 <button onClick={() => setWordWrap('on')} className={`flex-1 py-2 text-[9px] font-bold uppercase rounded transition-all ${wordWrap === 'on' ? 'bg-[var(--bg-elevated)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>On</button>
                                                 <button onClick={() => setWordWrap('off')} className={`flex-1 py-2 text-[9px] font-bold uppercase rounded transition-all ${wordWrap === 'off' ? 'bg-[var(--bg-elevated)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>Off</button>
@@ -197,7 +197,7 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
 
                                         <div className="pt-6 border-t border-[var(--border)] space-y-4">
                                             <div className="flex items-center justify-between">
-                                                <label className="text-[9px] font-black text-cyan-500 uppercase tracking-[0.2em] italic">Privacy_Shield</label>
+                                                <label className="text-[9px] font-black text-cyan-500 uppercase tracking-[0.2em] italic">Privacy</label>
                                                 {!isPro && (
                                                     <Link href="#" className="flex items-center gap-1 text-[8px] font-black text-amber-500 uppercase bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                                                         <Crown size={8} /> Upgrade
@@ -209,7 +209,7 @@ export default function EditorSidebar({ activeSidebar, setActiveSidebar }) {
                                                 <div className="flex items-center justify-between mb-3">
                                                     <div className="flex items-center gap-3">
                                                         {isPrivate ? <Lock size={14} className="text-rose-500" /> : <Unlock size={14} className="text-emerald-500" />}
-                                                        <span className="text-[10px] font-bold uppercase tracking-widest">{isPrivate ? 'Private_Core' : 'Public_Stream'}</span>
+                                                        <span className="text-[10px] font-bold uppercase tracking-widest">{isPrivate ? 'Private' : 'Public'}</span>
                                                     </div>
                                                     <button 
                                                         onClick={() => isPro && setIsPrivate(!isPrivate)}

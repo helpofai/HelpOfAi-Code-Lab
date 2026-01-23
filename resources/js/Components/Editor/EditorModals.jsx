@@ -32,7 +32,7 @@ export default function EditorModals({
                             <div className="space-y-8 text-left">
                                 <div className="flex items-center gap-3">
                                     <Share2 className="text-purple-500" size={20} />
-                                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Broadcast_Node</h3>
+                                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Share Project</h3>
                                 </div>
                                 
                                 <div className="space-y-4">
@@ -53,7 +53,7 @@ export default function EditorModals({
                                                 {isPrivate ? <Lock size={16} className="text-rose-500" /> : <Globe size={16} className="text-emerald-500" />}
                                                 <div>
                                                     <div className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">
-                                                        {isPrivate ? 'Restricted_Access' : 'Public_Frequency'}
+                                                        {isPrivate ? 'Private Access' : 'Public Access'}
                                                     </div>
                                                     <div className="text-[9px] text-[var(--text-muted)]">
                                                         {isPrivate ? 'Only you can view this node.' : 'Visible to the entire network.'}
@@ -70,7 +70,7 @@ export default function EditorModals({
 
                                 <div className="flex justify-end pt-4 border-t border-[var(--border)]">
                                     <button onClick={() => setActiveModal('embed')} className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-2 transition-colors">
-                                        <Code size={14} /> Generate_Embed_Code
+                                        <Code size={14} /> Get Embed Code
                                     </button>
                                 </div>
                             </div>
@@ -80,7 +80,7 @@ export default function EditorModals({
                             <div className="space-y-8 text-left">
                                 <div className="flex items-center gap-3">
                                     <Code className="text-cyan-500" size={20} />
-                                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Embed_Core</h3>
+                                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Embed Project</h3>
                                 </div>
                                 <textarea 
                                     readOnly 
@@ -93,7 +93,7 @@ export default function EditorModals({
                                         <ArrowLeft size={14} /> Back
                                     </button>
                                     <button onClick={() => { navigator.clipboard.writeText(`<iframe src="${window.location.origin}/editor/${project?.slug}" style="width:100%; height:500px; border:none; border-radius: 8px; overflow:hidden;" sandbox="allow-scripts allow-same-origin"></iframe>`); alert('Embed Code Copied.'); }} className="text-[10px] font-bold uppercase tracking-widest text-cyan-500 hover:text-cyan-400 flex items-center gap-2 transition-colors">
-                                        <Copy size={14} /> Copy_Snippet
+                                        <Copy size={14} /> Copy Code
                                     </button>
                                 </div>
                             </div>
@@ -103,13 +103,13 @@ export default function EditorModals({
                             <div className="space-y-8 text-left">
                                 <div className="flex items-center gap-3">
                                     <FolderPlus className="text-cyan-500" size={20} />
-                                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Categorize</h3>
+                                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Add to Collection</h3>
                                 </div>
                                 <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                                     {collections.map(c => (
                                         <button key={c.id} onClick={() => addToCollection(c.id)} className="w-full p-4 bg-[var(--bg-main)] border border-[var(--border)] rounded hover:border-cyan-500/40 text-left flex justify-between items-center transition-all">
                                             <span className="font-bold text-[var(--text-main)] uppercase text-[10px] tracking-widest">{c.title}</span>
-                                            <span className="text-[9px] text-[var(--text-muted)] font-black">{c.projects_count} Cores</span>
+                                            <span className="text-[9px] text-[var(--text-muted)] font-black">{c.projects_count} Projects</span>
                                         </button>
                                     ))}
                                 </div>

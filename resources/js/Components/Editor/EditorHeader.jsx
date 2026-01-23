@@ -22,10 +22,10 @@ export default function EditorHeader({ handleSave, handleCloudSave, isSaving, is
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className="bg-transparent border-none p-0 text-white font-bold text-sm focus:ring-0 w-32 md:w-48 placeholder-white/20 truncate leading-none"
-                        placeholder="Untitled_Module"
+                        placeholder="Untitled Project"
                     />
                     <div className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-1">
-                        Node: {auth.user ? auth.user.name : 'Guest'}
+                        User: {auth.user ? auth.user.name : 'Guest'}
                     </div>
                 </div>
             </div>
@@ -85,7 +85,7 @@ export default function EditorHeader({ handleSave, handleCloudSave, isSaving, is
                             title="Save to Google Drive"
                         >
                              {isSaving ? <Loader2 size={12} className="animate-spin inline" /> : <CloudUpload size={14} />}
-                             <span className="hidden md:block">Push Cloud</span>
+                             <span className="hidden md:block">Save to Cloud</span>
                         </button>
                     )}
                     <button 
