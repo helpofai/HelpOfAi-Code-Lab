@@ -100,4 +100,36 @@ class User extends Authenticatable
     {
         return $this->hasMany(Post::class);
     }
+
+    /**
+     * Get the teams the user belongs to.
+     */
+    public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'team_user')
+                    ->withPivot('role')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the teams owned by the user.
+     */
+    public function ownedTeams(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Team::class);
+    }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (User $user) {
+            // Create personal team
+            $user->ownedTeams()->create([
+                'name' => explode(' ', $user->name, 2)[0] . "'s Team",
+                'personal_team' => true,
+            ]);
+        });
+    }
 }
