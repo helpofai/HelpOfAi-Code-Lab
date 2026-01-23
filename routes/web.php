@@ -40,9 +40,7 @@ Route::get('/dashboard/my-projects', function () {
     return Inertia::render('MyProjects');
 })->middleware(['auth', 'verified'])->name('my-projects');
 
-Route::get('/explore', function () {
-    return Inertia::render('Explore');
-})->name('explore');
+
 
 Route::get('/cloud-sync', function () {
     return Inertia::render('CloudSync');

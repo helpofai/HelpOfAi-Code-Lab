@@ -30,16 +30,21 @@ export default function AuthenticatedLayout({ header, children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const userItems = [
-        { name: 'Dashboard', icon: LayoutDashboard, href: route('dashboard'), active: route().current('dashboard') },
-        { name: 'Explore', icon: Globe, href: route('explore'), active: route().current('explore') },
-        { name: 'Cloud Sync', icon: Cloud, href: route('cloud-sync'), active: route().current('cloud-sync') },
-        { name: 'Blog', icon: FileText, href: route('blog.index'), active: route().current('blog.index') },
+        const userItems = [
 
-        { name: 'Editor', icon: Code2, href: route('editor'), active: route().current('editor') },
-        { name: 'My Projects', icon: Database, href: route('my-projects'), active: route().current('my-projects') },
-        { name: 'Support', icon: LifeBuoy, href: route('support.index'), active: route().current('support.index') },
-    ];
+            { name: 'Dashboard', icon: LayoutDashboard, href: route('dashboard'), active: route().current('dashboard') },
+
+            { name: 'Cloud Sync', icon: Cloud, href: route('cloud-sync'), active: route().current('cloud-sync') },
+
+            { name: 'Blog', icon: FileText, href: route('blog.index'), active: route().current('blog.index') },
+
+            { name: 'Editor', icon: Code2, href: route('editor'), active: route().current('editor') },
+
+            { name: 'My Projects', icon: Database, href: route('my-projects'), active: route().current('my-projects') },
+
+            { name: 'Support', icon: LifeBuoy, href: route('support.index'), active: route().current('support.index') },
+
+        ];
 
     const adminItems = [
         { name: 'Admin Command', icon: Shield, href: route('admin.dashboard'), active: route().current('admin.dashboard') },
@@ -144,7 +149,6 @@ export default function AuthenticatedLayout({ header, children }) {
                             <Dropdown.Content align="right" width="48">
                                 <Dropdown.Link href={route('dashboard')}>Dashboard</Dropdown.Link>
                                 <Dropdown.Link href={route('my-projects')}>My Projects</Dropdown.Link>
-                                <Dropdown.Link href={route('explore')}>Explore</Dropdown.Link>
                                 <div className="border-t border-[var(--border)] my-1" />
                                 <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
                                 <Dropdown.Link href={route('support.index')}>Support</Dropdown.Link>

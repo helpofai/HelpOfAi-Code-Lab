@@ -8,13 +8,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// Public discovery routes
-Route::get('explore', [\App\Http\Controllers\Api\ExploreController::class, 'index']);
-Route::get('explore/categories', [\App\Http\Controllers\Api\ExploreController::class, 'categories']);
-Route::get('explore/stats', [\App\Http\Controllers\Api\ExploreController::class, 'stats']);
-Route::get('explore/latest', [\App\Http\Controllers\Api\ExploreController::class, 'latest']);
-Route::get('explore/random', [\App\Http\Controllers\Api\ExploreController::class, 'random']);
-Route::get('explore/featured', [\App\Http\Controllers\Api\ExploreController::class, 'featured']);
+
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('admin/stats', [\App\Http\Controllers\Api\AdminController::class, 'stats']);
