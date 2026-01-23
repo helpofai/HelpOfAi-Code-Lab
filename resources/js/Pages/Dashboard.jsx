@@ -167,7 +167,7 @@ export default function Dashboard() {
                                             <span className="text-[10px] font-bold uppercase tracking-widest">New Synthesis</span>
                                             <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                         </Link>
-                                        <Link href={route('explore')} className="flex items-center justify-between p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all group">
+                                        <Link href={route('cloud-sync')} className="flex items-center justify-between p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all group">
                                             <span className="text-[10px] font-bold uppercase tracking-widest">Global Archives</span>
                                             <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                         </Link>
