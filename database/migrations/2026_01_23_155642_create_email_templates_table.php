@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('email_templates', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('subject');
-            $table->longText('content'); // HTML content
-            $table->json('variables')->nullable(); // e.g. ['name', 'link']
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('email_templates')) {
+            Schema::create('email_templates', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('subject');
+                $table->longText('content'); // HTML content
+                $table->json('variables')->nullable(); // e.g. ['name', 'link']
+                $table->timestamps();
+            });
+        }
     }
 
     /**
