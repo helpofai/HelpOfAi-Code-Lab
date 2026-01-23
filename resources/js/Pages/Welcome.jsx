@@ -150,7 +150,8 @@ export default function Welcome({ auth, siteSettings }) {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {featured.length > 0 ? featured.slice(0, 3).map((project) => {
-                                const liveSrcDoc = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; background: white; font-family: sans-serif; } ${project.code?.css || ''}</style></head><body>${project.code?.html || ''}<script>${project.code?.js || ''}</script></body></html>`;
+                                const libraries = (project.settings?.externalLibraries || []).map(lib => lib.endsWith('.css') ? `<link rel="stylesheet" href="${lib}">` : `<script src="${lib}"></script>`).join('\n');
+                                const liveSrcDoc = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; background: white; font-family: sans-serif; } ${project.code?.css || ''}</style>${libraries}</head><body>${project.code?.html || ''}<script>${project.code?.js || ''}</script></body></html>`;
                                 return (
                                     <Link href={route('editor', { slug: project.slug })} key={project.id} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all hover:-translate-y-1 block">
                                         <div className="aspect-video bg-white relative overflow-hidden">

@@ -95,6 +95,7 @@ class ExploreController extends Controller
                     'css' => $fileData['css'] ?? '',
                     'js' => $fileData['js'] ?? '',
                 ];
+                $project->settings = $fileData['settings'] ?? [];
             }
         }
 
