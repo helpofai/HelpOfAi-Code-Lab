@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, usePage, useForm, router } from '@inertiajs/react';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -8,19 +8,63 @@ import {
     Search, Terminal, Database, Shield, RefreshCw,
     CloudOff, AlertTriangle, FileJson, Download,
     Cpu, Activity, Settings, Book, Key, Terminal as TerminalIcon,
-    Save, Lock, CheckCircle2, FolderPlus, Link as LinkIcon, Code2
+    Save, Lock, CheckCircle2, FolderPlus, Link as LinkIcon, Code2,
+    LayoutGrid, List
 } from 'lucide-react';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 
-export default function Explore() {
+function CloudFileThumbnail({ file }) {
+    const [fileContent, setFileContent] = useState(null);
+    
+    useEffect(() => {
+        const fetchContent = async () => {
+            try {
+                const res = await axios.get(`/api/google-drive/fetch/${file.id}`);
+                setFileContent(res.data);
+            } catch (e) {}
+        };
+        fetchContent();
+    }, [file.id]);
+
+    const srcDoc = useMemo(() => {
+        if (!fileContent?.code) return '';
+        return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    html, body { background: #1d1e22; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+                    ${fileContent.code.css || ''}
+                </style>
+            </head>
+            <body>${fileContent.code.html || ''}</body>
+            </html>
+        `;
+    }, [fileContent]);
+
+    return (
+        <div className="w-full h-full bg-[#1d1e22] relative overflow-hidden">
+            {fileContent ? (
+                <div className="absolute inset-0 w-full h-full group-hover:scale-110 transition-transform duration-[2s]">
+                    <iframe srcDoc={srcDoc} title="t" className="border-none pointer-events-none absolute" style={{ width: '400%', height: '400%', transform: 'scale(0.25)', transformOrigin: '0 0' }} sandbox="allow-scripts" />
+                </div>
+            ) : (
+                <div className="w-full h-full flex items-center justify-center bg-white/5"><div className="w-4 h-4 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" /></div>
+            )}
+        </div>
+    );
+}
+
+export default function CloudSync() {
     const { auth } = usePage().props;
     const [driveFiles, setDriveFiles] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [importingId, setImportingId] = useState(null);
+    const [viewMode, setViewMode] = useState('grid');
 
     const { data, setData, post, processing } = useForm({
         google_client_id: auth.user.personal_google_client_id || '',
@@ -126,6 +170,10 @@ export default function Explore() {
                                     className="bg-[var(--bg-surface)] border border-[var(--border)] rounded pl-10 pr-4 py-2 text-[10px] font-bold uppercase tracking-widest focus:border-cyan-500/50 focus:ring-0 w-full"
                                 />
                             </div>
+                            <div className="flex bg-[var(--bg-surface)] p-1 rounded border border-[var(--border)]">
+                                <button onClick={() => setViewMode('grid')} className={`p-2 rounded ${viewMode === 'grid' ? 'bg-[var(--bg-elevated)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)]'}`}><LayoutGrid size={16} /></button>
+                                <button onClick={() => setViewMode('list')} className={`p-2 rounded ${viewMode === 'list' ? 'bg-[var(--bg-elevated)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)]'}`}><List size={16} /></button>
+                            </div>
                             <button onClick={fetchDriveFiles} className="p-2.5 bg-[var(--bg-surface)] border border-[var(--border)] rounded hover:border-cyan-500/30 transition-all">
                                 <RefreshCw size={14} className={isLoading ? 'animate-spin text-cyan-500' : 'text-[var(--text-muted)]'} />
                             </button>
@@ -199,23 +247,52 @@ export default function Explore() {
                                         </div>
                                     </div>
 
-                                    <div className="flex-1 overflow-x-auto">
-                                        <table className="w-full text-left">
-                                            <thead className="bg-[var(--bg-main)]/50 border-b border-[var(--border)] text-[8px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">
-                                                <tr>
-                                                    <th className="px-8 py-5">File Name</th>
-                                                    <th className="px-8 py-5 text-right">Operations</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-[var(--border)]">
-                                                {isLoading ? (
-                                                    <tr><td colSpan="2" className="px-8 py-32 text-center text-[10px] font-black uppercase tracking-widest animate-pulse text-cyan-500 italic">Loading Files...</td></tr>
-                                                ) : !auth.user.google_drive_token ? (
-                                                    <tr><td colSpan="2" className="px-8 py-32 text-center opacity-40 italic space-y-4"><CloudOff size={48} className="mx-auto mb-4" /><span className="text-[10px] font-black uppercase tracking-widest block">Connect Google Drive to view files.</span></td></tr>
-                                                ) : filteredFiles.length === 0 ? (
-                                                    <tr><td colSpan="2" className="px-8 py-32 text-center text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] italic">No files found.</td></tr>
-                                                ) : (
-                                                    filteredFiles.map((file) => (
+                                    <div className="flex-1 overflow-x-auto p-6">
+                                        {isLoading ? (
+                                            <div className="flex flex-col items-center justify-center py-20 gap-4">
+                                                <div className="w-8 h-8 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest animate-pulse text-cyan-500 italic">Loading Files...</span>
+                                            </div>
+                                        ) : !auth.user.google_drive_token ? (
+                                            <div className="flex flex-col items-center justify-center py-32 opacity-40 italic space-y-4">
+                                                <CloudOff size={48} className="mx-auto" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest block">Connect Google Drive to view files.</span>
+                                            </div>
+                                        ) : filteredFiles.length === 0 ? (
+                                            <div className="flex flex-col items-center justify-center py-32 text-[var(--text-muted)] italic">
+                                                <span className="text-[10px] font-black uppercase tracking-widest">No files found.</span>
+                                            </div>
+                                        ) : viewMode === 'grid' ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {filteredFiles.map((file, idx) => (
+                                                    <motion.div key={file.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className="group bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-cyan-500/30 transition-all shadow-lg text-left">
+                                                        <div className="aspect-video bg-black relative border-b border-[var(--border)] overflow-hidden">
+                                                            <CloudFileThumbnail file={file} />
+                                                            <div className="absolute top-3 right-3 px-2 py-0.5 rounded border text-[8px] font-bold uppercase tracking-widest z-20 bg-cyan-500/10 border-cyan-500/30 text-cyan-500">Cloud</div>
+                                                        </div>
+                                                        <div className="p-4">
+                                                            <h3 className="text-sm font-black text-[var(--text-main)] uppercase italic tracking-tight group-hover:text-cyan-500 transition-colors mb-4 truncate">{file.name.replace('.hoa.json', '')}</h3>
+                                                            <div className="flex gap-2">
+                                                                <button onClick={() => importToLocal(file.id)} disabled={importingId === file.id} className="flex-1 py-2 bg-cyan-500 text-black rounded font-black text-[10px] uppercase tracking-widest hover:bg-white transition-colors flex items-center justify-center gap-2">
+                                                                    {importingId === file.id ? <RefreshCw size={12} className="animate-spin" /> : <Code2 size={12} />} Open
+                                                                </button>
+                                                                <a href={file.webViewLink} target="_blank" className="p-2 bg-[var(--bg-main)] border border-[var(--border)] rounded text-[var(--text-muted)] hover:text-white transition-colors"><ExternalLink size={14} /></a>
+                                                                <button onClick={() => deleteDriveFile(file.id)} className="p-2 bg-rose-500/10 border border-rose-500/20 rounded text-rose-500 hover:bg-rose-500 hover:text-white transition-colors"><Trash2 size={14} /></button>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <table className="w-full text-left">
+                                                <thead className="bg-[var(--bg-main)]/50 border-b border-[var(--border)] text-[8px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">
+                                                    <tr>
+                                                        <th className="px-8 py-5">File Name</th>
+                                                        <th className="px-8 py-5 text-right">Operations</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-[var(--border)]">
+                                                    {filteredFiles.map((file) => (
                                                         <tr key={file.id} className="hover:bg-white/[0.02] transition-colors group">
                                                             <td className="px-8 py-6">
                                                                 <div className="flex items-center gap-4">
@@ -241,10 +318,10 @@ export default function Explore() {
                                                                 </div>
                                                             </td>
                                                         </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        )}
                                     </div>
                                 </div>
                             </div>
