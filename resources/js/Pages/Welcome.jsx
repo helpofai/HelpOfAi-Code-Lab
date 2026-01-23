@@ -85,7 +85,6 @@ export default function Welcome({ auth, siteSettings }) {
                             <span className="text-xl font-black tracking-tighter text-[var(--text-main)] uppercase italic">HOACodeLab</span>
                         </Link>
                         <div className="hidden lg:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                            <Link href={route('explore')} className="hover:text-cyan-500 transition-colors">Grid_Exploration</Link>
                             <a href="#features" className="hover:text-cyan-500 transition-colors">Core_Engine</a>
                             <a href="#about" className="hover:text-cyan-500 transition-colors">About_Node</a>
                         </div>
@@ -147,9 +146,6 @@ export default function Welcome({ auth, siteSettings }) {
                                 <div className="flex items-center gap-2 text-cyan-500"><Activity size={16} /><span className="text-[10px] font-black uppercase tracking-[0.3em]">Live_Feed</span></div>
                                 <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Community_Transmissions</h2>
                             </div>
-                            <Link href={route('explore')} className="hidden md:flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] hover:text-cyan-500 transition-colors group">
-                                View_All_Signals <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                            </Link>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -259,7 +255,7 @@ export default function Welcome({ auth, siteSettings }) {
                             </div>
                         </div>
                         <div className="lg:col-span-2 space-y-8"><h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Platform</h4><ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]"><li>Features</li><li>Pricing</li><li>Changelog</li></ul></div>
-                        <div className="lg:col-span-2 space-y-8"><h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Community</h4><ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]"><li>Explore</li><li>Discord</li><li>Blog</li></ul></div>
+                        <div className="lg:col-span-2 space-y-8"><h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Community</h4><ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]"><li>Discord</li><li>Blog</li></ul></div>
                         <div className="lg:col-span-4 space-y-8"><h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Neural_Update</h4><p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Subscribe for system patches.</p><form className="flex gap-2"><input type="email" placeholder="USER@NET.LINK" className="flex-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded px-4 py-3 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-cyan-500" /><button className="px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] font-black uppercase text-[10px] tracking-widest rounded hover:bg-cyan-500 hover:text-white transition-colors">Join</button></form></div>
                     </div>
                     <div className="pt-12 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-6 text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em]">
