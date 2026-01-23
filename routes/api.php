@@ -8,7 +8,9 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-
+// Public stats & featured projects for Welcome page
+Route::get('explore/featured', [\App\Http\Controllers\Api\ExploreController::class, 'featured']);
+Route::get('explore/stats', [\App\Http\Controllers\Api\ExploreController::class, 'stats']);
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('admin/stats', [\App\Http\Controllers\Api\AdminController::class, 'stats']);
