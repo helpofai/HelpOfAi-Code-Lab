@@ -83,6 +83,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/admin/support/{ticket}/reply', [\App\Http\Controllers\Admin\SupportController::class, 'reply'])->name('admin.support.reply');
     Route::put('/admin/support/{ticket}/status', [\App\Http\Controllers\Admin\SupportController::class, 'updateStatus'])->name('admin.support.status');
     Route::delete('/admin/support/{ticket}', [\App\Http\Controllers\Admin\SupportController::class, 'destroy'])->name('admin.support.destroy');
+
+    // Admin Email System
+    Route::get('/admin/email/send', [\App\Http\Controllers\Admin\EmailController::class, 'sendPage'])->name('admin.email.send');
+    Route::post('/admin/email/send', [\App\Http\Controllers\Admin\EmailController::class, 'send'])->name('admin.email.send.process');
+    Route::get('/admin/email/settings', [\App\Http\Controllers\Admin\EmailController::class, 'settings'])->name('admin.email.settings');
+    Route::post('/admin/email/settings', [\App\Http\Controllers\Admin\EmailController::class, 'updateSettings'])->name('admin.email.settings.update');
+    Route::post('/admin/email/test', [\App\Http\Controllers\Admin\EmailController::class, 'testConnection'])->name('admin.email.test');
+    Route::resource('admin/email', \App\Http\Controllers\Admin\EmailController::class, ['names' => 'admin.email']);
 });
 
 Route::middleware('auth')->group(function () {
@@ -109,6 +117,14 @@ Route::middleware('auth')->group(function () {
         
         return back()->with('success', 'Config_Stored');
     })->name('google-drive.save-config');
+
+    // Team System
+    Route::resource('teams', \App\Http\Controllers\TeamController::class)->except(['create', 'edit']);
+    Route::post('teams/{team}/members', [\App\Http\Controllers\TeamController::class, 'addMember'])->name('teams.members.store');
+    Route::delete('teams/{team}/members/{user}', [\App\Http\Controllers\TeamController::class, 'removeMember'])->name('teams.members.destroy');
+    Route::delete('teams/{team}/invitations/{invitation}', [\App\Http\Controllers\TeamController::class, 'cancelInvitation'])->name('teams.invitations.destroy');
+    Route::post('invitations/{invitation}/accept', [\App\Http\Controllers\TeamController::class, 'acceptInvitation'])->name('invitations.accept');
+    Route::delete('invitations/{invitation}', [\App\Http\Controllers\TeamController::class, 'rejectInvitation'])->name('invitations.destroy');
 });
 
 require __DIR__.'/auth.php';
