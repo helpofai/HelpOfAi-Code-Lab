@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Code2, Settings, Wand2, Cloud, GitFork, Loader2, PanelBottom, PanelRight, PanelTop, CloudUpload } from 'lucide-react';
+import { Code2, Settings, Wand2, Cloud, GitFork, Loader2, PanelBottom, PanelRight, PanelTop, CloudUpload, Share2 } from 'lucide-react';
 import useProjectStore from '@/Stores/useProjectStore';
 
-export default function EditorHeader({ handleSave, handleCloudSave, isSaving, isOwner, formatCode, isFormatting, setActiveSidebar }) {
+export default function EditorHeader({ handleSave, handleCloudSave, isSaving, isOwner, formatCode, isFormatting, setActiveSidebar, setActiveModal }) {
     const { auth } = usePage().props;
     const { title, setTitle, layout, setLayout } = useProjectStore();
 
@@ -69,6 +69,13 @@ export default function EditorHeader({ handleSave, handleCloudSave, isSaving, is
                         className="p-2 bg-[var(--bg-elevated)] hover:bg-[var(--bg-main)] text-[var(--text-main)] border border-[var(--border)] rounded transition-all"
                     >
                         <Settings size={14} />
+                    </button>
+                    <button 
+                        onClick={() => setActiveModal('share')}
+                        className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 text-purple-500 hover:bg-purple-500 hover:text-white border border-purple-500/20 rounded text-[10px] font-bold uppercase tracking-widest transition-all"
+                    >
+                        <Share2 size={14} />
+                        <span className="hidden md:block">Share</span>
                     </button>
                     {auth.user?.google_drive_token && (
                         <button 

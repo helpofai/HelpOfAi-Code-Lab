@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Copy, Code, FolderPlus } from 'lucide-react';
+import { X, Share2, Copy, Code, FolderPlus, Lock, Globe, ArrowLeft } from 'lucide-react';
+import useProjectStore from '@/Stores/useProjectStore';
 
 export default function EditorModals({ 
     activeModal, 
@@ -11,6 +12,7 @@ export default function EditorModals({
     createCollection 
 }) {
     const [newCollectionTitle, setNewCollectionTitle] = useState('');
+    const { isPrivate, setIsPrivate } = useProjectStore();
 
     const handleCreateCollection = () => {
         if (!newCollectionTitle) return;
@@ -29,12 +31,47 @@ export default function EditorModals({
                         {activeModal === 'share' && (
                             <div className="space-y-8 text-left">
                                 <div className="flex items-center gap-3">
-                                    <Share2 className="text-cyan-500" size={20} />
-                                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Broadcast_Module</h3>
+                                    <Share2 className="text-purple-500" size={20} />
+                                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Broadcast_Node</h3>
                                 </div>
-                                <div className="p-4 bg-[var(--bg-main)] border border-[var(--border)] rounded flex items-center justify-between">
-                                    <code className="text-[10px] text-cyan-500 truncate mr-6 font-mono">{window.location.href}</code>
-                                    <button onClick={() => { navigator.clipboard.writeText(window.location.href); alert('Copied.'); }} className="p-2 hover:bg-[var(--bg-elevated)] rounded text-[var(--text-main)] transition-all"><Copy size={14} /></button>
+                                
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-[var(--bg-main)] border border-[var(--border)] rounded-xl flex items-center justify-between group hover:border-purple-500/30 transition-colors">
+                                        <code className="text-[10px] text-purple-400 truncate mr-6 font-mono select-all">
+                                            {project?.slug ? `${window.location.origin}/editor/${project.slug}` : 'Save project to generate link'}
+                                        </code>
+                                        {project?.slug && (
+                                            <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/editor/${project.slug}`); alert('Link Copied.'); }} className="p-2 hover:bg-[var(--bg-elevated)] rounded text-[var(--text-main)] transition-all">
+                                                <Copy size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {project && (
+                                        <div className="flex items-center justify-between p-4 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border)]">
+                                            <div className="flex items-center gap-3">
+                                                {isPrivate ? <Lock size={16} className="text-rose-500" /> : <Globe size={16} className="text-emerald-500" />}
+                                                <div>
+                                                    <div className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">
+                                                        {isPrivate ? 'Restricted_Access' : 'Public_Frequency'}
+                                                    </div>
+                                                    <div className="text-[9px] text-[var(--text-muted)]">
+                                                        {isPrivate ? 'Only you can view this node.' : 'Visible to the entire network.'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} className="sr-only peer" />
+                                                <div className="w-9 h-5 bg-[var(--bg-main)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+                                            </label>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex justify-end pt-4 border-t border-[var(--border)]">
+                                    <button onClick={() => setActiveModal('embed')} className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-2 transition-colors">
+                                        <Code size={14} /> Generate_Embed_Code
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -45,7 +82,20 @@ export default function EditorModals({
                                     <Code className="text-cyan-500" size={20} />
                                     <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Embed_Core</h3>
                                 </div>
-                                <textarea readOnly value={`<iframe src="${window.location.origin}/editor/${project?.slug}" style="width:100%; height:500px; border:none;" sandbox="allow-scripts"></iframe>`} className="w-full h-32 bg-[var(--bg-main)] border border-[var(--border)] rounded p-4 text-[10px] font-mono text-cyan-500 focus:ring-0 resize-none" />
+                                <textarea 
+                                    readOnly 
+                                    value={project?.slug ? `<iframe src="${window.location.origin}/editor/${project.slug}" style="width:100%; height:500px; border:none; border-radius: 8px; overflow:hidden;" sandbox="allow-scripts allow-same-origin"></iframe>` : 'Save project first.'} 
+                                    className="w-full h-32 bg-[var(--bg-main)] border border-[var(--border)] rounded p-4 text-[10px] font-mono text-cyan-500 focus:ring-0 resize-none" 
+                                    onClick={(e) => e.target.select()}
+                                />
+                                <div className="flex justify-between items-center pt-4 border-t border-[var(--border)]">
+                                    <button onClick={() => setActiveModal('share')} className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-2 transition-colors">
+                                        <ArrowLeft size={14} /> Back
+                                    </button>
+                                    <button onClick={() => { navigator.clipboard.writeText(`<iframe src="${window.location.origin}/editor/${project?.slug}" style="width:100%; height:500px; border:none; border-radius: 8px; overflow:hidden;" sandbox="allow-scripts allow-same-origin"></iframe>`); alert('Embed Code Copied.'); }} className="text-[10px] font-bold uppercase tracking-widest text-cyan-500 hover:text-cyan-400 flex items-center gap-2 transition-colors">
+                                        <Copy size={14} /> Copy_Snippet
+                                    </button>
+                                </div>
                             </div>
                         )}
 
