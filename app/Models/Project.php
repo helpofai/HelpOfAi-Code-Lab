@@ -12,6 +12,7 @@ class Project extends Model
 
     protected $fillable = [
         'user_id',
+        'team_id',
         'title',
         'category',
         'tags',
@@ -23,9 +24,7 @@ class Project extends Model
         'meta_description',
         'meta_keywords',
         'og_image',
-        'canonical_url',
-        'category',
-        'tags'
+        'canonical_url'
     ];
 
     protected $casts = [
@@ -35,13 +34,36 @@ class Project extends Model
         'tags' => 'array',
     ];
 
+    protected $hidden = [
+        'code',
+    ];
+
+    protected $appends = [
+        'og_image_url',
+    ];
+
+    public function getOgImageUrlAttribute(): string
+    {
+        return route('projects.og-image', ['slug' => $this->slug]);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
     public function collections(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Collection::class);
+    }
+
+    public function revisions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProjectRevision::class);
     }
 }

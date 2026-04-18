@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Copy, Code, FolderPlus, Lock, Globe, ArrowLeft } from 'lucide-react';
+import { X, Share2, Copy, Code, FolderPlus, Lock, Globe, ArrowLeft, GitCompare, ArrowRight } from 'lucide-react';
+import { DiffEditor } from '@monaco-editor/react';
 import useProjectStore from '@/Stores/useProjectStore';
 
 export default function EditorModals({ 
@@ -9,10 +10,12 @@ export default function EditorModals({
     project, 
     collections, 
     addToCollection, 
-    createCollection 
+    createCollection,
+    diffRevision
 }) {
     const [newCollectionTitle, setNewCollectionTitle] = useState('');
-    const { isPrivate, setIsPrivate } = useProjectStore();
+    const [diffType, setDiffType] = useState('html');
+    const { isPrivate, setIsPrivate, html, css, js } = useProjectStore();
 
     const handleCreateCollection = () => {
         if (!newCollectionTitle) return;
@@ -20,14 +23,74 @@ export default function EditorModals({
         setNewCollectionTitle('');
     };
 
+    const currentCode = { html, css, js };
+
     return (
         <AnimatePresence>
             {activeModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setActiveModal(null)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-                    <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} className="relative bg-[var(--bg-surface)] border border-[var(--border)] w-full max-w-lg rounded-2xl p-10 shadow-2xl overflow-hidden transition-colors duration-300">
-                        <button onClick={() => setActiveModal(null)} className="absolute top-6 right-6 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all"><X size={20} /></button>
+                    <motion.div 
+                        initial={{ scale: 0.98, opacity: 0 }} 
+                        animate={{ scale: 1, opacity: 1 }} 
+                        exit={{ scale: 0.98, opacity: 0 }} 
+                        className={`relative bg-[var(--bg-surface)] border border-[var(--border)] w-full ${activeModal === 'diff' ? 'max-w-6xl h-[80vh]' : 'max-w-lg'} rounded-2xl p-10 shadow-2xl overflow-hidden transition-all duration-300 flex flex-col`}
+                    >
+                        <button onClick={() => setActiveModal(null)} className="absolute top-6 right-6 text-[var(--text-muted)] hover:text-[var(--text-main)] z-10 transition-all"><X size={20} /></button>
                         
+                        {activeModal === 'diff' && diffRevision && (
+                            <div className="flex-1 flex flex-col min-h-0 space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-500"><GitCompare size={20} /></div>
+                                        <div className="text-left">
+                                            <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Review Changes</h3>
+                                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Comparing current with v{diffRevision.id}: {diffRevision.commit_message}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border)]">
+                                        {['html', 'css', 'js'].map(type => (
+                                            <button 
+                                                key={type} 
+                                                onClick={() => setDiffType(type)}
+                                                className={`px-4 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${diffType === type ? 'bg-cyan-500 text-black shadow-lg' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
+                                            >
+                                                {type}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 border border-[var(--border)] rounded-xl overflow-hidden bg-[#1e1e1e]">
+                                    <DiffEditor
+                                        height="100%"
+                                        language={diffType === 'js' ? 'javascript' : diffType}
+                                        theme="vs-dark"
+                                        original={diffRevision.code[diffType]}
+                                        modified={currentCode[diffType]}
+                                        options={{
+                                            renderSideBySide: true,
+                                            readOnly: true,
+                                            minimap: { enabled: false },
+                                            fontSize: 13,
+                                            fontFamily: 'JetBrains Mono, Menlo, monospace',
+                                            automaticLayout: true,
+                                            scrollBeyondLastLine: false,
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="flex justify-between items-center pt-4 border-t border-[var(--border)] text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2"><div className="w-2 h-2 bg-red-900/30 border border-red-500/30 rounded" /> Original</div>
+                                        <ArrowRight size={10} />
+                                        <div className="flex items-center gap-2"><div className="w-2 h-2 bg-emerald-900/30 border border-emerald-500/30 rounded" /> Modified</div>
+                                    </div>
+                                    <button onClick={() => setActiveModal(null)} className="px-6 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg hover:text-[var(--text-main)] transition-colors">Close Review</button>
+                                </div>
+                            </div>
+                        )}
+
                         {activeModal === 'share' && (
                             <div className="space-y-8 text-left">
                                 <div className="flex items-center gap-3">

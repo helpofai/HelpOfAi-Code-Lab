@@ -23,7 +23,7 @@ export default function BlogIndex({ posts }) {
                                 <FileText size={20} />
                             </div>
                             <div className="text-left">
-                                <h2 className="text-lg font-black tracking-tighter uppercase italic leading-none">Transmission_Log</h2>
+                                <h2 className="text-lg font-black tracking-tighter uppercase italic leading-none">Blog system</h2>
                                 <p className="text-[8px] text-purple-500 uppercase tracking-[0.4em] font-bold mt-1">Content Management</p>
                             </div>
                         </div>

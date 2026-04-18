@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EmailTemplate;
 use App\Models\User;
+use App\Models\EmailLog;
 use App\Mail\DynamicEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -20,7 +21,13 @@ class EmailController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Email/Index', [
-            'templates' => EmailTemplate::latest()->get()
+            'templates' => EmailTemplate::latest()->get(),
+            'logs' => EmailLog::with('template')->latest()->take(50)->get(),
+            'stats' => [
+                'total_sent' => EmailLog::where('status', 'sent')->count(),
+                'total_failed' => EmailLog::where('status', 'failed')->count(),
+                'broadcasts' => EmailLog::where('type', 'broadcast')->count(),
+            ]
         ]);
     }
 
@@ -192,11 +199,9 @@ class EmailController extends Controller
                 break;
         }
 
-        // In production, this should be queued.
-        // For now, we'll loop (use queue in production for large lists)
         $count = 0;
+        $failed = 0;
         foreach ($users as $user) {
-            // Basic variable replacement
             $content = str_replace(
                 ['{{name}}', '{{email}}'], 
                 [$user->name, $user->email], 
@@ -205,12 +210,57 @@ class EmailController extends Controller
 
             try {
                 Mail::to($user->email)->send(new DynamicEmail($template->subject, $content));
+                
+                EmailLog::create([
+                    'recipient' => $user->email,
+                    'subject' => $template->subject,
+                    'content' => $content,
+                    'status' => 'sent',
+                    'type' => $validated['recipient_type'] === 'specific' ? 'individual' : 'broadcast',
+                    'user_id' => $user->id,
+                    'template_id' => $template->id,
+                ]);
+
                 $count++;
             } catch (\Exception $e) {
-                // Log failure
+                EmailLog::create([
+                    'recipient' => $user->email,
+                    'subject' => $template->subject,
+                    'content' => $content,
+                    'status' => 'failed',
+                    'error' => $e->getMessage(),
+                    'type' => $validated['recipient_type'] === 'specific' ? 'individual' : 'broadcast',
+                    'user_id' => $user->id,
+                    'template_id' => $template->id,
+                ]);
+                $failed++;
             }
         }
 
-        return back()->with('success', "Email queued for $count recipients.");
+        return back()->with('success', "Email protocol completed. Sent: $count | Failed: $failed");
+    }
+
+    /**
+     * Resend a specific email from logs.
+     */
+    public function resend(EmailLog $log)
+    {
+        try {
+            Mail::to($log->recipient)->send(new DynamicEmail($log->subject, $log->content));
+            
+            $log->update([
+                'status' => 'sent',
+                'error' => null,
+                'created_at' => now(),
+            ]);
+
+            return back()->with('success', 'Email protocol re-initialized successfully.');
+        } catch (\Exception $e) {
+            $log->update([
+                'status' => 'failed',
+                'error' => $e->getMessage(),
+            ]);
+            return back()->with('error', 'Resend failed: ' . $e->getMessage());
+        }
     }
 }

@@ -7,7 +7,6 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
@@ -16,7 +15,16 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return Auth::user()->projects()->orderBy('updated_at', 'desc')->get();
+        $user = Auth::user();
+        
+        // Projects owned by user OR projects belonging to user's teams
+        $teamIds = $user->teams()->pluck('teams.id');
+        
+        return Project::where('user_id', $user->id)
+            ->orWhereIn('team_id', $teamIds)
+            ->with(['user', 'team'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
     }
 
     /**
@@ -34,7 +42,17 @@ class ProjectController extends Controller
             'settings' => 'nullable|array',
             'is_public' => 'boolean',
             'is_private' => 'boolean',
+            'team_id' => 'nullable|exists:teams,id',
         ]);
+
+        // If team_id is provided, verify user is member of that team
+        if ($validated['team_id'] ?? false) {
+            $isMember = $user->teams()->where('teams.id', $validated['team_id'])->exists() || 
+                        $user->ownedTeams()->where('id', $validated['team_id'])->exists();
+            if (!$isMember) {
+                return response()->json(['message' => 'Unauthorized to assign project to this team.'], 403);
+            }
+        }
 
         // SaaS Logic: Only Pro users can create private projects
         $isPrivate = $validated['is_private'] ?? false;
@@ -44,30 +62,23 @@ class ProjectController extends Controller
 
         $slug = Str::slug($validated['title']) . '-' . Str::random(6);
         
-        // Prepare JSON content for file storage
-        $jsonContent = json_encode([
-            'html' => $validated['code']['html'] ?? '',
-            'css' => $validated['code']['css'] ?? '',
-            'js' => $validated['code']['js'] ?? '',
-            'settings' => $validated['settings'] ?? []
-        ], JSON_PRETTY_PRINT);
-
-        // Store in File System
-        Storage::disk('local')->put("projects/{$slug}.json", $jsonContent);
-
-        // Save metadata to Database (without heavy code blob)
         $project = $user->projects()->create([
             'title' => $validated['title'],
+            'team_id' => $validated['team_id'] ?? null,
             'category' => $validated['category'] ?? null,
             'tags' => $validated['tags'] ?? [],
             'slug' => $slug,
-            'code' => [], // Keep empty in DB
+            'code' => [
+                'html' => $validated['code']['html'] ?? '',
+                'css' => $validated['code']['css'] ?? '',
+                'js' => $validated['code']['js'] ?? '',
+            ],
             'settings' => $validated['settings'] ?? [],
             'is_public' => $validated['is_public'] ?? true,
             'is_private' => $isPrivate,
         ]);
 
-        return response()->json($project, 201);
+        return response()->json($project->makeVisible('code'), 201);
     }
 
     /**
@@ -75,27 +86,19 @@ class ProjectController extends Controller
      */
     public function show(string $slug)
     {
-        $project = Project::where('slug', $slug)->firstOrFail();
+        $project = Project::with(['user', 'team'])->where('slug', $slug)->firstOrFail();
 
-        // Check if project is private and user is not owner
+        // Check if project is private and user is not owner/team member
         if (!$project->is_public) {
-            if (!Auth::check() || $project->user_id !== Auth::id()) {
+            $isTeamMember = $project->team_id && Auth::check() && 
+                            Auth::user()->teams()->where('teams.id', $project->team_id)->exists();
+                            
+            if (!Auth::check() || ($project->user_id !== Auth::id() && !$isTeamMember)) {
                 return response()->json(['message' => 'Unauthorized. Restricted Neural Core.'], 403);
             }
         }
 
-        // Retrieve code from File System
-        if (Storage::disk('local')->exists("projects/{$slug}.json")) {
-            $fileData = json_decode(Storage::disk('local')->get("projects/{$slug}.json"), true);
-            $project->code = [
-                'html' => $fileData['html'] ?? '',
-                'css' => $fileData['css'] ?? '',
-                'js' => $fileData['js'] ?? '',
-            ];
-            $project->settings = $fileData['settings'] ?? $project->settings;
-        }
-
-        return $project;
+        return $project->makeVisible('code');
     }
 
     /**
@@ -103,8 +106,19 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        if ($project->user_id !== Auth::id()) {
+        $user = Auth::user();
+        $isTeamMember = $project->team_id && $user->teams()->where('teams.id', $project->team_id)->exists();
+        
+        if ($project->user_id !== $user->id && !$isTeamMember) {
             return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Team role check: editors can save, members can't
+        if ($isTeamMember && $project->user_id !== $user->id) {
+            $team = $user->teams()->where('teams.id', $project->team_id)->first();
+            if ($team->pivot->role === 'member') {
+                return response()->json(['message' => 'Members have read-only access to team projects.'], 403);
+            }
         }
 
         $validated = $request->validate([
@@ -125,23 +139,19 @@ class ProjectController extends Controller
             return response()->json(['message' => 'Private visibility restricted to Pro accounts.'], 403);
         }
 
-        // Update File System if code is provided
-        if (isset($validated['code'])) {
-            $jsonContent = json_encode([
-                'html' => $validated['code']['html'] ?? '',
-                'css' => $validated['code']['css'] ?? '',
-                'js' => $validated['code']['js'] ?? '',
-                'settings' => $validated['settings'] ?? $project->settings
-            ], JSON_PRETTY_PRINT);
-
-            Storage::disk('local')->put("projects/{$project->slug}.json", $jsonContent);
-        }
-
         // Prepare update data
         $updateData = [
             'title' => $validated['title'] ?? $project->title,
             'settings' => $validated['settings'] ?? $project->settings,
         ];
+
+        if (isset($validated['code'])) {
+            $updateData['code'] = [
+                'html' => $validated['code']['html'] ?? $project->code['html'],
+                'css' => $validated['code']['css'] ?? $project->code['css'],
+                'js' => $validated['code']['js'] ?? $project->code['js'],
+            ];
+        }
 
         // Explicitly check if keys exist to allow toggling/clearing
         if (array_key_exists('category', $validated)) {
@@ -169,7 +179,7 @@ class ProjectController extends Controller
         // Update database metadata
         $project->update($updateData);
 
-        return $project;
+        return $project->makeVisible('code');
     }
 
     /**
@@ -177,12 +187,17 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        if ($project->user_id !== Auth::id()) {
+        $user = Auth::user();
+        $isTeamAdmin = $project->team_id && $user->teams()
+            ->where('teams.id', $project->team_id)
+            ->wherePivot('role', 'admin')
+            ->exists();
+
+        $isTeamOwner = $project->team && $project->team->user_id === $user->id;
+
+        if ($project->user_id !== $user->id && !$isTeamAdmin && !$isTeamOwner) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-
-        // Delete from File System
-        Storage::disk('local')->delete("projects/{$project->slug}.json");
 
         // Delete from Database
         $project->delete();

@@ -23,8 +23,27 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::delete('/admin/users/{user}', [\App\Http\Controllers\Api\AdminController::class, 'destroyUser']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('projects', ProjectController::class)->except(['show']);
+    Route::get('/teams-list', function() {
+        return auth()->user()->teams()->get()->merge(auth()->user()->ownedTeams()->get());
+    });
+    Route::apiResource('assets', AssetController::class)->only(['index', 'store', 'destroy']);
+    
+    // Subscription system (Stripe & Multi-Gateway)
+    Route::post('/subscription/checkout', [\App\Http\Controllers\Api\SubscriptionController::class, 'checkout']);
+    Route::post('/subscription/verify', [\App\Http\Controllers\Api\SubscriptionController::class, 'verify']);
+    Route::post('/subscription/portal', [\App\Http\Controllers\Api\SubscriptionController::class, 'portal']);
+    Route::get('/subscription/status', [\App\Http\Controllers\Api\SubscriptionController::class, 'status']);
+    
+    // Webhook placeholders for regional gateways
+    Route::post('/payment/phonepe/callback', function() { return response()->json(['status' => 'received']); })->name('api.phonepe.callback');
+    
+    Route::get('projects/{project}/revisions', [\App\Http\Controllers\Api\RevisionController::class, 'index']);
+    Route::post('projects/{project}/revisions', [\App\Http\Controllers\Api\RevisionController::class, 'store']);
+    Route::get('projects/{project}/revisions/{revision}', [\App\Http\Controllers\Api\RevisionController::class, 'show']);
+    Route::post('projects/{project}/revisions/{revision}/restore', [\App\Http\Controllers\Api\RevisionController::class, 'restore']);
+    
     Route::apiResource('collections', CollectionController::class);
     Route::post('collections/{collection}/add', [CollectionController::class, 'addProject']);
 

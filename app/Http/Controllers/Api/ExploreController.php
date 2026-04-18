@@ -88,15 +88,7 @@ class ExploreController extends Controller
             ->get();
 
         foreach ($projects as $project) {
-            if (\Illuminate\Support\Facades\Storage::disk('local')->exists("projects/{$project->slug}.json")) {
-                $fileData = json_decode(\Illuminate\Support\Facades\Storage::disk('local')->get("projects/{$project->slug}.json"), true);
-                $project->code = [
-                    'html' => $fileData['html'] ?? '',
-                    'css' => $fileData['css'] ?? '',
-                    'js' => $fileData['js'] ?? '',
-                ];
-                $project->settings = $fileData['settings'] ?? [];
-            }
+            $project->makeVisible('code');
         }
 
         return $projects;

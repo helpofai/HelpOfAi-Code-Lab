@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin\FrontManagementController;
 use App\Models\SiteSetting;
 
 Route::get('/', function () {
-    $settings = SiteSetting::whereIn('group', ['home', 'branding', 'seo', 'typography'])->get()->mapWithKeys(function ($item) {
+    $settings = SiteSetting::whereIn('group', ['home', 'branding', 'seo', 'typography', 'subscription'])->get()->mapWithKeys(function ($item) {
         return [$item->key => $item->value];
     });
 
@@ -31,6 +31,8 @@ Route::get('/editor/{slug?}', function ($slug = null) {
         'project' => $project
     ]);
 })->name('editor');
+
+Route::get('/projects/{slug}/og-image', [\App\Http\Controllers\Api\ProjectImageController::class, 'show'])->name('projects.og-image');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -68,6 +70,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/admin/update/dependencies', [\App\Http\Controllers\Admin\UpdateController::class, 'installDependencies'])->name('admin.update.dependencies');
     Route::post('/admin/update/assets', [\App\Http\Controllers\Admin\UpdateController::class, 'buildAssets'])->name('admin.update.assets');
 
+    Route::get('/admin/info', [\App\Http\Controllers\Admin\InfoController::class, 'index'])->name('admin.info');
+
     Route::get('/admin/blog', [\App\Http\Controllers\Admin\PostController::class, 'index'])->name('admin.blog.index');
     Route::get('/admin/blog/create', [\App\Http\Controllers\Admin\PostController::class, 'create'])->name('admin.blog.create');
     Route::post('/admin/blog', [\App\Http\Controllers\Admin\PostController::class, 'store'])->name('admin.blog.store');
@@ -75,8 +79,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('/admin/blog/{post}', [\App\Http\Controllers\Admin\PostController::class, 'update'])->name('admin.blog.update');
     Route::delete('/admin/blog/{post}', [\App\Http\Controllers\Admin\PostController::class, 'destroy'])->name('admin.blog.destroy');
 
+    // Page Manager
+    Route::resource('/admin/pages', \App\Http\Controllers\Admin\PageManagerController::class)->names('admin.pages');
+
     Route::get('/admin/subscriptions', [\App\Http\Controllers\Admin\SubscriptionController::class, 'index'])->name('admin.subscriptions');
     Route::post('/admin/subscriptions', [\App\Http\Controllers\Admin\SubscriptionController::class, 'update'])->name('admin.subscriptions.update');
+    Route::post('/admin/subscriptions/test-gateway', [\App\Http\Controllers\Admin\SubscriptionController::class, 'testGateway'])->name('admin.subscriptions.test-gateway');
 
     Route::get('/admin/support', [\App\Http\Controllers\Admin\SupportController::class, 'index'])->name('admin.support');
     Route::get('/admin/support/{ticket}', [\App\Http\Controllers\Admin\SupportController::class, 'show'])->name('admin.support.show');
@@ -87,6 +95,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     // Admin Email System
     Route::get('/admin/email/send', [\App\Http\Controllers\Admin\EmailController::class, 'sendPage'])->name('admin.email.send');
     Route::post('/admin/email/send', [\App\Http\Controllers\Admin\EmailController::class, 'send'])->name('admin.email.send.process');
+    Route::post('/admin/email/resend/{log}', [\App\Http\Controllers\Admin\EmailController::class, 'resend'])->name('admin.email.resend');
     Route::get('/admin/email/settings', [\App\Http\Controllers\Admin\EmailController::class, 'settings'])->name('admin.email.settings');
     Route::post('/admin/email/settings', [\App\Http\Controllers\Admin\EmailController::class, 'updateSettings'])->name('admin.email.settings.update');
     Route::post('/admin/email/test', [\App\Http\Controllers\Admin\EmailController::class, 'testConnection'])->name('admin.email.test');
@@ -126,5 +135,12 @@ Route::middleware('auth')->group(function () {
     Route::post('invitations/{invitation}/accept', [\App\Http\Controllers\TeamController::class, 'acceptInvitation'])->name('invitations.accept');
     Route::delete('invitations/{invitation}', [\App\Http\Controllers\TeamController::class, 'rejectInvitation'])->name('invitations.destroy');
 });
+
+Route::get('/p/{slug}', function ($slug) {
+    $page = \App\Models\Page::where('slug', $slug)->where('is_published', true)->firstOrFail();
+    return Inertia::render('Page', [
+        'page' => $page
+    ]);
+})->name('pages.show');
 
 require __DIR__.'/auth.php';

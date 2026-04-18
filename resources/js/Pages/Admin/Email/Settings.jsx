@@ -151,6 +151,102 @@ export default function EmailSettings({ settings }) {
                         </div>
 
                     </div>
+
+                    {/* Mail Setup Documentation Section */}
+                    <div className="max-w-6xl mx-auto mt-20 relative z-10">
+                        <div className="p-10 bg-[var(--bg-surface)] border border-[var(--border)] rounded-[3rem] shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                                <SettingsIcon size={200} />
+                            </div>
+                            
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl text-cyan-500">
+                                    <Activity size={24} />
+                                </div>
+                                <div className="text-left">
+                                    <h3 className="text-2xl font-black uppercase italic tracking-tighter">Mail_Setup_Protocol</h3>
+                                    <p className="text-[10px] text-cyan-500 font-bold uppercase tracking-[0.4em] mt-1">Beginner Integration Guide</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
+                                <div className="space-y-8">
+                                    <section className="space-y-4">
+                                        <h4 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-purple-500" /> Phase 01: SMTP Acquisition
+                                        </h4>
+                                        <p className="text-[11px] text-[var(--text-muted)] leading-relaxed uppercase tracking-widest font-medium">
+                                            To enable mail transmission, you need credentials from a service provider. 
+                                            Recommended modules for beginners:
+                                        </p>
+                                        <ul className="space-y-3 pt-2">
+                                            {[
+                                                { name: 'Mailtrap', desc: 'Safe testing environment. Won\'t send real emails to users.' },
+                                                { name: 'Brevo (Sendinblue)', desc: 'Free tier for real transmissions. 300 emails/day.' },
+                                                { name: 'Gmail SMTP', desc: 'Requires "App Passwords" to be enabled in Google Security.' }
+                                            ].map((item, i) => (
+                                                <li key={i} className="flex gap-4 p-4 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border)] group hover:border-purple-500/30 transition-all">
+                                                    <span className="text-purple-500 font-black text-xs">0{i+1}</span>
+                                                    <div>
+                                                        <p className="text-[10px] font-black text-white uppercase tracking-widest mb-1">{item.name}</p>
+                                                        <p className="text-[9px] text-[var(--text-muted)] leading-normal">{item.desc}</p>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </section>
+
+                                    <section className="space-y-4">
+                                        <h4 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> Phase 02: Kernel Configuration
+                                        </h4>
+                                        <div className="bg-black/40 border border-white/5 rounded-2xl p-6 space-y-4 font-mono text-[10px] text-slate-400">
+                                            <p><span className="text-cyan-500"># STEP 1:</span> Copy your host (e.g. live.smtp.mailtrap.io)</p>
+                                            <p><span className="text-cyan-500"># STEP 2:</span> Set Port to <span className="text-white">587</span> (TLS) or <span className="text-white">465</span> (SSL)</p>
+                                            <p><span className="text-cyan-500"># STEP 3:</span> Inject Username & Password accurately</p>
+                                            <p><span className="text-cyan-500"># STEP 4:</span> Match 'From Address' with your provider settings</p>
+                                        </div>
+                                    </section>
+                                </div>
+
+                                <div className="space-y-8">
+                                    <section className="space-y-4 p-8 bg-emerald-500/5 border border-emerald-500/10 rounded-[2rem]">
+                                        <h4 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                            <ShieldCheck size={16} /> Verification Protocol
+                                        </h4>
+                                        <p className="text-[10px] text-emerald-500/70 leading-relaxed font-bold uppercase tracking-widest italic">
+                                            Once settings are saved, use the <span className="text-white underline">Connection Diagnostics</span> panel to send a test signal. 
+                                            If you receive the transmission, the uplink is successful.
+                                        </p>
+                                    </section>
+
+                                    <section className="space-y-4">
+                                        <h4 className="text-xs font-black text-rose-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                            <AlertCircle size={16} /> Diagnostic Troubleshooting
+                                        </h4>
+                                        <div className="space-y-4">
+                                            {[
+                                                { q: 'Authentication Failed?', a: 'Verify password. If using Gmail, ensure 2FA and App Password are active.' },
+                                                { q: 'Connection Timeout?', a: 'Check Port. Try 587 with TLS or 465 with SSL. Ports 25 is often blocked.' },
+                                                { q: 'Emails going to Spam?', a: 'Verify your domain\'s SPF, DKIM, and DMARC records at your provider.' }
+                                            ].map((item, i) => (
+                                                <div key={i} className="space-y-1">
+                                                    <p className="text-[9px] font-black text-white uppercase tracking-widest">{item.q}</p>
+                                                    <p className="text-[9px] text-[var(--text-muted)] italic">{item.a}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+
+                                    <div className="pt-8 border-t border-[var(--border)]">
+                                        <p className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em] italic text-center">
+                                            System_Uplink // CodePen_Advanced_Core
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </AuthenticatedLayout>
         </div>

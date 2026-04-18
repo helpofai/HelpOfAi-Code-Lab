@@ -44,4 +44,12 @@ class Team extends Model
     {
         return $this->hasMany(TeamInvitation::class);
     }
+
+    /**
+     * Get all projects for the team.
+     */
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
 }

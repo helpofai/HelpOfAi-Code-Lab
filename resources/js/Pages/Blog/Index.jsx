@@ -2,8 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Code2, Calendar, User, ArrowRight, Sparkles, Search } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
-import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
+import PublicLayout from '@/Layouts/PublicLayout';
 
 export default function BlogIndex({ posts, categories, filters }) {
     const [search, setSearch] = useState(filters.search || '');
@@ -25,22 +24,10 @@ export default function BlogIndex({ posts, categories, filters }) {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 font-sans selection:bg-purple-500/30">
-            <ProBackground />
+        <PublicLayout>
             <Head title="Blog // Transmissions" />
 
-            <nav className="fixed top-0 w-full h-20 border-b border-[var(--border)] bg-[var(--bg-main)]/80 backdrop-blur-xl z-50 px-6 md:px-12 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-500 text-white rounded"><Code2 size={20} /></div>
-                    <span className="text-xl font-black tracking-tighter uppercase italic">HOACodeLab</span>
-                </Link>
-                <div className="flex items-center gap-4">
-                    <ThemeSwitcher />
-                    <Link href={route('login')} className="text-[10px] font-black uppercase tracking-widest hover:text-purple-500 transition-colors">Login</Link>
-                </div>
-            </nav>
-
-            <main className="relative z-10 pt-32 pb-24 px-6">
+            <div className="relative z-10 pt-32 pb-24 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16 space-y-4">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-500 text-[10px] font-black uppercase tracking-[0.3em]">
@@ -122,7 +109,7 @@ export default function BlogIndex({ posts, categories, filters }) {
                         )}
                     </div>
                 </div>
-            </main>
-        </div>
+            </div>
+        </PublicLayout>
     );
 }

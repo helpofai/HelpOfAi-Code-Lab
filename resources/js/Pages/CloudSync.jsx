@@ -18,32 +18,61 @@ import PrimaryButton from '@/Components/PrimaryButton';
 
 function CloudFileThumbnail({ file }) {
     const [fileContent, setFileContent] = useState(null);
-    
+    const [compiledContent, setCompiledContent] = useState({ html: '', css: '', js: '' });
+
     useEffect(() => {
         const fetchContent = async () => {
             try {
                 const res = await axios.get(`/api/google-drive/fetch/${file.id}`);
                 setFileContent(res.data);
+                
+                // Compiler Logic
+                let cCss = res.data.code.css || '';
+                let cJs = res.data.code.js || '';
+                const preps = res.data.settings?.preprocessors || { css: 'css', js: 'js' };
+
+                if (preps.css === 'scss' || preps.css === 'sass') {
+                    if (window.Sass) {
+                        window.Sass.compile(cCss, (result) => {
+                            if (result.text) setCompiledContent(prev => ({ ...prev, css: result.text }));
+                        });
+                    }
+                } else {
+                    setCompiledContent(prev => ({ ...prev, css: cCss }));
+                }
+
+                if (preps.js === 'babel' || preps.js === 'typescript') {
+                    if (window.Babel) {
+                        try {
+                            const result = window.Babel.transform(cJs, { presets: ['env', 'react', 'typescript'] }).code;
+                            setCompiledContent(prev => ({ ...prev, js: result }));
+                        } catch(e) {}
+                    }
+                } else {
+                    setCompiledContent(prev => ({ ...prev, js: cJs }));
+                }
+
+                setCompiledContent(prev => ({ ...prev, html: res.data.code.html || '' }));
+
             } catch (e) {}
         };
         fetchContent();
     }, [file.id]);
 
     const srcDoc = useMemo(() => {
-        if (!fileContent?.code) return '';
         return `
             <!DOCTYPE html>
             <html>
             <head>
                 <style>
                     html, body { background: #1d1e22; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-                    ${fileContent.code.css || ''}
+                    ${compiledContent.css}
                 </style>
             </head>
-            <body>${fileContent.code.html || ''}</body>
+            <body>${compiledContent.html}<script>${compiledContent.js}</script></body>
             </html>
         `;
-    }, [fileContent]);
+    }, [compiledContent]);
 
     return (
         <div className="w-full h-full bg-[#1d1e22] relative overflow-hidden">
@@ -86,6 +115,17 @@ export default function CloudSync() {
     }, [auth.user.google_drive_token]);
 
     useEffect(() => {
+        // Load Compilers on Mount for Thumbnails
+        if (!window.Babel) {
+            const script = document.createElement('script');
+            script.src = "https://unpkg.com/@babel/standalone/babel.min.js";
+            document.head.appendChild(script);
+        }
+        if (!window.Sass) {
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/sass.js@0.11.1/dist/sass.sync.js";
+            document.head.appendChild(script);
+        }
         fetchDriveFiles();
     }, [fetchDriveFiles]);
 
@@ -121,6 +161,7 @@ export default function CloudSync() {
             const saveRes = await axios.post('/api/projects', {
                 title: res.data.title + ' (Imported)',
                 code: res.data.code,
+                settings: res.data.settings || {},
                 is_public: false,
                 is_private: true
             });

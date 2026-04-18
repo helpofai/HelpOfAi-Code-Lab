@@ -19,7 +19,8 @@ import {
     Crown,
     Cloud,
     Mail,
-    Settings
+    Settings,
+    Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -54,12 +55,14 @@ export default function AuthenticatedLayout({ header, children }) {
         { name: 'Admin Command', icon: Shield, href: route('admin.dashboard'), active: route().current('admin.dashboard') },
         { name: 'User Matrix', icon: Users, href: route('admin.users'), active: route().current('admin.users') },
         { name: 'Subscription Control', icon: Crown, href: route('admin.subscriptions'), active: route().current('admin.subscriptions') },
-        { name: 'Transmission Log', icon: FileText, href: route('admin.blog.index'), active: route().current('admin.blog.index') },
+        { name: 'Blog system', icon: FileText, href: route('admin.blog.index'), active: route().current('admin.blog.index') },
         { name: 'Mail System', icon: Mail, href: route('admin.email.index'), active: route().current('admin.email.index') },
         { name: 'SMTP Config', icon: Settings, href: route('admin.email.settings'), active: route().current('admin.email.settings') },
         { name: 'Support Queue', icon: LifeBuoy, href: route('admin.support'), active: route().current('admin.support') },
         { name: 'Front Management', icon: LayoutDashboard, href: route('admin.front-management'), active: route().current('admin.front-management') },
+        { name: 'Page Manager', icon: FileText, href: route('admin.pages.index'), active: route().current('admin.pages.*') },
         { name: 'System Update', icon: Terminal, href: route('admin.update'), active: route().current('admin.update') },
+        { name: 'System Info', icon: Info, href: route('admin.info'), active: route().current('admin.info') },
     ];
 
     return (

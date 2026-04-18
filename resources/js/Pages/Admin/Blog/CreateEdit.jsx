@@ -7,7 +7,7 @@ import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
-import TipTapEditor from '@/Components/Editor/TipTapEditor';
+import TiptapEditor from '@/Components/Editor/TiptapEditor';
 
 export default function BlogCreateEdit({ post }) {
     const { data, setData, post: store, put, processing, errors } = useForm({
@@ -65,7 +65,7 @@ export default function BlogCreateEdit({ post }) {
                             <FileText size={20} />
                         </div>
                         <div className="text-left">
-                            <h2 className="text-lg font-black tracking-tighter uppercase italic leading-none">{post ? 'Edit_Transmission' : 'New_Transmission'}</h2>
+                            <h2 className="text-lg font-black tracking-tighter uppercase italic leading-none">{post ? 'Edit_Blog' : 'New_Blog'}</h2>
                             <p className="text-[8px] text-purple-500 uppercase tracking-[0.4em] font-bold mt-1">Content Editor</p>
                         </div>
                     </div>
@@ -84,8 +84,8 @@ export default function BlogCreateEdit({ post }) {
                                 </div>
                                 <div className="space-y-2">
                                     <InputLabel value="Content" />
-                                    <TipTapEditor 
-                                        value={data.content} 
+                                    <TiptapEditor 
+                                        content={data.content} 
                                         onChange={(value) => setData('content', value)} 
                                     />
                                     {errors.content && <p className="text-rose-500 text-xs">{errors.content}</p>}
@@ -168,7 +168,7 @@ export default function BlogCreateEdit({ post }) {
                                     </div>
 
                                     <PrimaryButton className="w-full justify-center py-3 bg-purple-500 hover:bg-purple-600 border-purple-500" disabled={processing}>
-                                        <Save size={16} className="mr-2" /> Save_Transmission
+                                        <Save size={16} className="mr-2" /> Save_Blog
                                     </PrimaryButton>
                                 </div>
                             </div>

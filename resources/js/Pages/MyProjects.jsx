@@ -51,7 +51,7 @@ function ProjectThumbnail({ project }) {
     );
 }
 
-function ProjectSettingsModal({ project, onClose, onUpdate }) {
+function ProjectSettingsModal({ project, teams, onClose, onUpdate }) {
     const [formData, setFormData] = useState({
         is_public: project.is_public ? 1 : 0,
         category: project.category || '',
@@ -59,6 +59,7 @@ function ProjectSettingsModal({ project, onClose, onUpdate }) {
         meta_title: project.meta_title || '',
         meta_description: project.meta_description || '',
         meta_keywords: project.meta_keywords || '',
+        team_id: project.team_id || '',
     });
     const [isSaving, setIsSaving] = useState(false);
 
@@ -105,6 +106,19 @@ function ProjectSettingsModal({ project, onClose, onUpdate }) {
                                 <input type="text" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded p-3 text-[var(--text-main)] focus:border-cyan-500/50 focus:ring-0 text-[10px] font-bold uppercase tracking-widest" />
                             </div>
                             <div className="space-y-2">
+                                <label className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Assign to Unit (Team)</label>
+                                <select 
+                                    value={formData.team_id} 
+                                    onChange={(e) => setFormData({...formData, team_id: e.target.value})} 
+                                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded p-3 text-[var(--text-main)] focus:border-cyan-500/50 focus:ring-0 text-[10px] font-bold uppercase tracking-widest appearance-none"
+                                >
+                                    <option value="">Personal Memory (No Team)</option>
+                                    {teams.map(team => (
+                                        <option key={team.id} value={team.id}>{team.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
                                 <label className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Tags</label>
                                 <input type="text" value={formData.tags} onChange={(e) => setFormData({...formData, tags: e.target.value})} className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded p-3 text-[var(--text-main)] focus:border-cyan-500/50 focus:ring-0 text-[10px] font-bold" />
                             </div>
@@ -124,15 +138,31 @@ function ProjectSettingsModal({ project, onClose, onUpdate }) {
 export default function MyProjects() {
     const { auth } = usePage().props;
     const [projects, setProjects] = useState([]);
+    const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [copySlug, setCopyStatus] = useState(null);
     const [editingProject, setEditingProject] = useState(null);
     const [viewMode, setViewMode] = useState('grid');
     const [activeCategory, setActiveCategory] = useState('ALL');
+    const [activeTeam, setActiveTeam] = useState('ALL');
 
     useEffect(() => {
-        axios.get('/api/projects').then(res => setProjects(res.data)).finally(() => setIsLoading(false));
+        const fetchData = async () => {
+            try {
+                const [projRes, teamsRes] = await Promise.all([
+                    axios.get('/api/projects'),
+                    axios.get('/api/teams-list')
+                ]);
+                setProjects(projRes.data);
+                setTeams(teamsRes.data);
+            } catch (e) {
+                console.error("Failed to fetch archives.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
     }, []);
 
     const handleShare = (slug) => {
@@ -150,7 +180,11 @@ export default function MyProjects() {
     };
 
     const categories = useMemo(() => ['ALL', ...new Set(projects.map(p => p.category).filter(Boolean))], [projects]);
-    const filteredProjects = projects.filter(p => (p.title.toLowerCase().includes(search.toLowerCase())) && (activeCategory === 'ALL' || p.category === activeCategory));
+    const filteredProjects = projects.filter(p => 
+        (p.title.toLowerCase().includes(search.toLowerCase())) && 
+        (activeCategory === 'ALL' || p.category === activeCategory) &&
+        (activeTeam === 'ALL' || (activeTeam === 'PERSONAL' ? !p.team_id : p.team_id == activeTeam))
+    );
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-cyan-500/30 relative transition-colors duration-300 text-left">
@@ -176,10 +210,19 @@ export default function MyProjects() {
                 <div className="relative min-h-screen p-6 md:p-12 overflow-y-auto">
                     <div className="max-w-7xl mx-auto relative z-10 space-y-10">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-lg shadow-xl">
-                            <div className="flex flex-wrap gap-2">
-                                {categories.map(cat => (
-                                    <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-1.5 rounded text-[9px] font-bold uppercase tracking-widest transition-all border ${activeCategory === cat ? 'bg-cyan-500 text-white dark:text-black border-cyan-500' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-main)]'}`}>{cat}</button>
-                                ))}
+                            <div className="flex flex-col gap-4 w-full md:w-auto">
+                                <div className="flex flex-wrap gap-2">
+                                    {categories.map(cat => (
+                                        <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-1.5 rounded text-[9px] font-bold uppercase tracking-widest transition-all border ${activeCategory === cat ? 'bg-cyan-500 text-white dark:text-black border-cyan-500' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-main)]'}`}>{cat}</button>
+                                    ))}
+                                </div>
+                                <div className="flex flex-wrap gap-2 border-t border-[var(--border)] pt-4">
+                                    <button onClick={() => setActiveTeam('ALL')} className={`px-4 py-1.5 rounded text-[9px] font-bold uppercase tracking-widest transition-all border ${activeTeam === 'ALL' ? 'bg-purple-500 text-white border-purple-500' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-main)]'}`}>All Units</button>
+                                    <button onClick={() => setActiveTeam('PERSONAL')} className={`px-4 py-1.5 rounded text-[9px] font-bold uppercase tracking-widest transition-all border ${activeTeam === 'PERSONAL' ? 'bg-cyan-500 text-white dark:text-black border-cyan-500' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-main)]'}`}>Personal</button>
+                                    {teams.map(team => (
+                                        <button key={team.id} onClick={() => setActiveTeam(team.id)} className={`px-4 py-1.5 rounded text-[9px] font-bold uppercase tracking-widest transition-all border ${activeTeam == team.id ? 'bg-purple-500 text-white border-purple-500' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-main)]'}`}>{team.name}</button>
+                                    ))}
+                                </div>
                             </div>
                             <div className="flex bg-[var(--bg-elevated)] p-1 rounded border border-[var(--border)]">
                                 <button onClick={() => setViewMode('grid')} className={`p-2 rounded ${viewMode === 'grid' ? 'bg-[var(--bg-main)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)]'}`}><LayoutGrid size={16} /></button>
@@ -196,6 +239,7 @@ export default function MyProjects() {
                                                 <ProjectThumbnail project={project} />
                                                 <div className="absolute top-3 left-3 flex flex-wrap gap-2 z-20">
                                                     {project.category && <span className="px-2 py-0.5 bg-black/60 border border-white/10 rounded text-[8px] font-bold uppercase text-cyan-400 tracking-widest">{project.category}</span>}
+                                                    {project.team && <span className="px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded text-[8px] font-black uppercase text-purple-400 tracking-widest">{project.team.name}</span>}
                                                 </div>
                                                 <div className={`absolute top-3 right-3 px-2 py-0.5 rounded border text-[8px] font-bold uppercase tracking-widest z-20 ${project.is_public ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-500' : 'bg-rose-500/10 border-rose-500/30 text-rose-500'}`}>{project.is_public ? 'Global' : 'Secure'}</div>
                                             </div>
@@ -226,7 +270,7 @@ export default function MyProjects() {
                     </div>
                 </div>
             </AuthenticatedLayout>
-            <AnimatePresence>{editingProject && <ProjectSettingsModal project={editingProject} onClose={() => setEditingProject(null)} onUpdate={(upd) => setProjects(projects.map(p => p.id === upd.id ? upd : p))} />}</AnimatePresence>
+            <AnimatePresence>{editingProject && <ProjectSettingsModal project={editingProject} teams={teams} onClose={() => setEditingProject(null)} onUpdate={(upd) => setProjects(projects.map(p => p.id === upd.id ? upd : p))} />}</AnimatePresence>
         </div>
     );
 }

@@ -194,6 +194,7 @@ class GoogleDriveController extends Controller
         $validated = $request->validate([
             'title' => 'required|string',
             'code' => 'required|array',
+            'settings' => 'nullable|array',
             'drive_file_id' => 'nullable|string'
         ]);
 
@@ -205,6 +206,7 @@ class GoogleDriveController extends Controller
             $content = json_encode([
                 'title' => $validated['title'],
                 'code' => $validated['code'],
+                'settings' => $validated['settings'] ?? [],
                 'synced_at' => now()->toIso8601String()
             ]);
 

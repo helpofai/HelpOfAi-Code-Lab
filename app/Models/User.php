@@ -6,11 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Cashier\Billable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +25,10 @@ class User extends Authenticatable
             'role',
             'is_blocked',
             'pro_expires_at',
+            'stripe_id',
+            'pm_type',
+            'pm_last_four',
+            'trial_ends_at',
         ];
     
         /**
@@ -42,6 +47,8 @@ class User extends Authenticatable
         public function isPro(): bool
         {
             if ($this->isAdmin()) return true;
+            if ($this->subscribed('default')) return true;
+            
             if ($this->role === self::ROLE_PAID_USER) {
                 return is_null($this->pro_expires_at) || $this->pro_expires_at->isFuture();
             }
@@ -83,6 +90,11 @@ class User extends Authenticatable
     public function projects(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Project::class);
+    }
+
+    public function assets(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Asset::class);
     }
 
     /**

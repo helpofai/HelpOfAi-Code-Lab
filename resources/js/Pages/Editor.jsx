@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
-import prettier from 'prettier/standalone';
-import parserHtml from 'prettier/parser-html';
-import parserCss from 'prettier/parser-postcss';
-import parserBabel from 'prettier/parser-babel';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 import useProjectStore from '@/Stores/useProjectStore';
+import { useEditorActions } from '@/Hooks/useEditorActions';
 import EditorHeader from '@/Components/Editor/EditorHeader';
 import EditorPanels from '@/Components/Editor/EditorPanels';
 import EditorFooter from '@/Components/Editor/EditorFooter';
@@ -16,16 +13,18 @@ import EditorModals from '@/Components/Editor/EditorModals';
 import ConsolePanel from '@/Components/Editor/ConsolePanel';
 
 export default function Editor({ auth, project: initialProject }) {
-    const { html, css, js, setHtml, setCss, setJs, setProject, title, isPrivate, externalLibraries, google_drive_file_id, setGoogleDriveFileId } = useProjectStore();
+    const { 
+        html, css, js, setProject, title, isPrivate, 
+        externalLibraries, setGoogleDriveFileId, preprocessors 
+    } = useProjectStore();
     const [previewContent, setPreviewContent] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
     const [activeSidebar, setActiveSidebar] = useState(null);
     const [activeModal, setActiveModal] = useState(null);
     const [showConsole, setShowConsole] = useState(false);
     const [logs, setLogs] = useState([]);
-    const [isFormatting, setIsFormatting] = useState(false);
     const [collections, setCollections] = useState([]);
     const [projectData, setProjectData] = useState(initialProject);
+    const [diffRevision, setDiffRevision] = useState(null);
 
     // Initialize Store
     useEffect(() => {
@@ -36,50 +35,64 @@ export default function Editor({ auth, project: initialProject }) {
                 setGoogleDriveFileId(initialProject.code.google_drive_file_id);
             }
         }
-    }, [initialProject]);
+    }, [initialProject, setProject, setGoogleDriveFileId]);
 
-    // Format Code
-    const formatCode = async () => {
-        setIsFormatting(true);
-        setLogs(prev => [...prev, { type: 'LOG', content: 'Initializing synthesis...', id: Date.now() }]);
-        try {
-            const options = { 
-                printWidth: 80, 
-                tabWidth: 2, 
-                useTabs: false, 
-                semi: true, 
-                singleQuote: false 
-            };
-
-            const formattedHtml = await prettier.format(html, { ...options, parser: 'html', plugins: [parserHtml] });
-            const formattedCss = await prettier.format(css, { ...options, parser: 'css', plugins: [parserCss] });
-            const formattedJs = await prettier.format(js, { ...options, parser: 'babel', plugins: [parserBabel] });
-
-            setHtml(formattedHtml);
-            setCss(formattedCss);
-            setJs(formattedJs);
-            
-            setLogs(prev => [...prev, { type: 'LOG', content: 'Optimization complete.', id: Date.now() }]);
-        } catch (err) { 
-            console.error(err);
-            setLogs(prev => [...prev, { type: 'ERR', content: `Error: ${err.message}`, id: Date.now() }]);
-        } finally { 
-            setIsFormatting(false); 
-        }
-    };
+    // Custom Hook for Editor Actions
+    const { 
+        isSaving, 
+        isFormatting, 
+        formatCode, 
+        handleSave, 
+        handleFork, 
+        handleCloudSave 
+    } = useEditorActions(projectData, setProjectData, setLogs);
 
     // Live Preview Logic (Debounced)
-    const srcDoc = useMemo(() => {
+    const [compiling, setCompiling] = useState(false);
+
+    const compileCode = async () => {
+        setCompiling(true);
+        let compiledCss = css;
+        let compiledJs = js;
+        const { preprocessors } = useProjectStore.getState();
+
+        try {
+            // 1. Compile CSS (Sass/SCSS)
+            if (preprocessors.css === 'scss' || preprocessors.css === 'sass') {
+                if (window.Sass) {
+                    compiledCss = await new Promise((resolve) => {
+                        window.Sass.compile(css, (result) => resolve(result.text || css));
+                    });
+                } else {
+                    console.warn("Sass compiler not loaded yet.");
+                }
+            }
+
+            // 2. Compile JS (Babel/JSX/TS)
+            if (preprocessors.js === 'babel' || preprocessors.js === 'typescript') {
+                if (window.Babel) {
+                    compiledJs = window.Babel.transform(js, {
+                        presets: ['env', 'react', 'typescript'],
+                        filename: 'script.tsx'
+                    }).code;
+                } else {
+                    console.warn("Babel compiler not loaded yet.");
+                }
+            }
+        } catch (err) {
+            setLogs(prev => [...prev, { type: 'ERR', content: 'Compilation Error: ' + err.message, id: Date.now() }]);
+        }
+
         const libs = externalLibraries.map(lib => lib.endsWith('.css') ? `<link rel="stylesheet" href="${lib}">` : `<script src="${lib}"></script>`).join('\n');
-        return (
-            `
+        
+        const content = `
             <!DOCTYPE html>
             <html>
             <head>
                 <meta charset="UTF-8" />
                 <style>
                     body { background: white; margin: 0; padding: 0; font-family: sans-serif; }
-                    ${css}
+                    ${compiledCss}
                 </style>
                 ${libs}
                 <script>
@@ -102,24 +115,51 @@ export default function Editor({ auth, project: initialProject }) {
                     window.addEventListener('unhandledrejection', (event) => {
                         window.parent.postMessage({ type: 'ERR', content: 'Unhandled Rejection: ' + event.reason }, '*');
                     });
+                    
+                    // REPL Listener
+                    window.addEventListener('message', (e) => {
+                        if (e.data.type === 'REPL_EXEC') {
+                            try {
+                                const result = eval(e.data.code);
+                                window.parent.postMessage({ type: 'LOG', content: '> ' + safeStringify(result) }, '*');
+                            } catch (err) {
+                                window.parent.postMessage({ type: 'ERR', content: 'REPL Error: ' + err.message }, '*');
+                            }
+                        }
+                    });
                 </script>
             </head>
-            <body>${html}<script>${js}</script></body>
+            <body>${html}<script>${compiledJs}</script></body>
             </html>
-        `
-        );
-    }, [html, css, js, externalLibraries]);
+        `;
+        
+        setPreviewContent(content);
+        setCompiling(false);
+    };
 
     useEffect(() => {
+        // Load Compilers on Mount
+        if (!window.Babel) {
+            const script = document.createElement('script');
+            script.src = "https://unpkg.com/@babel/standalone/babel.min.js";
+            document.head.appendChild(script);
+        }
+        if (!window.Sass) {
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/sass.js@0.11.1/dist/sass.sync.js";
+            document.head.appendChild(script);
+        }
+
         const handleMessage = (e) => {
             if (e.data.type === 'LOG' || e.data.type === 'ERR') {
                 setLogs(prev => [...prev, { type: e.data.type, content: e.data.content, id: Date.now() }].slice(-50));
             }
         };
         window.addEventListener('message', handleMessage);
-        const timeout = setTimeout(() => setPreviewContent(srcDoc), 800);
+
+        const timeout = setTimeout(compileCode, 800);
         return () => { window.removeEventListener('message', handleMessage); clearTimeout(timeout); };
-    }, [srcDoc]);
+    }, [html, css, js, externalLibraries, preprocessors]);
 
     const isOwner = useMemo(() => {
         if (!auth.user) return false;
@@ -127,68 +167,8 @@ export default function Editor({ auth, project: initialProject }) {
         return projectData.user_id === auth.user.id;
     }, [auth.user, projectData]);
 
-    const handleCloudSave = async () => {
-        if (!auth.user?.google_drive_token) return alert('Cloud Link Inactive. Connect via Cloud Sync page.');
-        
-        setIsSaving(true);
-        setLogs(prev => [...prev, { type: 'LOG', content: 'Initiating Cloud Uplink...', id: Date.now() }]);
-        
-        try {
-            const res = await axios.post('/api/google-drive/save', {
-                title,
-                code: { html, css, js },
-                drive_file_id: google_drive_file_id
-            });
-            
-            if (res.data.id) {
-                setGoogleDriveFileId(res.data.id);
-                setLogs(prev => [...prev, { type: 'LOG', content: 'Cloud Node Synced: ' + res.data.id, id: Date.now() }]);
-            }
-        } catch (e) {
-            console.error(e);
-            setLogs(prev => [...prev, { type: 'ERR', content: 'Cloud Uplink Failed.', id: Date.now() }]);
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleSave = async () => {
-        if (!auth.user) {
-            if (confirm('Authentication required. Redirect to login?')) {
-                window.location.href = route('login');
-            }
-            return;
-        }
-
-        if (!isOwner && projectData?.id) {
-            return handleFork();
-        }
-
-        setIsSaving(true);
-        try {
-            const data = { title, code: { html, css, js }, settings: { externalLibraries }, is_public: !isPrivate, is_private: isPrivate };
-            const endpoint = projectData?.id ? `/api/projects/${projectData.id}` : '/api/projects';
-            const method = projectData?.id ? 'put' : 'post';
-            const res = await axios[method](endpoint, data);
-            setProjectData(res.data);
-            if (!projectData?.id) window.history.pushState({}, '', `/editor/${res.data.slug}`);
-            setLogs(prev => [...prev, { type: 'LOG', content: 'Cloud sync successful.', id: Date.now() }]);
-        } catch (e) {
-            setLogs(prev => [...prev, { type: 'ERR', content: 'Sync failed. Verify connection.', id: Date.now() }]);
-        } finally { setIsSaving(false); }
-    };
-
-    const handleFork = async () => {
-        if (!projectData?.id) return alert('Initialize module before forking.');
-        try {
-            const data = { title: `${title} (Fork)`, code: { html, css, js }, settings: { externalLibraries }, is_public: !isPrivate, is_private: isPrivate };
-            const res = await axios.post('/api/projects', data);
-            window.location.href = `/editor/${res.data.slug}`;
-        } catch(e) {}
-    };
-
     const handleExport = () => {
-        const blob = new Blob([srcDoc], { type: 'text/html' });
+        const blob = new Blob([previewContent], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -216,12 +196,18 @@ export default function Editor({ auth, project: initialProject }) {
 
     const pageTitle = (projectData?.meta_title || title || 'Editor') + ' // HOACodeLab';
     const pageDescription = projectData?.meta_description || 'Prototyping node on HOACodeLab.';
+    const ogImage = projectData?.og_image_url || `${window.location.origin}/favicon.svg`;
 
     return (
         <div className="h-screen bg-[var(--bg-main)] flex flex-col font-sans overflow-hidden transition-colors duration-300">
             <Head>
                 <title>{pageTitle}</title>
                 <meta name="description" content={pageDescription} />
+                <meta property="og:title" content={pageTitle} />
+                <meta property="og:description" content={pageDescription} />
+                <meta property="og:image" content={ogImage} />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:image" content={ogImage} />
             </Head>
             
             <EditorHeader 
@@ -268,6 +254,14 @@ export default function Editor({ auth, project: initialProject }) {
             <EditorSidebar 
                 activeSidebar={activeSidebar} 
                 setActiveSidebar={setActiveSidebar} 
+                projectData={projectData}
+                setLogs={setLogs}
+                diffRevision={setDiffRevision}
+                setActiveModal={setActiveModal}
+                handleSave={handleSave}
+                handleFork={handleFork}
+                handleCloudSave={handleCloudSave}
+                fetchCollections={fetchCollections}
             />
 
             <EditorModals 
@@ -277,6 +271,7 @@ export default function Editor({ auth, project: initialProject }) {
                 collections={collections} 
                 addToCollection={addToCollection} 
                 createCollection={createCollection} 
+                diffRevision={diffRevision}
             />
         </div>
     );

@@ -5,8 +5,9 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { 
     ShieldCheck, Users, Database, Activity, 
-    Cpu, Terminal, Code2
+    Cpu, Terminal, Code2, TrendingUp, DollarSign
 } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ProBackground from '@/Components/Visuals/ProBackground';
 
 export default function AdminDashboard() {
@@ -74,12 +75,14 @@ export default function AdminDashboard() {
                 <Head title="Admin Command Center" />
                 <div className="relative min-h-full p-8 lg:p-12 overflow-y-auto">
                     <div className="max-w-7xl mx-auto relative z-10 space-y-10">
+                        
+                        {/* Stats Row */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             {[
                                 { label: 'TOTAL_USERS', val: stats.users.total, icon: Users, color: 'text-cyan-500' },
                                 { label: 'TOTAL_CORES', val: stats.projects.total, icon: Code2, color: 'text-purple-500' },
-                                { label: 'FILES_SYNCED', val: stats.projects.file_sync, icon: Database, color: 'text-amber-500' },
-                                { label: 'SYSTEM_UPTIME', val: stats.system.uptime, icon: Activity, color: 'text-emerald-500' }
+                                { label: 'ESTIMATED_MRR', val: `$${stats.revenue.monthly}`, icon: DollarSign, color: 'text-emerald-500' },
+                                { label: 'SYSTEM_UPTIME', val: stats.system.uptime, icon: Activity, color: 'text-rose-500' }
                             ].map((s, i) => (
                                 <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                                     className="bg-[var(--bg-surface)] border border-[var(--border)] p-8 rounded-2xl shadow-xl text-left"
@@ -91,8 +94,51 @@ export default function AdminDashboard() {
                             ))}
                         </div>
 
+                        {/* Revenue & Balance Row */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left">
-                            <div className="lg:col-span-1 bg-[var(--bg-surface)] border border-[var(--border)] p-10 rounded-2xl shadow-xl">
+                            <div className="lg:col-span-2 bg-[var(--bg-surface)] border border-[var(--border)] p-10 rounded-[2rem] shadow-xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-8 opacity-10"><TrendingUp size={120} /></div>
+                                <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-10 flex items-center">
+                                    <TrendingUp size={16} className="mr-3 text-emerald-500" /> Revenue_Growth_Matrix
+                                </h3>
+                                <div className="h-[300px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={stats.revenue.chart}>
+                                            <defs>
+                                                <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                                            <XAxis 
+                                                dataKey="name" 
+                                                axisLine={false} 
+                                                tickLine={false} 
+                                                tick={{ fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} 
+                                                dy={10}
+                                            />
+                                            <YAxis hide />
+                                            <Tooltip 
+                                                contentStyle={{ backgroundColor: '#050505', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                                                itemStyle={{ color: '#10b981', fontSize: '10px', fontWeight: 'black', textTransform: 'uppercase' }}
+                                                labelStyle={{ color: '#64748b', fontSize: '8px', marginBottom: '4px' }}
+                                            />
+                                            <Area 
+                                                type="monotone" 
+                                                dataKey="revenue" 
+                                                stroke="#10b981" 
+                                                strokeWidth={3}
+                                                fillOpacity={1} 
+                                                fill="url(#colorRev)" 
+                                                animationDuration={2000}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-1 bg-[var(--bg-surface)] border border-[var(--border)] p-10 rounded-[2rem] shadow-xl">
                                 <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-10 flex items-center">
                                     <Cpu size={16} className="mr-3 text-rose-500" /> Neural_Role_Balance
                                 </h3>
@@ -112,30 +158,32 @@ export default function AdminDashboard() {
                                     ))}
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="lg:col-span-2 bg-[var(--bg-surface)] border border-[var(--border)] p-10 rounded-2xl shadow-xl">
-                                <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-10 flex items-center">
-                                    <Users size={16} className="mr-3 text-cyan-500" /> Recent_Node_Arrivals
-                                </h3>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead><tr className="text-left border-b border-[var(--border)]">
-                                            <th className="pb-4 text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Ident</th>
-                                            <th className="pb-4 text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] text-right">Arrival</th>
-                                        </tr></thead>
-                                        <tbody className="divide-y divide-[var(--border)]">
-                                            {stats.users.latest.map(u => (
-                                                <tr key={u.id} className="group"><td className="py-4">
-                                                    <div className="flex flex-col"><span className="text-sm font-bold text-[var(--text-main)] group-hover:text-cyan-500 transition-colors">{u.name}</span><span className="text-[9px] text-[var(--text-muted)]">{u.email}</span></div>
-                                                </td><td className="py-4 text-right">
-                                                    <span className="text-[10px] font-mono text-[var(--text-muted)]">{new Date(u.created_at).toLocaleDateString()}</span>
-                                                </td></tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                        {/* Recent Users Row */}
+                        <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-10 rounded-[2rem] shadow-xl">
+                            <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-10 flex items-center">
+                                <Users size={16} className="mr-3 text-cyan-500" /> Recent_Node_Arrivals
+                            </h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead><tr className="text-left border-b border-[var(--border)]">
+                                        <th className="pb-4 text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">Ident</th>
+                                        <th className="pb-4 text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] text-right">Arrival</th>
+                                    </tr></thead>
+                                    <tbody className="divide-y divide-[var(--border)]">
+                                        {stats.users.latest.map(u => (
+                                            <tr key={u.id} className="group"><td className="py-4">
+                                                <div className="flex flex-col"><span className="text-sm font-bold text-[var(--text-main)] group-hover:text-cyan-500 transition-colors">{u.name}</span><span className="text-[9px] text-[var(--text-muted)]">{u.email}</span></div>
+                                            </td><td className="py-4 text-right">
+                                                <span className="text-[10px] font-mono text-[var(--text-muted)]">{new Date(u.created_at).toLocaleDateString()}</span>
+                                            </td></tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </AuthenticatedLayout>
