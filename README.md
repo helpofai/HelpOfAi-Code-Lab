@@ -113,6 +113,20 @@
 
 ### Production Deployment
 
+#### 🌐 Web-based Production Installer (Recommended for Hosting)
+For environments without terminal/SSH access (like shared hosting), HOACodeLab includes a high-fidelity web installer.
+
+1.  **Upload Files:** Upload the project to your web server.
+2.  **Access Installer:** Navigate to `https://your-domain.com/setup`.
+3.  **Follow Protocol:** Use the **Live Terminal UI** to run the 7-step deployment sequence:
+    *   Generate Application Key.
+    *   Run Database Migrations.
+    *   Link Storage Assets.
+    *   Flush & Optimize Caches.
+    *   Seed Default Data.
+4.  **Security:** Delete `app/Http/Controllers/SetupController.php` after successful installation.
+
+#### 💻 Manual CLI Deployment
 1.  **Setup Server:** Ensure your server meets Laravel 12 requirements.
 2.  **Deploy Code:** Clone repo and setup `.env`.
 3.  **Optimize:**
