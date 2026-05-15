@@ -113,20 +113,59 @@
 
 ### Production Deployment
 
-#### 🌐 Web-based Production Installer (Recommended for Hosting)
-For environments without terminal/SSH access (like shared hosting), HOACodeLab includes a high-fidelity web installer.
+#### 🌐 Web-based Production Installer (Recommended for Beginners)
+This is the easiest way to deploy HOACodeLab on shared hosting (cPanel, Hostinger, Bluehost, etc.) without using a terminal or SSH.
 
-1.  **Upload Files:** Upload the project to your web server.
-2.  **Access Installer:** Navigate to `https://your-domain.com/setup`.
-3.  **Follow Protocol:** Use the **Live Terminal UI** to run the 7-step deployment sequence:
-    *   Generate Application Key.
-    *   Run Database Migrations.
-    *   Link Storage Assets.
-    *   Flush & Optimize Caches.
-    *   Seed Default Data.
-4.  **Security:** Delete `app/Http/Controllers/SetupController.php` after successful installation.
+**Step 1: Prepare your Server**
+*   **PHP Version:** Log into your hosting panel (cPanel) and ensure your PHP version is set to **8.2 or 8.3**.
+*   **Extensions:** Ensure `bcmath`, `ctype`, `fileinfo`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, and `xml` are enabled in your PHP settings.
+
+**Step 2: Create a Database**
+1.  Go to **MySQL® Database Wizard** in your cPanel.
+2.  Create a new database (e.g., `hoa_codelab`).
+3.  Create a new user and a strong password. **Save these details.**
+4.  Add the user to the database with **ALL PRIVILEGES**.
+
+**Step 3: Upload Files**
+1.  Download the project source code.
+2.  Compress all files into a `.zip` archive (ensure the `app`, `public`, `vendor`, etc., are in the root of the zip).
+3.  Use cPanel **File Manager** to upload the zip to your `public_html` (or your subdomain folder).
+4.  **Extract** the zip file.
+
+**Step 4: Configure Environment**
+1.  Rename `.env.example` to `.env`.
+2.  Edit the `.env` file and update these lines with your Step 2 details:
+    ```ini
+    DB_DATABASE=your_database_name
+    DB_USERNAME=your_database_user
+    DB_PASSWORD=your_database_password
+    ```
+
+**Step 5: Run the Installer**
+1.  Visit `https://your-domain.com/setup` in your browser.
+2.  The **Live Terminal UI** will appear. Click the buttons in order (01 to 06):
+    *   **01 Security:** Generates your unique `APP_KEY`.
+    *   **02 Database:** Sets up your tables automatically.
+    *   **03 Storage:** Enables image and file uploads.
+    *   **04 Optimization:** Clears temporary system data.
+    *   **05 Seed:** Loads default settings and admin placeholders.
+    *   **06 Optimize:** Tuned the app for maximum speed.
+3.  Once finished, click **Launch App**.
+
+**⚠️ Security:** After a successful setup, delete `app/Http/Controllers/SetupController.php` for security.
+
+---
+
+#### 🛠️ cPanel Specific Configuration (The "Public" Folder)
+Laravel applications serve files from the `/public` folder. On cPanel, you may need to point your domain to that subfolder:
+
+1.  **If using a Subdomain:** Set the **Document Root** to `public_html/your-folder/public`.
+2.  **If using Main Domain:** If you cannot change the document root, move the `.htaccess` from the `public/` folder to the root directory and update its paths, OR use the cPanel "Domains" section to update the document root to `/public`.
+
+---
 
 #### 💻 Manual CLI Deployment
+For developers with SSH access:
 1.  **Setup Server:** Ensure your server meets Laravel 12 requirements.
 2.  **Deploy Code:** Clone repo and setup `.env`.
 3.  **Optimize:**
@@ -137,7 +176,6 @@ For environments without terminal/SSH access (like shared hosting), HOACodeLab i
     php artisan route:cache
     php artisan view:cache
     ```
-4.  **Web Server:** Configure Nginx/Apache to point to `/public`.
 
 ---
 
@@ -148,14 +186,14 @@ The `.env` file handles core configurations. Key custom variables:
 ```ini
 APP_NAME=HOACodeLab
 APP_URL=https://your-domain.com
-APP_VERSION=1.2.0
+APP_VERSION=1.7.0
 
 # Database
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_DATABASE=hoa_code_lab
-DB_USERNAME=root
-DB_PASSWORD=secret
+DB_DATABASE=your_db_name
+DB_USERNAME=your_db_user
+DB_PASSWORD=your_db_password
 ```
 
 ---
