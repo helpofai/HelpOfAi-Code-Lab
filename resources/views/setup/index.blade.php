@@ -228,9 +228,22 @@
             currentStep = step;
         }
 
+        async function handleResponse(response) {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                return await response.json();
+            } else {
+                const text = await response.text();
+                console.error('Non-JSON Response:', text);
+                throw new Error('Server returned non-JSON response. Check browser console (F12) for details.');
+            }
+        }
+
         async function saveEnv() {
             const btn = document.getElementById('btn-save-env');
+            const originalText = btn.innerText;
             btn.innerText = 'Saving...';
+            btn.disabled = true;
             
             const data = {
                 app_name: document.getElementById('app_name').value,
@@ -247,20 +260,27 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: JSON.stringify(data)
                 });
-                const res = await response.json();
+                
+                const res = await handleResponse(response);
                 if (res.success) {
                     btn.innerText = 'Saved OK';
                     btn.classList.add('bg-green-500/20', 'text-green-400');
-                } else throw new Error(res.error);
+                    appendLog('Environment configuration updated successfully.', 'success');
+                } else throw new Error(res.error || 'Unknown error during save');
             } catch (e) {
+                console.error(e);
                 alert('Save Failed: ' + e.message);
                 btn.innerText = 'Retry Save';
+            } finally {
+                btn.disabled = false;
             }
         }
 
         async function testDb() {
             const btn = document.getElementById('btn-test-db');
+            const originalText = btn.innerText;
             btn.innerText = 'Probing...';
+            btn.disabled = true;
             
             const data = {
                 db_host: document.getElementById('db_host').value,
@@ -275,17 +295,22 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: JSON.stringify(data)
                 });
-                const res = await response.json();
+                
+                const res = await handleResponse(response);
                 if (res.success) {
                     btn.innerText = 'Connection Valid';
                     btn.classList.add('bg-green-500', 'text-white');
                     document.getElementById('next-to-3').classList.remove('hidden');
                     document.getElementById('db-status-badge').innerText = 'Uplink_Established';
                     document.getElementById('db-status-badge').className = 'text-green-500';
-                } else throw new Error(res.error);
+                    appendLog('Database connection handshake successful.', 'success');
+                } else throw new Error(res.error || 'Database connection rejected by host.');
             } catch (e) {
+                console.error(e);
                 alert('Connection Failed: ' + e.message);
                 btn.innerText = 'Verify Uplink';
+            } finally {
+                btn.disabled = false;
             }
         }
 
