@@ -6,108 +6,207 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Models\SiteSetting;
+use Illuminate\Support\Facades\Hash;
 
 class SetupController extends Controller
 {
     public function index()
     {
-        // Safety: If the app is already installed and configured, we might want to restrict this.
-        // But for a first-time setup, we need it open.
-        // We'll check if .env exists and has APP_KEY to decide the "state".
         $envExists = File::exists(base_path('.env'));
         $appKeySet = config('app.key') && config('app.key') !== 'base64:';
+
+        // Check current DB connection status
+        $dbConnected = false;
+        try {
+            DB::connection()->getPdo();
+            $dbConnected = true;
+        } catch (\Exception $e) {}
 
         return view('setup.index', [
             'envExists' => $envExists,
             'appKeySet' => $appKeySet,
+            'dbConnected' => $dbConnected,
             'phpVersion' => PHP_VERSION,
-            'extensions' => [
-                'BCMath' => extension_loaded('bcmath'),
-                'Ctype' => extension_loaded('ctype'),
-                'Fileinfo' => extension_loaded('fileinfo'),
-                'JSON' => extension_loaded('json'),
-                'Mbstring' => extension_loaded('mbstring'),
-                'OpenSSL' => extension_loaded('openssl'),
-                'PDO' => extension_loaded('pdo'),
-                'Tokenizer' => extension_loaded('tokenizer'),
-                'XML' => extension_loaded('xml'),
-                'GD' => extension_loaded('gd'),
+            'requirements' => $this->getRequirements(),
+            'currentEnv' => [
+                'app_name' => config('app.name'),
+                'app_url' => config('app.url'),
+                'db_host' => config('database.connections.mysql.host'),
+                'db_name' => config('database.connections.mysql.database'),
+                'db_user' => config('database.connections.mysql.username'),
             ]
         ]);
+    }
+
+    private function getRequirements()
+    {
+        return [
+            'PHP >= 8.2' => version_compare(PHP_VERSION, '8.2', '>='),
+            'BCMath' => extension_loaded('bcmath'),
+            'Ctype' => extension_loaded('ctype'),
+            'Fileinfo' => extension_loaded('fileinfo'),
+            'JSON' => extension_loaded('json'),
+            'Mbstring' => extension_loaded('mbstring'),
+            'OpenSSL' => extension_loaded('openssl'),
+            'PDO' => extension_loaded('pdo'),
+            'Tokenizer' => extension_loaded('tokenizer'),
+            'XML' => extension_loaded('xml'),
+            'GD' => extension_loaded('gd'),
+            'Storage Writable' => is_writable(storage_path()),
+            'Bootstrap Writable' => is_writable(base_path('bootstrap/cache')),
+        ];
+    }
+
+    public function saveEnv(Request $request)
+    {
+        $validated = $request->validate([
+            'app_name' => 'required|string',
+            'app_url' => 'required|url',
+            'db_host' => 'required|string',
+            'db_name' => 'required|string',
+            'db_user' => 'required|string',
+            'db_pass' => 'nullable|string',
+        ]);
+
+        try {
+            $envPath = base_path('.env');
+            $examplePath = base_path('.env.example');
+
+            if (!File::exists($envPath)) {
+                File::copy($examplePath, $envPath);
+            }
+
+            $content = File::get($envPath);
+            
+            $changes = [
+                'APP_NAME' => $validated['app_name'],
+                'APP_URL' => $validated['app_url'],
+                'DB_HOST' => $validated['db_host'],
+                'DB_DATABASE' => $validated['db_name'],
+                'DB_USERNAME' => $validated['db_user'],
+                'DB_PASSWORD' => $validated['db_pass'] ?? '',
+            ];
+
+            foreach ($changes as $key => $value) {
+                $content = preg_replace("/^{$key}=.*$/m", "{$key}=\"{$value}\"", $content);
+            }
+
+            File::put($envPath, $content);
+            
+            // Clear config cache to apply changes
+            Artisan::call('config:clear');
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function checkDb(Request $request)
+    {
+        try {
+            // Attempt a fresh connection with provided credentials
+            config([
+                'database.connections.mysql.host' => $request->db_host,
+                'database.connections.mysql.database' => $request->db_name,
+                'database.connections.mysql.username' => $request->db_user,
+                'database.connections.mysql.password' => $request->db_pass ?? '',
+            ]);
+            
+            DB::purge('mysql');
+            DB::connection('mysql')->getPdo();
+            
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function createAdmin(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|min:8',
+        ]);
+
+        try {
+            User::updateOrCreate(
+                ['email' => $validated['email']],
+                [
+                    'name' => $validated['name'],
+                    'password' => Hash::make($validated['password']),
+                    'role' => User::ROLE_ADMIN,
+                ]
+            );
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function finish(Request $request)
+    {
+        try {
+            if ($request->site_name) {
+                SiteSetting::set('site_name', $request->site_name, 'branding');
+            }
+            
+            Artisan::call('optimize');
+            
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function run(Request $request)
     {
         $command = $request->input('command');
-        
-        // Define allowed commands for safety
         $allowedCommands = [
-            'key:generate',
-            'migrate',
-            'migrate:fresh',
-            'db:seed',
-            'optimize:clear',
-            'storage:link',
-            'config:cache',
-            'route:cache',
-            'view:cache',
+            'key:generate', 'migrate', 'migrate:fresh', 'db:seed', 
+            'optimize:clear', 'storage:link', 'config:cache', 
+            'route:cache', 'view:cache'
         ];
 
         if (!in_array($command, $allowedCommands)) {
-            return response()->json(['error' => 'Unauthorized command'], 403);
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Set execution time for long processes
         set_time_limit(600);
 
         return response()->stream(function () use ($command) {
-            $this->sendEvent('Establishing connection with system kernel...', 'info');
-            $this->sendEvent('Executing: php artisan ' . $command, 'info');
-
             try {
-                // Check if proc_open is available for real-time process streaming
                 if (function_exists('proc_open')) {
                     $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
-                    // We use the full path to artisan to ensure it works in all environments
                     $artisan = base_path('artisan');
                     $fullCommand = "{$php} {$artisan} {$command} --force --no-interaction";
 
                     \Illuminate\Support\Facades\Process::path(base_path())
                         ->timeout(600)
                         ->run($fullCommand, function (string $type, string $output) {
-                            // Split output by lines to send them individually for a better terminal feel
                             $lines = explode("\n", $output);
                             foreach ($lines as $line) {
-                                if (trim($line) !== '') {
-                                    $this->sendEvent($line, 'success');
-                                }
+                                if (trim($line) !== '') $this->sendEvent($line, 'success');
                             }
                         });
-                    
-                    $this->sendEvent('Process cycle completed.', 'done');
+                    $this->sendEvent('Command finished.', 'done');
                 } else {
-                    // Fallback to Artisan::call if proc_open is disabled (common on some shared hosting)
-                    $this->sendEvent('Notice: Real-time streaming limited. Running command in batch mode...', 'info');
                     Artisan::call($command, ['--force' => true]);
-                    $output = Artisan::output();
-                    
-                    $lines = explode("\n", $output);
-                    foreach ($lines as $line) {
-                        if (trim($line) !== '') {
-                            $this->sendEvent($line, 'success');
-                        }
-                    }
-                    $this->sendEvent('Batch command finished.', 'done');
+                    $this->sendEvent(Artisan::output(), 'success');
+                    $this->sendEvent('Command finished.', 'done');
                 }
             } catch (\Exception $e) {
-                $this->sendEvent('CRITICAL_FAILURE: ' . $e->getMessage(), 'error');
-                Log::error('Setup command failed: ' . $e->getMessage());
+                $this->sendEvent('Error: ' . $e->getMessage(), 'error');
             }
         }, 200, [
             'Content-Type' => 'text/event-stream',
             'Cache-Control' => 'no-cache',
             'X-Accel-Buffering' => 'no',
-            'Connection' => 'keep-alive',
         ]);
     }
 
@@ -118,10 +217,8 @@ class SetupController extends Controller
             'status' => $status,
             'timestamp' => date('H:i:s'),
         ]) . "\n\n";
-        
-        if (ob_get_level() > 0) {
-            ob_flush();
-        }
+        if (ob_get_level() > 0) ob_flush();
         flush();
     }
 }
+

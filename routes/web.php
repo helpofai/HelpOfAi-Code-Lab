@@ -146,5 +146,9 @@ Route::get('/p/{slug}', function ($slug) {
 // Production Installer (Setup) Routes
 Route::get('/setup', [\App\Http\Controllers\SetupController::class, 'index'])->name('setup.index');
 Route::post('/setup/run', [\App\Http\Controllers\SetupController::class, 'run'])->name('setup.run');
+Route::post('/setup/save-env', [\App\Http\Controllers\SetupController::class, 'saveEnv'])->name('setup.save-env');
+Route::post('/setup/check-db', [\App\Http\Controllers\SetupController::class, 'checkDb'])->name('setup.check-db');
+Route::post('/setup/create-admin', [\App\Http\Controllers\SetupController::class, 'createAdmin'])->name('setup.create-admin');
+Route::post('/setup/finish', [\App\Http\Controllers\SetupController::class, 'finish'])->name('setup.finish');
 
 require __DIR__.'/auth.php';
