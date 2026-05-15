@@ -30,8 +30,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Dynamically override Stripe configuration from database settings
-        if (Schema::hasTable('site_settings')) {
-            try {
+        try {
+            if (Schema::hasTable('site_settings')) {
                 $stripeKey = \App\Models\SiteSetting::where('key', 'stripe_key')->first()?->value;
                 $stripeSecret = \App\Models\SiteSetting::where('key', 'stripe_secret')->first()?->value;
                 $stripeWebhook = \App\Models\SiteSetting::where('key', 'stripe_webhook_secret')->first()?->value;
@@ -39,9 +39,9 @@ class AppServiceProvider extends ServiceProvider
                 if ($stripeKey) config(['services.stripe.key' => $stripeKey]);
                 if ($stripeSecret) config(['services.stripe.secret' => $stripeSecret, 'cashier.secret' => $stripeSecret]);
                 if ($stripeWebhook) config(['services.stripe.webhook.secret' => $stripeWebhook]);
-            } catch (\Exception $e) {
-                // Fail silently during migrations/early setup
             }
+        } catch (\Exception $e) {
+            // Fail silently during migrations, early setup, or if DB is unreachable
         }
     }
 }
