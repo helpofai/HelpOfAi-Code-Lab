@@ -4,6 +4,26 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ---
 
+## [1.8.0] - ADVANCED_INSTALLER_REFINED - 2026-05-15
+
+### 🛡️ Added: Enterprise Deployment Suite V2
+- **Advanced 6-Phase Wizard:** Replaced the single-page installer with a professional, multi-step deployment matrix.
+  - **Phase 01: Systems_Check:** Real-time environment diagnostic verification.
+  - **Phase 02: Kernel_Config:** Integrated .env editor with built-in **DB Connection Tester**.
+  - **Phase 03: Execution_Matrix:** Restored full 6-command Artisan grid (Key Gen, Migrate, Storage Link, Cache Flush, Seed, Prod Optimize) with live terminal feedback.
+  - **Phase 04: Admin_Provisioning:** Direct UI for creating the master administrative identity.
+  - **Phase 05: Website_Meta:** Configuration of global site branding and metadata constants.
+  - **Phase 06: Handshake_Finalized:** Success state with direct launch protocol.
+- **Cache-Proof Communication:** Refactored all installer handshakes to use relative URLs, bypassing stale route caches during initial deployment.
+- **Enforced JSON Handshaking:** Improved error diagnostics by forcing JSON responses and adding verbose console logging for failed server handshakes.
+
+### 🔧 Fixed: Core Integrity & API Handshakes
+- **Reflection Error Neutralization:** Fixed `ReflectionException` in API routes by properly importing `AssetController` and `CollectionController`.
+- **Bootloader Hardening:** Added `try-catch` guards in `AppServiceProvider` to prevent boot crashes when the database is not yet initialized (first-run safety).
+- **Silent Failure Diagnostics:** Implemented improved JavaScript error handling to capture and report raw PHP failures in the developer console.
+
+---
+
 ## [1.7.0] - DEPLOYMENT_OS - 2026-04-18
 
 ### 🚀 Added: Production Setup Protocol (Installer)
@@ -104,4 +124,4 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ### Node Status: **STABLE**
 ### Core Clearance: **LEVEL_0**
-### Build Signature: **HOA-PRO-1.6.0-FINAL**
+### Build Signature: **HOA-PRO-1.8.0-FINAL**

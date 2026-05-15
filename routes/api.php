@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\AssetController;
+use App\Http\Controllers\Api\CollectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

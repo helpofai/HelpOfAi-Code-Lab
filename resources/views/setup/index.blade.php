@@ -122,7 +122,7 @@
                         <h3 class="text-2xl font-black text-white tracking-tighter italic uppercase">Execution_Matrix</h3>
                         
                         <!-- Terminal -->
-                        <div class="terminal rounded-3xl overflow-hidden flex flex-col h-[300px] border border-white/5 shadow-2xl">
+                        <div class="terminal rounded-3xl overflow-hidden flex flex-col h-[280px] border border-white/5 shadow-2xl">
                             <div class="px-6 py-2 bg-white/5 border-b border-white/5 flex justify-between items-center">
                                 <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Live_Terminal.exe</span>
                                 <div id="term-status" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
@@ -132,11 +132,15 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <button onclick="runCommand('key:generate')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-purple-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">Gen Key</button>
-                            <button onclick="runCommand('migrate')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-cyan-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">Migrate</button>
-                            <button onclick="runCommand('db:seed')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-rose-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">Seed DB</button>
-                            <button onclick="nextStep(4)" class="p-3 bg-purple-600 text-white rounded-xl font-bold uppercase text-[10px] tracking-widest">Next Phase</button>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            <button onclick="runCommand('key:generate')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-purple-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">01 Gen Key</button>
+                            <button onclick="runCommand('migrate')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-cyan-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">02 Migrate</button>
+                            <button onclick="runCommand('storage:link')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-amber-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">03 Link Assets</button>
+                            <button onclick="runCommand('optimize:clear')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-slate-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">04 Flush Caches</button>
+                            <button onclick="runCommand('db:seed')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-rose-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">05 Seed DB</button>
+                            <button onclick="runProductionOptimize()" class="p-3 bg-purple-600/20 border border-purple-500/30 rounded-xl hover:bg-purple-600 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wider text-purple-400">06 Prod Optimize</button>
+                            <div class="col-span-2 hidden md:block"></div>
+                            <button onclick="nextStep(4)" class="col-span-2 md:col-span-4 p-4 bg-purple-600 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-lg shadow-purple-500/20 hover:scale-[1.02] transition-all">Continue to Phase 04</button>
                         </div>
                     </div>
 
@@ -369,6 +373,16 @@
             line.innerText = `>> [${new Date().toLocaleTimeString()}] ${message}`;
             output.appendChild(line);
             output.scrollTop = output.scrollHeight;
+        }
+
+        async function runProductionOptimize() {
+            const commands = ['config:cache', 'route:cache', 'view:cache'];
+            appendLog('Starting Production Optimization Chain...', 'info');
+            for (const cmd of commands) {
+                await runCommand(cmd);
+                await new Promise(r => setTimeout(r, 500));
+            }
+            appendLog('--- PRODUCTION OPTIMIZATION COMPLETE ---', 'done');
         }
 
         async function runCommand(command) {
