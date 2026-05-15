@@ -242,7 +242,7 @@
             };
 
             try {
-                const response = await fetch('{{ route('setup.save-env') }}', {
+                const response = await fetch('/setup/save-env', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: JSON.stringify(data)
@@ -270,7 +270,7 @@
             };
 
             try {
-                const response = await fetch('{{ route('setup.check-db') }}', {
+                const response = await fetch('/setup/check-db', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: JSON.stringify(data)
@@ -300,7 +300,7 @@
             };
 
             try {
-                const response = await fetch('{{ route('setup.create-admin') }}', {
+                const response = await fetch('/setup/create-admin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: JSON.stringify(data)
@@ -319,7 +319,7 @@
             btn.innerText = 'Finalizing...';
             
             try {
-                const response = await fetch('{{ route('setup.finish') }}', {
+                const response = await fetch('/setup/finish', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: JSON.stringify({ site_name: document.getElementById('site_name').value })
@@ -349,7 +349,7 @@
         async function runCommand(command) {
             appendLog(`Executing: php artisan ${command}`, 'info');
             try {
-                const response = await fetch('{{ route('setup.run') }}', {
+                const response = await fetch('/setup/run', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: JSON.stringify({ command })
