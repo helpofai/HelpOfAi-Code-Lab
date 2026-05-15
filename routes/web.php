@@ -143,4 +143,8 @@ Route::get('/p/{slug}', function ($slug) {
     ]);
 })->name('pages.show');
 
+// Production Installer (Setup) Routes
+Route::get('/setup', [\App\Http\Controllers\SetupController::class, 'index'])->name('setup.index');
+Route::post('/setup/run', [\App\Http\Controllers\SetupController::class, 'run'])->name('setup.run');
+
 require __DIR__.'/auth.php';
