@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // AUTO-CONFIGURATION: Trust all proxies for production load balancers (Nginx/Cloudflare)
         $middleware->trustProxies(at: '*');
 
+        $middleware->validateCsrfTokens(except: [
+            'admin/update/*',
+            'setup/*',
+        ]);
+
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
