@@ -256,84 +256,44 @@ class UpdateController extends Controller
                 $this->sendUpdateLog("Code updated successfully.", 30, 'success');
 
                 // 1.5 Update .env intelligently
-                $this->sendUpdateLog("Updating configuration...", 35);
+                $this->sendUpdateLog("Synchronizing configuration with remote matrix...", 35);
                 try {
                     $envPath = base_path('.env');
                     $examplePath = base_path('.env.example');
 
                     if (File::exists($envPath) && File::exists($examplePath)) {
-                        
-                        if (!is_writable($envPath)) {
-                            $this->sendUpdateLog("CRITICAL: .env file is not writable. Check permissions.", 36, 'error');
-                        }
-
                         $envContent = File::get($envPath);
                         $exampleContent = File::get($examplePath);
 
-                        // Parse .env into lines
-                        $envLines = explode("\n", $envContent);
-                        
-                        // Parse .env.example to get new keys and version
-                        preg_match_all('/^([A-Z0-9_]+)=(.*)$/m', $exampleContent, $matches, PREG_SET_ORDER);
-                        $exampleKeys = [];
-                        $newVersion = null;
+                        // Parse .env.example to get target version
+                        preg_match('/APP_VERSION=(.*)/', $exampleContent, $vMatch);
+                        $targetVersion = isset($vMatch[1]) ? trim($vMatch[1]) : null;
 
-                        foreach ($matches as $match) {
-                            $key = $match[1];
-                            $value = $match[2];
-                            $exampleKeys[$key] = $value;
-                            if ($key === 'APP_VERSION') {
-                                $newVersion = trim($value);
-                            }
-                        }
-
-                        // Check for existing keys in .env
-                        $existingKeys = [];
-                        foreach ($envLines as $line) {
-                            if (preg_match('/^\s*([A-Z0-9_]+)=/', $line, $match)) {
-                                $existingKeys[] = $match[1];
-                            }
-                        }
-
-                        $updatedEnvContent = $envContent;
-                        $hasChanges = false;
-
-                        // Append new keys
-                        foreach ($exampleKeys as $key => $value) {
-                            if (!in_array($key, $existingKeys)) {
-                                $updatedEnvContent = rtrim($updatedEnvContent) . "\n{$key}={$value}\n";
-                                $hasChanges = true;
-                                $this->sendUpdateLog("Added new configuration key: {$key}", 36);
-                            }
-                        }
-
-                        // Update APP_VERSION with a more flexible regex
-                        if ($newVersion) {
-                            $this->sendUpdateLog("Remote version detected: {$newVersion}", 37);
-                            $pattern = '/^\s*APP_VERSION\s*=\s*.*$/m';
-                            if (preg_match($pattern, $updatedEnvContent)) {
-                                $updatedEnvContent = preg_replace($pattern, "APP_VERSION={$newVersion}", $updatedEnvContent);
-                                $hasChanges = true;
-                            } else {
-                                $updatedEnvContent = rtrim($updatedEnvContent) . "\nAPP_VERSION={$newVersion}\n";
-                                $hasChanges = true;
-                            }
-                        }
-
-                        if ($hasChanges) {
-                            File::put($envPath, $updatedEnvContent);
-                            $this->sendUpdateLog("Local .env file has been synchronized.", 39, 'success');
+                        if ($targetVersion) {
+                            $this->sendUpdateLog("Target version identified: {$targetVersion}", 36);
                             
-                            // CRITICAL: Clear config cache immediately using PHP binary
-                            $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
-                            $clear = Process::path(base_path())->run("$php artisan config:clear");
-                            $this->sendUpdateLog("System cache reset: " . ($clear->successful() ? 'OK' : 'FAILED'), 40);
-                        } else {
-                            $this->sendUpdateLog("Configuration is already optimal.", 40);
+                            // Check if key exists
+                            if (str_contains($envContent, 'APP_VERSION=')) {
+                                $envContent = preg_replace('/APP_VERSION=.*/', "APP_VERSION={$targetVersion}", $envContent);
+                            } else {
+                                $envContent = rtrim($envContent) . "\nAPP_VERSION={$targetVersion}\n";
+                            }
+                            
+                            File::put($envPath, $envContent);
+                            $this->sendUpdateLog("Environment variables updated to {$targetVersion}.", 38, 'success');
                         }
+
+                        // Clear ALL caches thoroughly
+                        $this->sendUpdateLog("Purging system cache and re-initializing manifest...", 40);
+                        $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
+                        Process::path(base_path())->run("$php artisan config:clear");
+                        Process::path(base_path())->run("$php artisan cache:clear");
+                        Process::path(base_path())->run("$php artisan optimize:clear");
+                        
+                        $this->sendUpdateLog("System manifest reset successful.", 45, 'success');
                     }
                 } catch (\Exception $e) {
-                    $this->sendUpdateLog("Config Sync Error: " . $e->getMessage(), 40, 'error');
+                    $this->sendUpdateLog("Config Sync Error: " . $e->getMessage(), 45, 'error');
                 }
 
             } else {
