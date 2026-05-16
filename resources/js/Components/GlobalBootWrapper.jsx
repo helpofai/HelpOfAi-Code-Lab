@@ -22,7 +22,8 @@ export default function GlobalBootWrapper({ children }) {
             root.setAttribute('data-theme', activeTheme);
             
             // Sync background to prevent flashes
-            root.style.backgroundColor = activeTheme === 'dark' ? '#050505' : '#ffffff';
+            // Light: #fafafa, Dark: #030303
+            root.style.backgroundColor = activeTheme === 'dark' ? '#030303' : '#fafafa';
             root.style.colorScheme = activeTheme;
         };
 
