@@ -265,25 +265,56 @@ class UpdateController extends Controller
                         $envContent = File::get($envPath);
                         $exampleContent = File::get($examplePath);
 
-                        // Parse .env.example to get target version
-                        preg_match('/APP_VERSION=(.*)/', $exampleContent, $vMatch);
-                        $targetVersion = isset($vMatch[1]) ? trim($vMatch[1]) : null;
+                        // 1. Parse .env.example for new keys and target version
+                        preg_match_all('/^([A-Z0-9_]+)=(.*)$/m', $exampleContent, $matches, PREG_SET_ORDER);
+                        $exampleKeys = [];
+                        $targetVersion = null;
 
-                        if ($targetVersion) {
-                            $this->sendUpdateLog("Target version identified: {$targetVersion}", 36);
-                            
-                            // Check if key exists
-                            if (str_contains($envContent, 'APP_VERSION=')) {
-                                $envContent = preg_replace('/APP_VERSION=.*/', "APP_VERSION={$targetVersion}", $envContent);
-                            } else {
-                                $envContent = rtrim($envContent) . "\nAPP_VERSION={$targetVersion}\n";
-                            }
-                            
-                            File::put($envPath, $envContent);
-                            $this->sendUpdateLog("Environment variables updated to {$targetVersion}.", 38, 'success');
+                        foreach ($matches as $match) {
+                            $key = $match[1];
+                            $value = $match[2];
+                            $exampleKeys[$key] = $value;
+                            if ($key === 'APP_VERSION') $targetVersion = trim($value);
                         }
 
-                        // Clear ALL caches thoroughly
+                        // 2. Identify existing keys in .env
+                        $envLines = explode("\n", $envContent);
+                        $existingKeys = [];
+                        foreach ($envLines as $line) {
+                            if (preg_match('/^\s*([A-Z0-9_]+)=/', $line, $match)) {
+                                $existingKeys[] = $match[1];
+                            }
+                        }
+
+                        $updatedEnvContent = $envContent;
+                        $hasChanges = false;
+
+                        // 3. Append missing keys
+                        foreach ($exampleKeys as $key => $value) {
+                            if (!in_array($key, $existingKeys)) {
+                                $updatedEnvContent = rtrim($updatedEnvContent) . "\n{$key}={$value}\n";
+                                $hasChanges = true;
+                                $this->sendUpdateLog("Added new configuration key: {$key}", 36);
+                            }
+                        }
+
+                        // 4. Force Version Sync
+                        if ($targetVersion) {
+                            $this->sendUpdateLog("Target version identified: {$targetVersion}", 37);
+                            if (str_contains($updatedEnvContent, 'APP_VERSION=')) {
+                                $updatedEnvContent = preg_replace('/APP_VERSION=.*/', "APP_VERSION={$targetVersion}", $updatedEnvContent);
+                            } else {
+                                $updatedEnvContent = rtrim($updatedEnvContent) . "\nAPP_VERSION={$targetVersion}\n";
+                            }
+                            $hasChanges = true;
+                        }
+
+                        if ($hasChanges) {
+                            File::put($envPath, $updatedEnvContent);
+                            $this->sendUpdateLog("Local environment successfully synchronized.", 39, 'success');
+                        }
+
+                        // 5. Clear ALL caches thoroughly
                         $this->sendUpdateLog("Purging system cache and re-initializing manifest...", 40);
                         $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
                         Process::path(base_path())->run("$php artisan config:clear");
