@@ -25,7 +25,30 @@ Route::get('/', function () {
 Route::get('/editor/{slug?}', function ($slug = null) {
     $project = null;
     if ($slug) {
-        $project = Project::where('slug', $slug)->firstOrFail();
+        $project = Project::with(['user', 'team'])->where('slug', $slug)->firstOrFail();
+        
+        $user = auth()->user();
+        $hasPurchased = false;
+        if ($user) {
+            $hasPurchased = $project->purchases()->where('user_id', $user->id)->exists();
+        }
+
+        $isOwner = $user && $project->user_id === $user->id;
+        $isTeamMember = $project->team_id && $user && 
+                        $user->teams()->where('teams.id', $project->team_id)->exists();
+
+        // Security Guard: Private Projects
+        if (!$project->is_public) {
+            if (!$isOwner && !$isTeamMember) {
+                abort(403, 'Unauthorized. Restricted Neural Core.');
+            }
+        }
+
+        // Add metadata for frontend logic
+        $project->has_purchased = $hasPurchased;
+
+        // Force visibility of code and settings for Live Previews
+        $project->makeVisible(['code', 'settings']);
     }
     return Inertia::render('Editor', [
         'project' => $project
@@ -86,6 +109,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/admin/subscriptions', [\App\Http\Controllers\Admin\SubscriptionController::class, 'update'])->name('admin.subscriptions.update');
     Route::post('/admin/subscriptions/test-gateway', [\App\Http\Controllers\Admin\SubscriptionController::class, 'testGateway'])->name('admin.subscriptions.test-gateway');
 
+    // Sales Management
+    Route::get('/admin/sales', [\App\Http\Controllers\Admin\SalesController::class, 'index'])->name('admin.sales.index');
+    Route::get('/admin/sales/paid-projects', [\App\Http\Controllers\Admin\SalesController::class, 'paidProjects'])->name('admin.sales.paid-projects');
+
     Route::get('/admin/support', [\App\Http\Controllers\Admin\SupportController::class, 'index'])->name('admin.support');
     Route::get('/admin/support/{ticket}', [\App\Http\Controllers\Admin\SupportController::class, 'show'])->name('admin.support.show');
     Route::post('/admin/support/{ticket}/reply', [\App\Http\Controllers\Admin\SupportController::class, 'reply'])->name('admin.support.reply');
@@ -107,6 +134,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/support', [\App\Http\Controllers\SupportController::class, 'store'])->name('support.store');
     Route::get('/support/{ticket}', [\App\Http\Controllers\SupportController::class, 'show'])->name('support.show');
     Route::post('/support/{ticket}/reply', [\App\Http\Controllers\SupportController::class, 'reply'])->name('support.reply');
+
+    // Project Purchases
+    Route::get('/checkout/project/{project:slug}', [\App\Http\Controllers\PurchaseController::class, 'checkoutPage'])->name('checkout.project');
+    Route::get('/purchase/status', [\App\Http\Controllers\PurchaseController::class, 'statusPage'])->name('purchase.status');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

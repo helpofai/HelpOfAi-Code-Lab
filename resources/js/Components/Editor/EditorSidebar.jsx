@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, PlusCircle, Lock, Unlock, Crown, Cloud, CloudOff, RefreshCw, Globe, Server, Code, Shield, Users, Settings, Layers, Activity } from 'lucide-react';
+import { X, Trash2, PlusCircle, Lock, Unlock, Crown, Cloud, CloudOff, RefreshCw, Globe, Server, Code, Shield, Users, Settings, Layers, Activity, Tag, CreditCard } from 'lucide-react';
 import { usePage, Link } from '@inertiajs/react';
 import useProjectStore from '@/Stores/useProjectStore';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -28,6 +28,8 @@ export default function EditorSidebar({
         fontSize, setFontSize, 
         wordWrap, setWordWrap,
         isPrivate, setIsPrivate,
+        isForSale, setIsForSale,
+        price, setPrice,
         google_drive_file_id, setGoogleDriveFileId,
         setProject,
         setHtml, setCss, setJs, // Added these
@@ -349,40 +351,77 @@ export default function EditorSidebar({
                                             </div>
                                         </div>
 
-                                        <div className="pt-6 border-t border-[var(--border)] space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <label className="text-[9px] font-black text-cyan-500 uppercase tracking-[0.2em] italic">Privacy</label>
-                                                {!isPro && (
-                                                    <Link href="#" className="flex items-center gap-1 text-[8px] font-black text-amber-500 uppercase bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                                                        <Crown size={8} /> Upgrade
-                                                    </Link>
-                                                )}
-                                            </div>
-                                            
-                                            <div className={`p-4 rounded-xl border transition-all ${isPrivate ? 'bg-rose-500/5 border-rose-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <div className="flex items-center gap-3">
-                                                        {isPrivate ? <Lock size={14} className="text-rose-500" /> : <Unlock size={14} className="text-emerald-500" />}
-                                                        <span className="text-[10px] font-bold uppercase tracking-widest">{isPrivate ? 'Private' : 'Public'}</span>
+                                        {isPro && (
+                                            <>
+                                                <div className="pt-6 border-t border-[var(--border)] space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <label className="text-[9px] font-black text-cyan-500 uppercase tracking-[0.2em] italic">Privacy</label>
                                                     </div>
-                                                    <button 
-                                                        onClick={() => isPro && setIsPrivate(!isPrivate)}
-                                                        disabled={!isPro}
-                                                        className={`relative w-10 h-5 rounded-full transition-colors ${!isPro ? 'bg-slate-800 opacity-50 cursor-not-allowed' : (isPrivate ? 'bg-rose-500' : 'bg-slate-700')}`}
-                                                    >
-                                                        <motion.div 
-                                                            animate={{ x: isPrivate ? 20 : 2 }}
-                                                            className="absolute top-1 w-3 h-3 bg-white rounded-full"
-                                                        />
-                                                    </button>
+                                                    
+                                                    <div className={`p-4 rounded-xl border transition-all ${isPrivate ? 'bg-rose-500/5 border-rose-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
+                                                        <div className="flex items-center justify-between mb-3">
+                                                            <div className="flex items-center gap-3">
+                                                                {isPrivate ? <Lock size={14} className="text-rose-500" /> : <Unlock size={14} className="text-emerald-500" />}
+                                                                <span className="text-[10px] font-bold uppercase tracking-widest">{isPrivate ? 'Private' : 'Public'}</span>
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => setIsPrivate(!isPrivate)}
+                                                                className={`relative w-10 h-5 rounded-full transition-colors ${isPrivate ? 'bg-rose-500' : 'bg-slate-700'}`}
+                                                            >
+                                                                <motion.div 
+                                                                    animate={{ x: isPrivate ? 20 : 2 }}
+                                                                    className="absolute top-1 w-3 h-3 bg-white rounded-full"
+                                                                />
+                                                            </button>
+                                                        </div>
+                                                        <p className="text-[8px] leading-relaxed text-[var(--text-muted)] font-medium uppercase tracking-tighter italic">
+                                                            {isPrivate 
+                                                                ? 'Restricted: This node is hidden from the explore grid and search protocols.' 
+                                                                : 'Open: This node is visible to the entire community matrix.'}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <p className="text-[8px] leading-relaxed text-[var(--text-muted)] font-medium uppercase tracking-tighter italic">
-                                                    {isPrivate 
-                                                        ? 'Restricted: This node is hidden from the explore grid and search protocols.' 
-                                                        : 'Open: This node is visible to the entire community matrix.'}
-                                                </p>
-                                            </div>
-                                        </div>
+
+                                                <div className="pt-6 border-t border-[var(--border)] space-y-4">
+                                                    <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-500 italic">Marketplace_Monetization</h4>
+                                                    <div className={`p-4 rounded-xl border transition-all ${isForSale ? 'bg-cyan-500/5 border-cyan-500/20' : 'bg-[var(--bg-main)] border-[var(--border)]'}`}>
+                                                        <div className="flex items-center justify-between mb-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <Tag size={14} className={isForSale ? 'text-cyan-500' : 'text-[var(--text-muted)]'} />
+                                                                <span className="text-[10px] font-bold uppercase tracking-widest">List for Sale</span>
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => setIsForSale(!isForSale)}
+                                                                className={`relative w-10 h-5 rounded-full transition-colors ${isForSale ? 'bg-cyan-500' : 'bg-slate-700'}`}
+                                                            >
+                                                                <motion.div 
+                                                                    animate={{ x: isForSale ? 20 : 2 }}
+                                                                    className="absolute top-1 w-3 h-3 bg-white rounded-full"
+                                                                />
+                                                            </button>
+                                                        </div>
+                                                        
+                                                        {isForSale && (
+                                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3 pt-2">
+                                                                <div className="flex items-center justify-between">
+                                                                    <span className="text-[8px] font-black uppercase text-cyan-500 tracking-widest">Unit Price (USD)</span>
+                                                                    <CreditCard size={12} className="text-cyan-500/50" />
+                                                                </div>
+                                                                <input 
+                                                                    type="number" 
+                                                                    step="0.01"
+                                                                    value={price}
+                                                                    onChange={(e) => setPrice(e.target.value)}
+                                                                    className="w-full bg-[var(--bg-main)] border border-cyan-500/30 rounded-lg px-3 py-2 text-[10px] text-cyan-400 font-mono outline-none focus:border-cyan-500 transition-all"
+                                                                    placeholder="0.00"
+                                                                />
+                                                                <p className="text-[7px] text-[var(--text-muted)] italic uppercase font-bold tracking-tighter">Code will be blurred until purchased. Live previews remain accessible.</p>
+                                                            </motion.div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             )}

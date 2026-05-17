@@ -8,12 +8,13 @@ import {
     User, Clock, Box, Rocket, Monitor, Workflow,
     CheckCircle2, AppWindow, Command, Braces,
     Layout, Smartphone, Terminal, Eye, Sparkles, Lock,
-    Activity, Heart
+    Activity, Heart, Tag, ShoppingBag
 } from 'lucide-react';
 import axios from 'axios';
 import PublicLayout from '@/Layouts/PublicLayout';
 import useProjectStore from '@/Stores/useProjectStore';
 import MonacoWrapper from '@/Components/Editor/MonacoWrapper';
+import PaymentModal from '@/Components/Modals/PaymentModal';
 
 // Fully Functional "Neural_Sandbox" Editor for the Home Page
 const HomeEditor = () => {
@@ -164,7 +165,7 @@ const HomeEditor = () => {
     );
 };
 
-const ProjectPreview = ({ project }) => {
+const ProjectPreviewContent = ({ project }) => {
     const [compiled, setCompiled] = useState({ css: '', js: '' });
     const [isCompiling, setIsCompiling] = useState(true);
 
@@ -202,21 +203,29 @@ const ProjectPreview = ({ project }) => {
     const srcDoc = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; background: white; font-family: sans-serif; } ${compiled.css}</style>${libs}</head><body>${project.code?.html || ''}<script>${compiled.js}</script></body></html>`;
 
     return (
+        <div className="w-full h-full relative">
+            {!isCompiling ? (
+                <iframe srcDoc={srcDoc} className="w-full h-full border-none pointer-events-none scale-75 origin-top-left" style={{ width: '133.33%', height: '133.33%' }} sandbox="allow-scripts" title={`preview-${project.id}`} />
+            ) : (
+                <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center text-[10px] font-black uppercase text-slate-300">Syncing_Node...</div>
+            )}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                <div className="p-3 bg-cyan-500 text-black rounded-full shadow-xl transform scale-90 group-hover:scale-100 transition-transform"><Zap size={20} fill="currentColor" /></div>
+            </div>
+            <div className="absolute top-4 right-4">
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[8px] font-black text-white uppercase tracking-widest">Live Preview</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ProjectPreview = ({ project }) => {
+    return (
         <Link href={route('editor', { slug: project.slug })} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all hover:-translate-y-1 block shadow-xl">
             <div className="aspect-video bg-white relative overflow-hidden">
-                {!isCompiling ? (
-                    <iframe srcDoc={srcDoc} className="w-full h-full border-none pointer-events-none scale-75 origin-top-left" style={{ width: '133.33%', height: '133.33%' }} sandbox="allow-scripts" title={`preview-${project.id}`} />
-                ) : (
-                    <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center text-[10px] font-black uppercase text-slate-300">Syncing_Node...</div>
-                )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                    <div className="p-3 bg-cyan-500 text-black rounded-full shadow-xl transform scale-90 group-hover:scale-100 transition-transform"><Zap size={20} fill="currentColor" /></div>
-                </div>
-                <div className="absolute top-4 right-4">
-                    <div className="flex items-center gap-1.5 px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg">
-                        <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[8px] font-black text-white uppercase tracking-widest">Live Preview</span>
-                    </div>
-                </div>
+                <ProjectPreviewContent project={project} />
             </div>
             <div className="p-6 space-y-4 text-left">
                 <div className="flex justify-between items-start">
@@ -232,10 +241,9 @@ const ProjectPreview = ({ project }) => {
     );
 };
 
-import PaymentModal from '@/Components/Modals/PaymentModal';
-
 export default function Welcome({ auth, siteSettings }) {
     const [featured, setFeatured] = useState([]);
+    const [paidProjects, setPaidProjects] = useState([]);
     const [globalStats, setGlobalStats] = useState({ projects: 0, users: 0, public_projects: 0 });
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
@@ -253,10 +261,19 @@ export default function Welcome({ auth, siteSettings }) {
         }
 
         axios.get('/api/explore/featured').then(res => setFeatured(res.data));
+        axios.get('/api/explore/paid').then(res => setPaidProjects(res.data));
         axios.get('/api/explore/stats').then(res => setGlobalStats(res.data));
     }, []);
 
     const getSetting = (key, defaultVal) => siteSettings?.[key] || defaultVal;
+
+    const handleBuy = (project) => {
+        if (!auth.user) {
+            window.location.href = route('login');
+            return;
+        }
+        window.location.href = route('checkout.project', { project: project.slug });
+    };
 
     const handleUpgrade = async () => {
         if (!auth.user) {
@@ -337,6 +354,49 @@ export default function Welcome({ auth, siteSettings }) {
                     </div>
                 </div>
             </section>
+
+            {/* Marketplace Section */}
+            {paidProjects.length > 0 && (
+                <section className="py-32 px-6 border-b border-[var(--border)] bg-cyan-500/[0.02]">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex justify-between items-end mb-16">
+                            <div className="space-y-2 text-left">
+                                <div className="flex items-center gap-2 text-cyan-500"><Tag size={16} /><span className="text-[10px] font-black uppercase tracking-[0.3em]">Marketplace</span></div>
+                                <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Premium Modules</h2>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {paidProjects.map((project) => (
+                                <div key={project.id} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all hover:-translate-y-1 shadow-xl flex flex-col">
+                                    <div className="aspect-video bg-white relative overflow-hidden">
+                                        <ProjectPreviewContent project={project} />
+                                        <div className="absolute top-4 right-4 px-3 py-1 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg z-30">
+                                            ${project.price}
+                                        </div>
+                                    </div>
+                                    <div className="p-6 space-y-4 text-left flex-1 flex flex-col">
+                                        <div className="flex justify-between items-start">
+                                            <h3 className="text-lg font-black text-[var(--text-main)] uppercase italic tracking-tighter truncate">{project.title}</h3>
+                                        </div>
+                                        <div className="flex items-center gap-4 text-[10px] text-[var(--text-muted)] font-mono">
+                                            <span className="flex items-center gap-1 uppercase font-bold"><User size={10} className="text-cyan-500/40" /> {project.user?.name || 'Unknown'}</span>
+                                        </div>
+                                        <div className="pt-4 mt-auto">
+                                            <button 
+                                                onClick={() => handleBuy(project)}
+                                                className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg shadow-cyan-500/10 flex items-center justify-center gap-2"
+                                            >
+                                                <ShoppingBag size={14} /> Buy Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             <section id="features" className="py-48 px-6 bg-[var(--bg-main)] text-left">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">

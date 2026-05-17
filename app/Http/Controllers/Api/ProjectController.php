@@ -42,6 +42,8 @@ class ProjectController extends Controller
             'settings' => 'nullable|array',
             'is_public' => 'boolean',
             'is_private' => 'boolean',
+            'is_for_sale' => 'boolean',
+            'price' => 'nullable|numeric|min:0',
             'team_id' => 'nullable|exists:teams,id',
         ]);
 
@@ -76,29 +78,40 @@ class ProjectController extends Controller
             'settings' => $validated['settings'] ?? [],
             'is_public' => $validated['is_public'] ?? true,
             'is_private' => $isPrivate,
+            'is_for_sale' => $validated['is_for_sale'] ?? false,
+            'price' => $validated['price'] ?? 0.00,
         ]);
 
         return response()->json($project->makeVisible('code'), 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $slug)
     {
         $project = Project::with(['user', 'team'])->where('slug', $slug)->firstOrFail();
+        $user = Auth::user();
+        
+        $hasPurchased = false;
+        if ($user) {
+            $hasPurchased = $project->purchases()->where('user_id', $user->id)->exists();
+        }
+
+        $isOwner = $user && $project->user_id === $user->id;
+        $isTeamMember = $project->team_id && $user && 
+                        $user->teams()->where('teams.id', $project->team_id)->exists();
 
         // Check if project is private and user is not owner/team member
         if (!$project->is_public) {
-            $isTeamMember = $project->team_id && Auth::check() && 
-                            Auth::user()->teams()->where('teams.id', $project->team_id)->exists();
-                            
-            if (!Auth::check() || ($project->user_id !== Auth::id() && !$isTeamMember)) {
+            if (!$isOwner && !$isTeamMember) {
                 return response()->json(['message' => 'Unauthorized. Restricted Neural Core.'], 403);
             }
         }
 
-        return $project->makeVisible('code');
+        // Add purchase status to the project object
+        $project->has_purchased = $hasPurchased;
+
+        // If it's for sale and NOT purchased/owned, we still send the project but frontend will blur it.
+        // NOTE: For true security, you'd scramble the code here, but user asked for "Live Previews" to show.
+        return $project->makeVisible(['code', 'settings']);
     }
 
     /**
@@ -129,6 +142,8 @@ class ProjectController extends Controller
             'settings' => 'nullable|array',
             'is_public' => 'boolean',
             'is_private' => 'boolean',
+            'is_for_sale' => 'boolean',
+            'price' => 'nullable|numeric|min:0',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:255',
@@ -165,6 +180,12 @@ class ProjectController extends Controller
         }
         if (array_key_exists('is_private', $validated)) {
             $updateData['is_private'] = $validated['is_private'];
+        }
+        if (array_key_exists('is_for_sale', $validated)) {
+            $updateData['is_for_sale'] = $validated['is_for_sale'];
+        }
+        if (array_key_exists('price', $validated)) {
+            $updateData['price'] = $validated['price'];
         }
         if (array_key_exists('meta_title', $validated)) {
             $updateData['meta_title'] = $validated['meta_title'];

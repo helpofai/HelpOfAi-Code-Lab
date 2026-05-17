@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Copy, Code, FolderPlus, Lock, Globe, ArrowLeft, GitCompare, ArrowRight } from 'lucide-react';
+import { X, Share2, Copy, Code, FolderPlus, Lock, Globe, ArrowLeft, GitCompare, ArrowRight, Tag, CreditCard } from 'lucide-react';
 import { DiffEditor } from '@monaco-editor/react';
 import useProjectStore from '@/Stores/useProjectStore';
 
@@ -15,7 +15,7 @@ export default function EditorModals({
 }) {
     const [newCollectionTitle, setNewCollectionTitle] = useState('');
     const [diffType, setDiffType] = useState('html');
-    const { isPrivate, setIsPrivate, html, css, js } = useProjectStore();
+    const { isPrivate, setIsPrivate, isForSale, setIsForSale, price, setPrice, html, css, js } = useProjectStore();
 
     const handleCreateCollection = () => {
         if (!newCollectionTitle) return;
@@ -111,23 +111,63 @@ export default function EditorModals({
                                     </div>
 
                                     {project && (
-                                        <div className="flex items-center justify-between p-4 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border)]">
-                                            <div className="flex items-center gap-3">
-                                                {isPrivate ? <Lock size={16} className="text-rose-500" /> : <Globe size={16} className="text-emerald-500" />}
-                                                <div>
-                                                    <div className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">
-                                                        {isPrivate ? 'Private Access' : 'Public Access'}
-                                                    </div>
-                                                    <div className="text-[9px] text-[var(--text-muted)]">
-                                                        {isPrivate ? 'Only you can view this node.' : 'Visible to the entire network.'}
+                                        <>
+                                            <div className="flex items-center justify-between p-4 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border)]">
+                                                <div className="flex items-center gap-3">
+                                                    {isPrivate ? <Lock size={16} className="text-rose-500" /> : <Globe size={16} className="text-emerald-500" />}
+                                                    <div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">
+                                                            {isPrivate ? 'Private Access' : 'Public Access'}
+                                                        </div>
+                                                        <div className="text-[9px] text-[var(--text-muted)]">
+                                                            {isPrivate ? 'Only you can view this node.' : 'Visible to the entire network.'}
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <label className="relative inline-flex items-center cursor-pointer">
+                                                    <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} className="sr-only peer" />
+                                                    <div className="w-9 h-5 bg-[var(--bg-main)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+                                                </label>
                                             </div>
-                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} className="sr-only peer" />
-                                                <div className="w-9 h-5 bg-[var(--bg-main)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
-                                            </label>
-                                        </div>
+
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between p-4 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border)]">
+                                                    <div className="flex items-center gap-3">
+                                                        <Tag size={16} className={isForSale ? 'text-cyan-500' : 'text-[var(--text-muted)]'} />
+                                                        <div>
+                                                            <div className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">
+                                                                Marketplace Listing
+                                                            </div>
+                                                            <div className="text-[9px] text-[var(--text-muted)]">
+                                                                List this project for sale on the marketplace.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" checked={isForSale} onChange={(e) => setIsForSale(e.target.checked)} className="sr-only peer" />
+                                                        <div className="w-9 h-5 bg-[var(--bg-main)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500"></div>
+                                                    </label>
+                                                </div>
+
+                                                {isForSale && (
+                                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-xl space-y-3">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-[9px] font-black uppercase tracking-widest text-cyan-500">Set Price (USD)</span>
+                                                            <CreditCard size={14} className="text-cyan-500/50" />
+                                                        </div>
+                                                        <input 
+                                                            type="number" 
+                                                            step="0.01"
+                                                            value={price}
+                                                            onChange={(e) => setPrice(e.target.value)}
+                                                            className="w-full bg-[var(--bg-main)] border border-cyan-500/30 rounded-lg px-4 py-2 text-sm text-cyan-400 font-mono outline-none focus:border-cyan-500 transition-all"
+                                                            placeholder="0.00"
+                                                        />
+                                                        <p className="text-[8px] text-[var(--text-muted)] italic">Code will be blurred until purchased. Previews remain public.</p>
+                                                    </motion.div>
+                                                )}
+                                            </div>
+                                        </>
                                     )}
                                 </div>
 

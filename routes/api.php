@@ -12,6 +12,7 @@ Route::get('/user', function (Request $request) {
 
 // Public stats & featured projects for Welcome page
 Route::get('explore/featured', [\App\Http\Controllers\Api\ExploreController::class, 'featured']);
+Route::get('explore/paid', [\App\Http\Controllers\Api\ExploreController::class, 'paid']);
 Route::get('explore/stats', [\App\Http\Controllers\Api\ExploreController::class, 'stats']);
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
@@ -48,6 +49,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     
     Route::apiResource('collections', CollectionController::class);
     Route::post('collections/{collection}/add', [CollectionController::class, 'addProject']);
+
+    // Project Purchases
+    Route::post('/purchase/checkout', [\App\Http\Controllers\Api\PurchaseController::class, 'checkout']);
+    Route::post('/purchase/verify', [\App\Http\Controllers\Api\PurchaseController::class, 'verify']);
+    Route::get('/purchases/my-purchases', [\App\Http\Controllers\Api\PurchaseController::class, 'myPurchases']);
 
     Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
     Route::put('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);

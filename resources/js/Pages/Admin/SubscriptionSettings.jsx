@@ -153,7 +153,7 @@ export default function SubscriptionSettings({ auth, settings }) {
                                                     
                                                     {/* Top Tabs System */}
                                                     <div className="flex bg-[var(--bg-main)] p-1 rounded-xl border border-[var(--border)] overflow-x-auto no-scrollbar">
-                                                        {['stripe', 'razorpay', 'paytm', 'phonepe'].map((gw) => (
+                                                        {['test', 'stripe', 'razorpay', 'paytm', 'phonepe'].map((gw) => (
                                                             <button 
                                                                 key={gw}
                                                                 type="button"
@@ -173,6 +173,23 @@ export default function SubscriptionSettings({ auth, settings }) {
                                                         label={`${activeGateway.toUpperCase()}_Protocol_Status`}
                                                         description={`Activate or hibernate the ${activeGateway} payment bridge.`}
                                                     />
+
+                                                    {activeGateway === 'test' && (
+                                                        <div className="space-y-6 animate-in fade-in duration-300">
+                                                            <div className="p-8 bg-amber-500/5 border border-amber-500/20 rounded-3xl space-y-4">
+                                                                <div className="flex items-center gap-3 border-b border-amber-500/20 pb-4">
+                                                                    <Activity className="text-amber-500" size={18} />
+                                                                    <h4 className="text-xs font-black text-white uppercase tracking-[0.2em]">Neural_Test_Bridge</h4>
+                                                                </div>
+                                                                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest leading-relaxed">
+                                                                    This bridge allows for instant purchase verification without external ciphers. Use this for testing the "Neural Lock" and "Marketplace" flows in development.
+                                                                </p>
+                                                                <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 rounded-lg text-amber-500 text-[9px] font-black uppercase tracking-widest">
+                                                                    <AlertTriangle size={14} /> Warning: Do not enable in production environments.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
 
                                                     {activeGateway === 'stripe' && (
                                                         <div className="space-y-6 animate-in fade-in duration-300">

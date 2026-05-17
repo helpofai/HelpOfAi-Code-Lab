@@ -113,6 +113,11 @@ class User extends Authenticatable
         return $this->hasMany(Post::class);
     }
 
+    public function purchases(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
     /**
      * Get the teams the user belongs to.
      */

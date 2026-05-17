@@ -30,6 +30,7 @@ class SubscriptionController extends Controller
             'allow_guest_preview' => '1',
             
             // Gateway Status
+            'test_enabled' => '0',
             'stripe_enabled' => '0',
             'razorpay_enabled' => '0',
             'paytm_enabled' => '0',

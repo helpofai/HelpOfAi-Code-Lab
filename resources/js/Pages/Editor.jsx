@@ -15,6 +15,7 @@ import ConsolePanel from '@/Components/Editor/ConsolePanel';
 export default function Editor({ auth, project: initialProject }) {
     const { 
         html, css, js, setProject, title, isPrivate, 
+        isForSale, price,
         externalLibraries, setGoogleDriveFileId, preprocessors 
     } = useProjectStore();
     const [previewContent, setPreviewContent] = useState('');
@@ -25,17 +26,45 @@ export default function Editor({ auth, project: initialProject }) {
     const [collections, setCollections] = useState([]);
     const [projectData, setProjectData] = useState(initialProject);
     const [diffRevision, setDiffRevision] = useState(null);
+    const [hasPurchased, setHasPurchased] = useState(initialProject?.has_purchased || false);
 
     // Initialize Store
     useEffect(() => {
         if (initialProject) {
             setProject(initialProject);
             setProjectData(initialProject);
+            setHasPurchased(initialProject.has_purchased || false);
             if (initialProject.code?.google_drive_file_id) {
                 setGoogleDriveFileId(initialProject.code.google_drive_file_id);
             }
         }
     }, [initialProject, setProject, setGoogleDriveFileId]);
+
+    // Handle Purchase Verification from URL
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const purchased = urlParams.get('purchased');
+        const sessionId = urlParams.get('session_id');
+
+        if (purchased === 'true' && sessionId && projectData?.id) {
+            const verifyPurchase = async () => {
+                try {
+                    await axios.post('/api/purchase/verify', {
+                        gateway: 'stripe',
+                        project_id: projectData.id,
+                        session_id: sessionId
+                    });
+                    setHasPurchased(true);
+                    alert('Neural Unlock Successful. Code Access Granted.');
+                    // Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch (e) {
+                    console.error('Purchase verification failed.');
+                }
+            };
+            verifyPurchase();
+        }
+    }, [projectData]);
 
     // Custom Hook for Editor Actions
     const { 
@@ -138,15 +167,17 @@ export default function Editor({ auth, project: initialProject }) {
     };
 
     useEffect(() => {
-        // Load Compilers on Mount
+        // Load Compilers on Mount with Error Handling
         if (!window.Babel) {
             const script = document.createElement('script');
             script.src = "https://unpkg.com/@babel/standalone/babel.min.js";
+            script.onerror = () => setLogs(prev => [...prev, { type: 'ERR', content: 'Uplink_Failed: Babel Compiler Offline.', id: Date.now() }]);
             document.head.appendChild(script);
         }
         if (!window.Sass) {
             const script = document.createElement('script');
             script.src = "https://cdn.jsdelivr.net/npm/sass.js@0.11.1/dist/sass.sync.js";
+            script.onerror = () => setLogs(prev => [...prev, { type: 'ERR', content: 'Uplink_Failed: Sass Compiler Offline.', id: Date.now() }]);
             document.head.appendChild(script);
         }
 
@@ -224,7 +255,7 @@ export default function Editor({ auth, project: initialProject }) {
             <div className="flex-1 min-h-0 flex flex-col">
                 <PanelGroup direction="vertical" className="flex-1 h-full">
                     <Panel defaultSize={showConsole ? 70 : 100} minSize={20}>
-                        <EditorPanels previewContent={previewContent} />
+                        <EditorPanels previewContent={previewContent} hasPurchased={hasPurchased} isOwner={isOwner} />
                     </Panel>
                     
                     {showConsole && (

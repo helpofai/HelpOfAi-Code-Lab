@@ -95,6 +95,24 @@ class ExploreController extends Controller
     }
 
     /**
+     * Get paid projects for marketplace section.
+     */
+    public function paid()
+    {
+        $projects = Project::where('is_for_sale', true)
+            ->with('user:id,name')
+            ->orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get();
+
+        foreach ($projects as $project) {
+            $project->makeVisible(['code', 'settings']);
+        }
+
+        return $projects;
+    }
+
+    /**
      * Get global system stats for welcome page.
      */
     public function stats()

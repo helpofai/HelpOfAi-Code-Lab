@@ -4,6 +4,26 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ---
 
+## [1.9.0] - NEURAL_MARKETPLACE_HARDENED - 2026-05-16
+
+### 💎 Added: Neural_Marketplace & Checkout Protocol
+- **Internal Checkout Lifecycle:** Replaced direct gateway redirects with a unified, high-fidelity `Checkout.jsx` terminal.
+- **Dynamic Gateway Matrix:** The checkout system now autonomously detects and presents only the "Active" payment bridges (Stripe, Razorpay, etc.) configured in the Admin Command Center.
+- **Neural_Test_Bridge:** Injected a specialized mock gateway for development environments, allowing end-to-end verification of the purchase-to-unlock lifecycle without real currency.
+- **Unified Handshake Status:** New `PaymentStatus.jsx` terminal for real-time success/failure feedback and transaction telemetry.
+- **Neural Lock V2:** Hardened the source code obfuscation protocol. Paid projects now redirect directly to the Internal Checkout for instant unlocking.
+
+### 🛡️ Hardened: Admin Billing Infrastructure
+- **Dynamic Gateway Protocols:** Refactored the Subscription Matrix to support "One-Click" activation/deactivation of regional payment bridges (Stripe, Razorpay, Paytm, PhonePe).
+- **Protocol Key Sync:** Synchronized the backend kernel to use unified database keys for all gateway statuses, preventing cache desync issues.
+- **Test Matrix Intelligence:** Added a dedicated "TEST" protocol tab in the Admin UI for safe sandbox management.
+
+### 🔧 Fixed: Execution & Handshake Integrity
+- **Stale Route Neutralization:** Implemented `php artisan optimize:clear` during updates to ensure new payment routes are instantly registered.
+- **State Integrity:** Resolved prop-drilling errors in the `EditorPanels` where project slugs were not being correctly passed to the Neural Lock overlays.
+
+---
+
 ## [1.8.0] - ADVANCED_INSTALLER_REFINED - 2026-05-15
 
 ### 🛡️ Added: Enterprise Deployment Suite V2
@@ -124,4 +144,4 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ### Node Status: **STABLE**
 ### Core Clearance: **LEVEL_0**
-### Build Signature: **HOA-PRO-1.8.0-FINAL**
+### Build Signature: **HOA-PRO-1.9.0-FINAL**

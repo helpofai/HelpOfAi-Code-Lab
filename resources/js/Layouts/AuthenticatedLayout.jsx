@@ -20,7 +20,9 @@ import {
     Cloud,
     Mail,
     Settings,
-    Info
+    Info,
+    ShoppingBag,
+    Tag
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -56,6 +58,8 @@ export default function AuthenticatedLayout({ header, children }) {
         { name: 'User Matrix', icon: Users, href: route('admin.users'), active: route().current('admin.users') },
         { name: 'Subscription Control', icon: Crown, href: route('admin.subscriptions'), active: route().current('admin.subscriptions') },
         { name: 'Blog system', icon: FileText, href: route('admin.blog.index'), active: route().current('admin.blog.index') },
+        { name: 'Sales Matrix', icon: ShoppingBag, href: route('admin.sales.index'), active: route().current('admin.sales.index') },
+        { name: 'Paid Projects', icon: Tag, href: route('admin.sales.paid-projects'), active: route().current('admin.sales.paid-projects') },
         { name: 'Mail System', icon: Mail, href: route('admin.email.index'), active: route().current('admin.email.index') },
         { name: 'SMTP Config', icon: Settings, href: route('admin.email.settings'), active: route().current('admin.email.settings') },
         { name: 'Support Queue', icon: LifeBuoy, href: route('admin.support'), active: route().current('admin.support') },

@@ -39,7 +39,7 @@ export default function MonacoWrapper({ language, value, onChange, fontSize, wor
     useEffect(() => {
         if (!monaco) return;
 
-        // 1. Load Emmet via CDN
+        // 1. Load Emmet via CDN with Error Handling
         if (!window.emmetMonaco) {
             const script = document.createElement('script');
             script.src = "https://unpkg.com/emmet-monaco-es/dist/emmet-monaco.min.js";
@@ -48,6 +48,9 @@ export default function MonacoWrapper({ language, value, onChange, fontSize, wor
                     window.emmetMonaco.emmetHTML(monaco);
                     window.emmetMonaco.emmetCSS(monaco);
                 }
+            };
+            script.onerror = () => {
+                console.warn("Uplink_Failed: Emmet Module Offline.");
             };
             document.head.appendChild(script);
         } else {

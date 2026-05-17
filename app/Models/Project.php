@@ -20,6 +20,8 @@ class Project extends Model
         'code',
         'settings',
         'is_public',
+        'is_for_sale',
+        'price',
         'meta_title',
         'meta_description',
         'meta_keywords',
@@ -31,6 +33,8 @@ class Project extends Model
         'code' => 'array',
         'settings' => 'array',
         'is_public' => 'boolean',
+        'is_for_sale' => 'boolean',
+        'price' => 'decimal:2',
         'tags' => 'array',
     ];
 
@@ -65,5 +69,10 @@ class Project extends Model
     public function revisions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ProjectRevision::class);
+    }
+
+    public function purchases(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Purchase::class);
     }
 }

@@ -6,7 +6,7 @@ import useProjectStore from '@/Stores/useProjectStore';
 export const useEditorActions = (projectData, setProjectData, setLogs) => {
     const { auth } = usePage().props;
     const { 
-        html, css, js, title, isPrivate, externalLibraries, 
+        html, css, js, title, isPrivate, isForSale, price, externalLibraries, 
         setHtml, setCss, setJs, google_drive_file_id, setGoogleDriveFileId,
         theme, preprocessors
     } = useProjectStore();
@@ -58,14 +58,16 @@ export const useEditorActions = (projectData, setProjectData, setLogs) => {
                 code: { html, css, js }, 
                 settings: { externalLibraries, theme, preprocessors }, 
                 is_public: !isPrivate, 
-                is_private: isPrivate 
+                is_private: isPrivate,
+                is_for_sale: false, // Fork is always free by default
+                price: 0
             };
             const res = await axios.post('/api/projects', data);
             window.location.href = `/editor/${res.data.slug}`;
         } catch(e) {
             setLogs(prev => [...prev, { type: 'ERR', content: 'Fork operation failed.', id: Date.now() }]);
         }
-    }, [projectData, title, html, css, js, externalLibraries, isPrivate, setLogs]);
+    }, [projectData, title, html, css, js, externalLibraries, isPrivate, theme, preprocessors, setLogs]);
 
     const handleSave = useCallback(async () => {
         if (!auth.user) {
@@ -88,7 +90,9 @@ export const useEditorActions = (projectData, setProjectData, setLogs) => {
                 code: { html, css, js }, 
                 settings: { externalLibraries, theme, preprocessors }, 
                 is_public: !isPrivate, 
-                is_private: isPrivate 
+                is_private: isPrivate,
+                is_for_sale: isForSale,
+                price: price
             };
             const endpoint = projectData?.id ? `/api/projects/${projectData.id}` : '/api/projects';
             const method = projectData?.id ? 'put' : 'post';
@@ -103,7 +107,7 @@ export const useEditorActions = (projectData, setProjectData, setLogs) => {
         } finally {
             setIsSaving(false);
         }
-    }, [auth.user, projectData, title, html, css, js, externalLibraries, isPrivate, handleFork, setProjectData, setLogs]);
+    }, [auth.user, projectData, title, html, css, js, externalLibraries, isPrivate, isForSale, price, theme, preprocessors, handleFork, setProjectData, setLogs]);
 
     const handleCloudSave = useCallback(async () => {
         if (!auth.user?.google_drive_token) return alert('Cloud Link Inactive. Connect via Cloud Sync page.');
