@@ -67,7 +67,66 @@ class UpdateController extends Controller
             'queue_connection' => config('queue.default'),
             'server_time' => now()->toDateTimeString(),
             'timezone' => config('app.timezone'),
+            'node_status' => $this->resolveBinaryPath('node', 'NODE_BINARY') ? 'Detected' : 'Not Found',
+            'npm_status' => $this->resolveBinaryPath('npm', 'NPM_BINARY') ? 'Detected' : 'Not Found',
         ];
+    }
+
+    private function updateEnvKey($key, $value)
+    {
+        try {
+            $envPath = base_path('.env');
+            if (!File::exists($envPath)) return false;
+
+            $content = File::get($envPath);
+            $pattern = "/^{$key}=.*$/m";
+            $newLine = "{$key}=\"{$value}\"";
+
+            if (preg_match($pattern, $content)) {
+                $content = preg_replace($pattern, $newLine, $content);
+            } else {
+                $content = rtrim($content) . "\n" . $newLine . "\n";
+            }
+
+            File::put($envPath, $content);
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Failed to update .env key {$key}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function resolveBinaryPath($name, $envKey, $autoSave = false)
+    {
+        // 1. Check .env override
+        $envValue = env($envKey);
+        if ($envValue && File::exists($envValue)) {
+            return $envValue;
+        }
+
+        // 2. Check global path
+        $check = Process::run("{$name} -v");
+        if ($check->successful()) {
+            return $name;
+        }
+
+        // 3. Check common shared hosting paths
+        $commonPaths = [
+            "/usr/local/bin/{$name}",
+            "/usr/bin/{$name}",
+            "/opt/node/bin/{$name}",
+            "/usr/local/nodejs/bin/{$name}",
+            "/opt/alt/node" . config('app.node_version', '20') . "/usr/bin/{$name}", // cPanel style
+        ];
+
+        foreach ($commonPaths as $path) {
+            if (File::exists($path)) {
+                if ($autoSave) $this->updateEnvKey($envKey, $path);
+                return $path;
+            }
+        }
+
+        return null;
     }
 
     public function check(Request $request)
@@ -397,7 +456,8 @@ class UpdateController extends Controller
                 
                 if (File::exists(base_path('composer.phar'))) {
                     $composerBinary = "{$php} " . base_path('composer.phar');
-                    $this->sendUpdateLog("Local 'composer.phar' detected. Using local binary.", 20, 'success');
+                    $this->updateEnvKey('COMPOSER_BINARY', $composerBinary);
+                    $this->sendUpdateLog("Local 'composer.phar' detected. Path persisted to .env.", 20, 'success');
                 } else {
                     $this->sendUpdateLog("Local binary missing. Attempting to download 'composer.phar'...", 20);
                     try {
@@ -405,8 +465,9 @@ class UpdateController extends Controller
                         if ($response->successful()) {
                             File::put(base_path('composer.phar'), $response->body());
                             @chmod(base_path('composer.phar'), 0755);
-                            $this->sendUpdateLog("Local composer binary downloaded successfully.", 25, 'success');
                             $composerBinary = "{$php} " . base_path('composer.phar');
+                            $this->updateEnvKey('COMPOSER_BINARY', $composerBinary);
+                            $this->sendUpdateLog("Local composer binary downloaded and path persisted.", 25, 'success');
                         } else {
                             throw new \Exception("Server returned HTTP " . $response->status());
                         }
@@ -456,19 +517,23 @@ class UpdateController extends Controller
                 return;
             }
 
-            // Check npm
-            $npmCheck = Process::run('npm -v');
-            if (!$npmCheck->successful()) {
+            // Resolve NPM Binary
+            $npmBinary = $this->resolveBinaryPath('npm', 'NPM_BINARY', true);
+            
+            if (!$npmBinary) {
                 $this->sendUpdateLog("Error: npm is not available on this server.", 100, 'error');
+                $this->sendUpdateLog("Action: Set 'NPM_BINARY' in your .env or upload pre-built 'public/build' folder.", 100, 'error');
                 return;
             }
 
+            $this->sendUpdateLog("Using NPM binary: {$npmBinary}", 15, 'success');
+
             $this->sendUpdateLog("Installing Node modules...", 30);
-            $npmInstall = Process::path(base_path())->run('npm install');
+            $npmInstall = Process::path(base_path())->timeout(600)->run("{$npmBinary} install");
             
             if ($npmInstall->successful()) {
                 $this->sendUpdateLog("Modules installed. Compiling assets (Vite)...", 60);
-                $npmBuild = Process::path(base_path())->run('npm run build');
+                $npmBuild = Process::path(base_path())->timeout(600)->run("{$npmBinary} run build");
                 
                 if ($npmBuild->successful()) {
                     $this->sendUpdateLog($npmBuild->output());

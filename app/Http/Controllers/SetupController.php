@@ -57,7 +57,56 @@ class SetupController extends Controller
             'GD' => extension_loaded('gd'),
             'Storage Writable' => is_writable(storage_path()),
             'Bootstrap Writable' => is_writable(base_path('bootstrap/cache')),
+            'Node.js' => $this->resolveBinaryPath('node', 'NODE_BINARY', true) !== null,
+            'NPM' => $this->resolveBinaryPath('npm', 'NPM_BINARY', true) !== null,
         ];
+    }
+
+    private function updateEnvKey($key, $value)
+    {
+        try {
+            $envPath = base_path('.env');
+            if (!File::exists($envPath)) return false;
+
+            $content = File::get($envPath);
+            $pattern = "/^{$key}=.*$/m";
+            $newLine = "{$key}=\"{$value}\"";
+
+            if (preg_match($pattern, $content)) {
+                $content = preg_replace($pattern, $newLine, $content);
+            } else {
+                $content = rtrim($content) . "\n" . $newLine . "\n";
+            }
+
+            File::put($envPath, $content);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    private function resolveBinaryPath($name, $envKey, $autoSave = false)
+    {
+        $envValue = env($envKey);
+        if ($envValue && File::exists($envValue)) return $envValue;
+
+        $check = \Illuminate\Support\Facades\Process::run("{$name} -v");
+        if ($check->successful()) return $name;
+
+        $commonPaths = [
+            "/usr/local/bin/{$name}", "/usr/bin/{$name}", "/opt/node/bin/{$name}",
+            "/usr/local/nodejs/bin/{$name}",
+            "/opt/alt/node" . config('app.node_version', '20') . "/usr/bin/{$name}",
+        ];
+
+        foreach ($commonPaths as $path) {
+            if (File::exists($path)) {
+                if ($autoSave) $this->updateEnvKey($envKey, $path);
+                return $path;
+            }
+        }
+
+        return null;
     }
 
     public function saveEnv(Request $request)
@@ -170,7 +219,8 @@ class SetupController extends Controller
         $allowedCommands = [
             'key:generate', 'migrate', 'migrate:fresh', 'db:seed', 
             'optimize:clear', 'storage:link', 'config:cache', 
-            'route:cache', 'view:cache', 'composer:install'
+            'route:cache', 'view:cache', 'composer:install',
+            'npm:install', 'npm:build'
         ];
 
         if (!in_array($command, $allowedCommands)) {
@@ -186,6 +236,11 @@ class SetupController extends Controller
 
                 if ($command === 'composer:install') {
                     $this->runComposerInstall($php);
+                    return;
+                }
+
+                if (str_starts_with($command, 'npm:')) {
+                    $this->runNpmCommand(str_replace('npm:', '', $command));
                     return;
                 }
 
@@ -228,7 +283,8 @@ class SetupController extends Controller
             
             if (File::exists(base_path('composer.phar'))) {
                 $composerBinary = "{$php} " . base_path('composer.phar');
-                $this->sendEvent("Local 'composer.phar' detected.", 'success');
+                $this->updateEnvKey('COMPOSER_BINARY', $composerBinary);
+                $this->sendEvent("Local 'composer.phar' detected. Path persisted.", 'success');
             } else {
                 $this->sendEvent("Downloading 'composer.phar' from getcomposer.org...", 'info');
                 try {
@@ -236,8 +292,9 @@ class SetupController extends Controller
                     if ($response->successful()) {
                         File::put(base_path('composer.phar'), $response->body());
                         @chmod(base_path('composer.phar'), 0755);
-                        $this->sendEvent("Composer binary downloaded.", 'success');
                         $composerBinary = "{$php} " . base_path('composer.phar');
+                        $this->updateEnvKey('COMPOSER_BINARY', $composerBinary);
+                        $this->sendEvent("Composer binary downloaded and path persisted.", 'success');
                     } else {
                         throw new \Exception("Server error during download.");
                     }
@@ -257,6 +314,31 @@ class SetupController extends Controller
             });
         
         $this->sendEvent('Composer install finished.', 'done');
+    }
+
+    private function runNpmCommand($action)
+    {
+        $this->sendEvent("Initializing Node.js Asset Compiler ({$action})...", 'info');
+        
+        $npmBinary = $this->resolveBinaryPath('npm', 'NPM_BINARY', true);
+        
+        if (!$npmBinary) {
+            $this->sendEvent("Error: NPM is not available on this server.", 'error');
+            $this->sendEvent("Action: Set 'NPM_BINARY' in your .env or upload 'public/build' manually.", 'error');
+            return;
+        }
+
+        $this->sendEvent("Using NPM binary: {$npmBinary}", 'success');
+        
+        $command = "{$npmBinary} " . ($action === 'install' ? 'install' : 'run build');
+        
+        \Illuminate\Support\Facades\Process::path(base_path())
+            ->timeout(900)
+            ->run($command, function ($type, $output) {
+                $this->sendEvent($output, 'success');
+            });
+            
+        $this->sendEvent("NPM {$action} finished.", 'done');
     }
 
     private function sendEvent($message, $status = 'info')
