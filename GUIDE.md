@@ -1,5 +1,5 @@
 # 🧠 HOACodeLab // Core Protocol Guide
-**Version:** 1.4.4  
+**Version:** 1.10.0  
 **Classification:** Technical Architecture & Operational Manual
 
 ---
@@ -12,6 +12,7 @@ HOACodeLab is an industrial-grade cloud prototyping substrate. It operates on a 
 - **Neural Interface:** React 19 + Inertia.js
 - **Synthesis Engine:** Monaco Editor (VS Code Engine)
 - **Live Preview:** Sandboxed Iframe Array
+- **Marketplace:** Internal Checkout Lifecycle
 - **State Management:** Zustand (Cross-Component Sync)
 
 ---
@@ -22,11 +23,35 @@ All user-generated code is executed **strictly within the browser**. The server 
 ### **The Sandbox Protocol**
 - **Iframe Isolation:** User code is injected via `srcdoc`.
 - **Sandbox Attributes:** `allow-scripts` is active, but `allow-same-origin` and `allow-top-navigation` are permanently disabled.
-- **CSRF Protection:** All cloud-sync operations are protected by state-verified tokens.
+- **Neural Lock:** Paid modules utilize a blur/grayscale overlay on the source code until ownership is verified via the Purchase Ledger.
 
 ---
 
-## ☁️ 03. Cloud Synchronization (Google Drive)
+## 💎 03. Neural Marketplace
+The Marketplace allows for the monetization of high-end code modules.
+
+### **Marketplace Logic**
+1. **Premium Flag:** Projects can be toggled to `is_for_sale` via the Editor Sidebar.
+2. **Checkout Terminal:** Users are routed through an internal `Checkout.jsx` terminal for gateway selection.
+3. **Instant Unlock:** Upon successful handshake, the project is assigned to the user's account and the Neural Lock is neutralized.
+4. **Resale Prevention:** Forking a purchased project resets its status to "Free" for the new owner.
+
+---
+
+## 🛠️ 04. Infrastructure Resilience Protocol
+Designed for stability across restricted hosting environments (Shared Hosting, cPanel).
+
+### **Autonomous Discovery**
+- **Binary Locate:** The system scans common paths (`/usr/local/bin`, `/opt/node/bin`) to find Node and NPM.
+- **Composer Fallback:** If global `composer` is missing, the installer autonomously downloads `composer.phar` from getcomposer.org.
+- **Path Persistence:** Discovered paths are injected into the `.env` matrix for zero-latency execution.
+
+### **Manual_Override**
+Admins can manually register binary paths via the `/setup` terminal if autonomous discovery is blocked by server permissions.
+
+---
+
+## ☁️ 05. Cloud Synchronization (Google Drive)
 The platform features a decentralized storage architecture, allowing users to bridge their personal Google Cloud infrastructure.
 
 ### **Setup Protocol**

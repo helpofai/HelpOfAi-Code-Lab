@@ -39,7 +39,22 @@ Ensure cookies are only sent over HTTPS.
 SESSION_SECURE_COOKIE=true
 ```
 
-## 2. Web Server Configuration (Nginx)
+## 2. Infrastructure Resilience (Binary Paths)
+
+If you are on shared hosting or a restricted server where `node`, `npm`, or `composer` are not in the global system path, you must specify their absolute paths in your `.env`.
+
+### Common Hosting Path Examples
+```ini
+# For cPanel / Node.js Selector
+NODE_BINARY=/opt/alt/node20/usr/bin/node
+NPM_BINARY=/opt/alt/node20/usr/bin/npm
+
+# For local Composer
+COMPOSER_BINARY="php /home/user/public_html/composer.phar"
+```
+*Note: You can use the **Manual_Override** terminal at `/setup` to save these paths directly.*
+
+## 3. Web Server Configuration (Nginx)
 
 Below is a robust Nginx configuration that handles the main domain and wildcards.
 

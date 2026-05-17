@@ -12,6 +12,7 @@
   [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
   [![Inertia](https://img.shields.io/badge/Inertia.js-2.0-9553E9?style=for-the-badge&logo=inertia&logoColor=white)](https://inertiajs.com)
+  [![Version](https://img.shields.io/badge/Version-1.10.0-purple?style=for-the-badge)](https://github.com/helpofai/HelpOfAi-Code-Lab)
   
   <br />
 
@@ -41,6 +42,7 @@
 ### 🛠️ Project Management
 *   **Create & Fork:** Start from scratch or fork existing projects to build upon others' work.
 *   **Collections:** Organize your projects into logical collections/folders.
+*   **Neural Marketplace:** Buy and sell premium code modules. Features a high-fidelity **Internal Checkout Terminal** and the **Neural Lock** source-code obfuscation protocol.
 *   **External Libraries:** Easily inject CDN libraries (React, Vue, Tailwind, GSAP, etc.) directly into your project.
 *   **Export:** Download your project as a single `.html` file.
 *   **Sharing:** Generate public links or embed codes to share your work with the world.
@@ -143,14 +145,18 @@ This is the easiest way to deploy HOACodeLab on shared hosting (cPanel, Hostinge
 
 **Step 5: Run the Installer**
 1.  Visit `https://your-domain.com/setup` in your browser.
-2.  The **Live Terminal UI** will appear. Click the buttons in order (01 to 06):
+2.  The **Live Terminal UI** will appear. Click the buttons in order (00 to 08):
+    *   **00 Composer:** Autonomously installs PHP dependencies (handles download & path discovery automatically).
     *   **01 Security:** Generates your unique `APP_KEY`.
-    *   **02 Database:** Sets up your tables automatically.
+    *   **02 Database:** Sets up your tables automatically (Idempotent: safe to retry).
     *   **03 Storage:** Enables image and file uploads.
     *   **04 Optimization:** Clears temporary system data.
     *   **05 Seed:** Loads default settings and admin placeholders.
-    *   **06 Optimize:** Tuned the app for maximum speed.
-3.  Once finished, click **Launch App**.
+    *   **06 NPM Install:** Installs Node modules (uses auto-discovery for hosting-specific Node paths).
+    *   **07 NPM Build:** Compiles the frontend matrix (Vite).
+    *   **08 Prod Optimize:** Tuned the app for maximum speed.
+3.  **Restricted Hosting?** Use the **Manual_Override** toggle in Phase 03 to manually set binary paths if auto-discovery fails.
+4.  Once finished, click **Launch App**.
 
 **⚠️ Security:** After a successful setup, delete `app/Http/Controllers/SetupController.php` for security.
 
@@ -186,14 +192,12 @@ The `.env` file handles core configurations. Key custom variables:
 ```ini
 APP_NAME=HOACodeLab
 APP_URL=https://your-domain.com
-APP_VERSION=1.7.0
+APP_VERSION=1.10.0
 
-# Database
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_DATABASE=your_db_name
-DB_USERNAME=your_db_user
-DB_PASSWORD=your_db_password
+# Path Overrides (For Resilience Protocol)
+NODE_BINARY=/path/to/node
+NPM_BINARY=/path/to/npm
+COMPOSER_BINARY="php /path/to/composer.phar"
 ```
 
 ---
