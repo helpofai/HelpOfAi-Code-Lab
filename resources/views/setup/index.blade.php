@@ -119,8 +119,43 @@
 
                     <!-- STEP 3: ARTISAN PROTOCOLS -->
                     <div id="step-3" class="step-content hidden space-y-8">
-                        <h3 class="text-2xl font-black text-white tracking-tighter italic uppercase">Execution_Matrix</h3>
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-2xl font-black text-white tracking-tighter italic uppercase">Execution_Matrix</h3>
+                            <button onclick="toggleManualOverride()" class="text-[9px] font-black text-slate-500 hover:text-purple-400 uppercase tracking-widest border border-white/5 px-3 py-1 rounded-full transition-all">Manual_Override</button>
+                        </div>
                         
+                        <!-- Manual Override Panel -->
+                        <div id="manual-override" class="hidden glass rounded-2xl p-6 space-y-6 border-purple-500/20">
+                            <div class="space-y-1">
+                                <h4 class="text-[10px] font-black text-purple-400 uppercase tracking-widest">Server_Path_Diagnostics</h4>
+                                <p class="text-[10px] text-slate-500">Upload binaries to: <span class="text-white mono bg-white/5 px-2 py-0.5 rounded">{{ $basePath }}</span></p>
+                                <p class="text-[9px] text-slate-600 italic">If auto-download fails, manually upload 'composer.phar' and enter the path below.</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[9px] font-bold uppercase text-slate-500 tracking-wider">Node Path</label>
+                                    <input type="text" id="manual_node" value="{{ $currentEnv['node_binary'] }}" placeholder="/usr/bin/node" class="w-full px-3 py-2 rounded-lg text-[10px] font-mono">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[9px] font-bold uppercase text-slate-500 tracking-wider">NPM Path</label>
+                                    <input type="text" id="manual_npm" value="{{ $currentEnv['npm_binary'] }}" placeholder="/usr/bin/npm" class="w-full px-3 py-2 rounded-lg text-[10px] font-mono">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[9px] font-bold uppercase text-slate-500 tracking-wider">Composer Path</label>
+                                    <input type="text" id="manual_composer" value="{{ $currentEnv['composer_binary'] }}" placeholder="php composer.phar" class="w-full px-3 py-2 rounded-lg text-[10px] font-mono">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center pt-2">
+                                <a href="https://getcomposer.org/composer.phar" target="_blank" class="text-[9px] font-black text-cyan-400 hover:text-cyan-300 uppercase tracking-widest flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    Download_Composer.phar
+                                </a>
+                                <button onclick="saveManualPaths()" id="btn-save-paths" class="px-5 py-2 bg-purple-600/20 border border-purple-500/30 text-purple-400 font-black uppercase text-[9px] tracking-widest rounded-xl hover:bg-purple-600 hover:text-white transition-all">Save_Paths</button>
+                            </div>
+                        </div>
+
                         <!-- Terminal -->
                         <div class="terminal rounded-3xl overflow-hidden flex flex-col h-[280px] border border-white/5 shadow-2xl">
                             <div class="px-6 py-2 bg-white/5 border-b border-white/5 flex justify-between items-center">
@@ -139,7 +174,9 @@
                             <button onclick="runCommand('storage:link')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-amber-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">03 Link Assets</button>
                             <button onclick="runCommand('optimize:clear')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-slate-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">04 Flush Caches</button>
                             <button onclick="runCommand('db:seed')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-rose-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">05 Seed DB</button>
-                            <button onclick="runProductionOptimize()" class="p-3 bg-purple-600/20 border border-purple-500/30 rounded-xl hover:bg-purple-600 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wider text-purple-400">06 Prod Optimize</button>
+                            <button onclick="runCommand('npm:install')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-cyan-400/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">06 NPM Install</button>
+                            <button onclick="runCommand('npm:build')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-cyan-400/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">07 NPM Build</button>
+                            <button onclick="runProductionOptimize()" class="p-3 bg-purple-600/20 border border-purple-500/30 rounded-xl hover:bg-purple-600 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wider text-purple-400">08 Prod Optimize</button>
                             <div class="col-span-2 hidden md:block"></div>
                             <button onclick="nextStep(4)" class="col-span-2 md:col-span-4 p-4 bg-purple-600 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-lg shadow-purple-500/20 hover:scale-[1.02] transition-all">Continue to Phase 04</button>
                         </div>
@@ -374,6 +411,39 @@
             line.innerText = `>> [${new Date().toLocaleTimeString()}] ${message}`;
             output.appendChild(line);
             output.scrollTop = output.scrollHeight;
+        }
+
+        function toggleManualOverride() {
+            const panel = document.getElementById('manual-override');
+            panel.classList.toggle('hidden');
+        }
+
+        async function saveManualPaths() {
+            const btn = document.getElementById('btn-save-paths');
+            btn.innerText = 'Saving...';
+            
+            const data = {
+                node_binary: document.getElementById('manual_node').value,
+                npm_binary: document.getElementById('manual_npm').value,
+                composer_binary: document.getElementById('manual_composer').value,
+            };
+
+            try {
+                const response = await fetch('/setup/save-paths', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify(data)
+                });
+                const res = await response.json();
+                if (res.success) {
+                    btn.innerText = 'Saved OK';
+                    btn.classList.add('bg-green-500/20', 'text-green-400');
+                    appendLog('Manual binary paths persisted to .env successfully.', 'success');
+                } else throw new Error(res.error);
+            } catch (e) {
+                alert('Save Failed: ' + e.message);
+                btn.innerText = 'Save_Paths';
+            }
         }
 
         async function runProductionOptimize() {

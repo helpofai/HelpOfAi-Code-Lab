@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 class SetupController extends Controller
 {
@@ -30,6 +31,7 @@ class SetupController extends Controller
             'appKeySet' => $appKeySet,
             'dbConnected' => $dbConnected,
             'phpVersion' => PHP_VERSION,
+            'basePath' => base_path(),
             'requirements' => $this->getRequirements(),
             'currentEnv' => [
                 'app_name' => config('app.name'),
@@ -37,6 +39,9 @@ class SetupController extends Controller
                 'db_host' => config('database.connections.mysql.host'),
                 'db_name' => config('database.connections.mysql.database'),
                 'db_user' => config('database.connections.mysql.username'),
+                'node_binary' => env('NODE_BINARY'),
+                'npm_binary' => env('NPM_BINARY'),
+                'composer_binary' => env('COMPOSER_BINARY'),
             ]
         ]);
     }
@@ -60,6 +65,25 @@ class SetupController extends Controller
             'Node.js' => $this->resolveBinaryPath('node', 'NODE_BINARY', true) !== null,
             'NPM' => $this->resolveBinaryPath('npm', 'NPM_BINARY', true) !== null,
         ];
+    }
+
+    public function savePaths(Request $request)
+    {
+        $validated = $request->validate([
+            'node_binary' => 'nullable|string',
+            'npm_binary' => 'nullable|string',
+            'composer_binary' => 'nullable|string',
+        ]);
+
+        try {
+            if ($validated['node_binary']) $this->updateEnvKey('NODE_BINARY', $validated['node_binary']);
+            if ($validated['npm_binary']) $this->updateEnvKey('NPM_BINARY', $validated['npm_binary']);
+            if ($validated['composer_binary']) $this->updateEnvKey('COMPOSER_BINARY', $validated['composer_binary']);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     private function updateEnvKey($key, $value)
@@ -288,7 +312,14 @@ class SetupController extends Controller
             } else {
                 $this->sendEvent("Downloading 'composer.phar' from getcomposer.org...", 'info');
                 try {
-                    $response = \Illuminate\Support\Facades\Http::timeout(30)->get('https://getcomposer.org/composer.phar');
+                    // Try with SSL first
+                    $response = Http::timeout(30)->get('https://getcomposer.org/composer.phar');
+                    if (!$response->successful()) {
+                         // Try without SSL verification if it failed
+                        $this->sendEvent("Initial download failed. Retrying without SSL verification...", 'info');
+                        $response = Http::withoutVerifying()->timeout(30)->get('https://getcomposer.org/composer.phar');
+                    }
+
                     if ($response->successful()) {
                         File::put(base_path('composer.phar'), $response->body());
                         @chmod(base_path('composer.phar'), 0755);
@@ -300,7 +331,8 @@ class SetupController extends Controller
                     }
                 } catch (\Exception $e) {
                     $this->sendEvent("Download failed: " . $e->getMessage(), 'error');
-                    $this->sendEvent("Action: Manually upload 'composer.phar' to root.", 'error');
+                    $this->sendEvent("Action: Manually download from https://getcomposer.org/composer.phar and upload to root.", 'error');
+                    $this->sendEvent("Root Path: " . base_path(), 'info');
                     return;
                 }
             }
@@ -352,4 +384,3 @@ class SetupController extends Controller
         flush();
     }
 }
-
