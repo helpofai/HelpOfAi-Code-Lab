@@ -4,6 +4,26 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ---
 
+## [1.10.0] - INFRASTRUCTURE_HARDENED - 2026-05-16
+
+### 🛠️ Added: Resilience Protocol & Execution Matrix
+- **Autonomous Binary Resolution:** Implemented a tiered discovery system for Composer, Node.js, and NPM. The system now autonomously scans common hosting paths and detects local binaries.
+- **Composer_Uplink Fallback:** The installer now autonomously downloads `composer.phar` from *getcomposer.org* if a global installation is missing.
+- **SSL Resilience Protocol:** Integrated `withoutVerifying()` fallbacks for environment-restricted cURL/SSL certificate handshakes.
+- **Manual Path-Override UI:** Injected a specialized override panel into the `/setup` terminal for manual binary path registration.
+- **Autonomous Path-Persistence:** Discovered binary paths are now automatically injected and saved into the `.env` matrix for zero-latency execution in future cycles.
+
+### 🛡️ Hardened: Deployment & Migration Integrity
+- **Idempotent Migration Matrix:** Refactored marketplace migrations with `Schema::hasTable` and `Schema::hasColumn` guards to prevent update crashes during partial state recovery.
+- **Memory_Limit Escalation:** Prefix all Composer commands with `-d memory_limit=-1` to bypass shared hosting resource caps.
+- **High-Verbosity Diagnostics:** Enabled `-vvv` logging for Composer to unmask silent environment failures in the Live Terminal.
+
+### 🔧 Fixed: Environment Compatibility
+- **Resilient PHP Kernel:** Unified all Artisan calls to use the absolute `PHP_BINARY` path, neutralizing "Command not found" errors on restricted hosts.
+- **Node_Locate Logic:** Added specialized detection for cPanel/Alt-Node and other common shared hosting directory structures.
+
+---
+
 ## [1.9.0] - NEURAL_MARKETPLACE_HARDENED - 2026-05-16
 
 ### 💎 Added: Neural_Marketplace & Checkout Protocol
