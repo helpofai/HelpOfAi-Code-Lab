@@ -235,6 +235,8 @@ class UpdateController extends Controller
             $this->sendUpdateLog("Starting system update...", 10);
             flush();
 
+            $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
+
             if (!function_exists('proc_open')) {
                 $this->sendUpdateLog("Error: proc_open is disabled. Cannot run update commands.", 100, 'error');
                 return;
@@ -316,7 +318,6 @@ class UpdateController extends Controller
 
                         // 5. Clear ALL caches thoroughly
                         $this->sendUpdateLog("Purging system cache and re-initializing manifest...", 40);
-                        $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
                         Process::path(base_path())->run("$php artisan config:clear");
                         Process::path(base_path())->run("$php artisan cache:clear");
                         Process::path(base_path())->run("$php artisan optimize:clear");
@@ -334,7 +335,7 @@ class UpdateController extends Controller
 
             // 2. Migrate
             $this->sendUpdateLog("Running database migrations...", 50);
-            $migrate = Process::path(base_path())->run('php artisan migrate --force');
+            $migrate = Process::path(base_path())->run("$php artisan migrate --force");
             if ($migrate->successful()) {
                 $this->sendUpdateLog($migrate->output());
                 $this->sendUpdateLog("Database migrated.", 70, 'success');
@@ -344,15 +345,15 @@ class UpdateController extends Controller
 
             // 3. Optimize Clear
             $this->sendUpdateLog("Clearing system caches...", 80);
-            $optimize = Process::path(base_path())->run('php artisan optimize:clear');
+            $optimize = Process::path(base_path())->run("$php artisan optimize:clear");
             $this->sendUpdateLog($optimize->output());
 
             // 4. Reload Config Cache (Production)
             if (app()->environment('production')) {
                 $this->sendUpdateLog("Caching configuration...", 90);
-                Process::path(base_path())->run('php artisan config:cache');
-                Process::path(base_path())->run('php artisan route:cache');
-                Process::path(base_path())->run('php artisan view:cache');
+                Process::path(base_path())->run("$php artisan config:cache");
+                Process::path(base_path())->run("$php artisan route:cache");
+                Process::path(base_path())->run("$php artisan view:cache");
             }
 
             $this->sendUpdateLog("System update completed successfully.", 100, 'success');
@@ -386,8 +387,39 @@ class UpdateController extends Controller
                 return;
             }
 
+            // Tiered Composer Resolution
+            $composerBinary = 'composer';
+            $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
+            $globalCheck = Process::run('composer --version');
+            
+            if (!$globalCheck->successful()) {
+                $this->sendUpdateLog("Global 'composer' command not found. Checking for local binary...", 15);
+                
+                if (File::exists(base_path('composer.phar'))) {
+                    $composerBinary = "{$php} " . base_path('composer.phar');
+                    $this->sendUpdateLog("Local 'composer.phar' detected. Using local binary.", 20, 'success');
+                } else {
+                    $this->sendUpdateLog("Local binary missing. Attempting to download 'composer.phar'...", 20);
+                    try {
+                        $response = Http::timeout(30)->get('https://getcomposer.org/composer.phar');
+                        if ($response->successful()) {
+                            File::put(base_path('composer.phar'), $response->body());
+                            @chmod(base_path('composer.phar'), 0755);
+                            $this->sendUpdateLog("Local composer binary downloaded successfully.", 25, 'success');
+                            $composerBinary = "{$php} " . base_path('composer.phar');
+                        } else {
+                            throw new \Exception("Server returned HTTP " . $response->status());
+                        }
+                    } catch (\Exception $e) {
+                        $this->sendUpdateLog("Automated download failed: " . $e->getMessage(), 100, 'error');
+                        $this->sendUpdateLog("Action Required: Manually upload 'composer.phar' to your root directory.", 100, 'error');
+                        return;
+                    }
+                }
+            }
+
             $this->sendUpdateLog("Installing PHP dependencies (this may take time)...", 30);
-            $composer = Process::path(base_path())->run('composer install --no-dev --optimize-autoloader');
+            $composer = Process::path(base_path())->timeout(600)->run("{$composerBinary} install --no-dev --optimize-autoloader");
             
             if ($composer->successful()) {
                 $this->sendUpdateLog($composer->output());
