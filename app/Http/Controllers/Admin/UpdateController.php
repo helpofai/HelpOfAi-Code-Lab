@@ -478,17 +478,17 @@ class UpdateController extends Controller
                     }
                 }
             }
+$this->sendUpdateLog("Installing PHP dependencies (this may take time)...", 30);
+// Prefix with memory limit increase and use high verbosity for debugging
+$fullComposerCommand = "{$php} -d memory_limit=-1 {$composerBinary} install --no-dev --optimize-autoloader -vvv";
+$composer = Process::path(base_path())->timeout(900)->run($fullComposerCommand);
 
-            $this->sendUpdateLog("Installing PHP dependencies (this may take time)...", 30);
-            $composer = Process::path(base_path())->timeout(600)->run("{$composerBinary} install --no-dev --optimize-autoloader");
-            
-            if ($composer->successful()) {
-                $this->sendUpdateLog($composer->output());
-                $this->sendUpdateLog("Dependencies installed successfully.", 100, 'success');
-                $this->sendUpdateLog("Process complete.", 100, 'done');
-            } else {
-                $this->sendUpdateLog("Composer failed: " . $composer->errorOutput(), 100, 'error');
-            }
+if ($composer->successful()) {
+    $this->sendUpdateLog("Dependencies installed successfully.", 100, 'success');
+} else {
+    $this->sendUpdateLog("Composer failed: " . $composer->errorOutput() . " " . $composer->output(), 100, 'error');
+    return;
+}
         }, 200, [
             'Content-Type' => 'text/event-stream',
             'Cache-Control' => 'no-cache',

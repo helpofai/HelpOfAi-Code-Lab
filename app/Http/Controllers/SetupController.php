@@ -339,9 +339,11 @@ class SetupController extends Controller
         }
 
         $this->sendEvent("Installing PHP dependencies...", 'info');
+        $fullComposerCommand = "{$php} -d memory_limit=-1 {$composerBinary} install --no-dev --optimize-autoloader -vvv";
+        
         \Illuminate\Support\Facades\Process::path(base_path())
-            ->timeout(600)
-            ->run("{$composerBinary} install --no-dev --optimize-autoloader", function ($type, $output) {
+            ->timeout(900)
+            ->run($fullComposerCommand, function ($type, $output) {
                 $this->sendEvent($output, 'success');
             });
         
