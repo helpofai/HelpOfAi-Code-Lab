@@ -133,6 +133,7 @@
                         </div>
 
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            <button onclick="runCommand('composer:install')" class="p-3 bg-purple-600/20 border border-purple-500/30 rounded-xl hover:bg-purple-600 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wider text-purple-400">00 Composer</button>
                             <button onclick="runCommand('key:generate')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-purple-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">01 Gen Key</button>
                             <button onclick="runCommand('migrate')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-cyan-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">02 Migrate</button>
                             <button onclick="runCommand('storage:link')" class="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-amber-500/50 transition-all text-[10px] font-bold uppercase tracking-wider text-white">03 Link Assets</button>

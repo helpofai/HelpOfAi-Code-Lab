@@ -170,7 +170,7 @@ class SetupController extends Controller
         $allowedCommands = [
             'key:generate', 'migrate', 'migrate:fresh', 'db:seed', 
             'optimize:clear', 'storage:link', 'config:cache', 
-            'route:cache', 'view:cache'
+            'route:cache', 'view:cache', 'composer:install'
         ];
 
         if (!in_array($command, $allowedCommands)) {
@@ -181,9 +181,15 @@ class SetupController extends Controller
 
         return response()->stream(function () use ($command) {
             try {
+                $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
+                $artisan = base_path('artisan');
+
+                if ($command === 'composer:install') {
+                    $this->runComposerInstall($php);
+                    return;
+                }
+
                 if (function_exists('proc_open')) {
-                    $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
-                    $artisan = base_path('artisan');
                     $fullCommand = "{$php} {$artisan} {$command} --force --no-interaction";
 
                     \Illuminate\Support\Facades\Process::path(base_path())
@@ -208,6 +214,49 @@ class SetupController extends Controller
             'Cache-Control' => 'no-cache',
             'X-Accel-Buffering' => 'no',
         ]);
+    }
+
+    private function runComposerInstall($php)
+    {
+        $this->sendEvent("Initializing Composer Dependency Manager...", 'info');
+        
+        $composerBinary = 'composer';
+        $globalCheck = \Illuminate\Support\Facades\Process::run('composer --version');
+        
+        if (!$globalCheck->successful()) {
+            $this->sendEvent("Global 'composer' missing. Checking local binary...", 'info');
+            
+            if (File::exists(base_path('composer.phar'))) {
+                $composerBinary = "{$php} " . base_path('composer.phar');
+                $this->sendEvent("Local 'composer.phar' detected.", 'success');
+            } else {
+                $this->sendEvent("Downloading 'composer.phar' from getcomposer.org...", 'info');
+                try {
+                    $response = \Illuminate\Support\Facades\Http::timeout(30)->get('https://getcomposer.org/composer.phar');
+                    if ($response->successful()) {
+                        File::put(base_path('composer.phar'), $response->body());
+                        @chmod(base_path('composer.phar'), 0755);
+                        $this->sendEvent("Composer binary downloaded.", 'success');
+                        $composerBinary = "{$php} " . base_path('composer.phar');
+                    } else {
+                        throw new \Exception("Server error during download.");
+                    }
+                } catch (\Exception $e) {
+                    $this->sendEvent("Download failed: " . $e->getMessage(), 'error');
+                    $this->sendEvent("Action: Manually upload 'composer.phar' to root.", 'error');
+                    return;
+                }
+            }
+        }
+
+        $this->sendEvent("Installing PHP dependencies...", 'info');
+        \Illuminate\Support\Facades\Process::path(base_path())
+            ->timeout(600)
+            ->run("{$composerBinary} install --no-dev --optimize-autoloader", function ($type, $output) {
+                $this->sendEvent($output, 'success');
+            });
+        
+        $this->sendEvent('Composer install finished.', 'done');
     }
 
     private function sendEvent($message, $status = 'info')
