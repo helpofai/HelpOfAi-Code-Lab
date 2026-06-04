@@ -6,10 +6,10 @@
     RewriteEngine On
 
     # -------------------------------------------------------------------
-    # Force HTTPS (uncomment in production)
+    # Force HTTPS
     # -------------------------------------------------------------------
-    # RewriteCond %{HTTPS} off
-    # RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
 
     # -------------------------------------------------------------------
     # Block access to sensitive files and directories
@@ -69,8 +69,8 @@
     # Permissions policy (restrict sensitive browser features)
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), usb=()"
 
-    # HSTS (uncomment in production with valid HTTPS)
-    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    # HSTS (forces HTTPS for all future visits)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
     # Remove server signature
     Header always unset X-Powered-By
