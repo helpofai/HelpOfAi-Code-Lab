@@ -5,6 +5,9 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 import useProjectStore from '@/Stores/useProjectStore';
 import { useEditorActions } from '@/Hooks/useEditorActions';
+import { useToast } from '@/Components/Toast/ToastProvider';
+import useHotkeys from '@/Hooks/useHotkeys';
+import CommandPalette from '@/Components/Editor/CommandPalette';
 import EditorHeader from '@/Components/Editor/EditorHeader';
 import EditorPanels from '@/Components/Editor/EditorPanels';
 import EditorFooter from '@/Components/Editor/EditorFooter';
@@ -27,6 +30,8 @@ export default function Editor({ auth, project: initialProject }) {
     const [projectData, setProjectData] = useState(initialProject);
     const [diffRevision, setDiffRevision] = useState(null);
     const [hasPurchased, setHasPurchased] = useState(initialProject?.has_purchased || false);
+    const [paletteOpen, setPaletteOpen] = useState(false);
+    const toast = useToast();
 
     // Initialize Store
     useEffect(() => {
@@ -55,7 +60,7 @@ export default function Editor({ auth, project: initialProject }) {
                         session_id: sessionId
                     });
                     setHasPurchased(true);
-                    alert('Neural Unlock Successful. Code Access Granted.');
+                    toast.success('Neural Unlock Successful. Code Access Granted.');
                     // Clean URL
                     window.history.replaceState({}, document.title, window.location.pathname);
                 } catch (e) {
@@ -75,6 +80,32 @@ export default function Editor({ auth, project: initialProject }) {
         handleFork, 
         handleCloudSave 
     } = useEditorActions(projectData, setProjectData, setLogs);
+
+    // Keyboard Shortcuts
+    useHotkeys({
+        'ctrl+s': (e) => { e.preventDefault(); handleSave(); },
+        'ctrl+shift+f': (e) => { e.preventDefault(); formatCode(); },
+        'ctrl+k': (e) => { e.preventDefault(); setPaletteOpen(prev => !prev); },
+        'ctrl+j': (e) => { e.preventDefault(); setShowConsole(prev => !prev); },
+        'ctrl+b': (e) => { e.preventDefault(); setActiveSidebar(prev => prev ? null : 'settings'); },
+    }, [handleSave, formatCode]);
+
+    const handlePaletteExecute = (action) => {
+        switch (action) {
+            case 'save': handleSave(); break;
+            case 'format': formatCode(); break;
+            case 'new': window.location.href = '/editor'; break;
+            case 'fork': handleFork(); break;
+            case 'console': setShowConsole(prev => !prev); break;
+            case 'layout-bottom': useProjectStore.getState().setLayout('bottom'); break;
+            case 'layout-right': useProjectStore.getState().setLayout('right'); break;
+            case 'layout-top': useProjectStore.getState().setLayout('top'); break;
+            case 'share': setActiveModal('share'); break;
+            case 'export': handleExport(); break;
+            case 'sidebar': setActiveSidebar(prev => prev ? null : 'settings'); break;
+            case 'settings': setActiveModal('settings'); break;
+        }
+    };
 
     // Live Preview Logic (Debounced)
     const [compiling, setCompiling] = useState(false);
@@ -213,9 +244,9 @@ export default function Editor({ auth, project: initialProject }) {
     };
 
     const addToCollection = async (id) => {
-        if (!projectData?.id) return alert('Initialize core first.');
+        if (!projectData?.id) return toast.warning('Initialize core first.');
         await axios.post(`/api/collections/${id}/add`, { project_id: projectData.id });
-        alert('Module linked.');
+        toast.success('Module linked.');
         setActiveModal(null);
     };
 
@@ -303,6 +334,12 @@ export default function Editor({ auth, project: initialProject }) {
                 addToCollection={addToCollection} 
                 createCollection={createCollection} 
                 diffRevision={diffRevision}
+            />
+
+            <CommandPalette
+                isOpen={paletteOpen}
+                onClose={() => setPaletteOpen(false)}
+                onExecute={handlePaletteExecute}
             />
         </div>
     );

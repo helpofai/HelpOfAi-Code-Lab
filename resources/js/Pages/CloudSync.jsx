@@ -12,6 +12,7 @@ import {
     LayoutGrid, List
 } from 'lucide-react';
 import ProBackground from '@/Components/Visuals/ProBackground';
+import { useToast } from '@/Components/Toast/ToastProvider';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
@@ -94,6 +95,7 @@ export default function CloudSync() {
     const [search, setSearch] = useState('');
     const [importingId, setImportingId] = useState(null);
     const [viewMode, setViewMode] = useState('grid');
+    const toast = useToast();
 
     const { data, setData, post, processing } = useForm({
         google_client_id: auth.user.personal_google_client_id || '',
@@ -133,16 +135,16 @@ export default function CloudSync() {
         e.preventDefault();
         post(route('google-drive.save-config'), {
             preserveScroll: true,
-            onSuccess: () => alert('Personal_API_Ciphers_Stored')
+            onSuccess: () => toast.success('Personal_API_Ciphers_Stored')
         });
     };
 
     const handleGoogleAuth = async () => {
-        if (!auth.user.personal_google_client_id) return alert('Config_Required');
+        if (!auth.user.personal_google_client_id) return toast.warning('Config_Required');
         try {
             const res = await axios.get('/api/google-drive/auth');
             window.location.href = res.data.url;
-        } catch (e) { alert('Auth_Failed'); }
+        } catch (e) { toast.error('Auth_Failed'); }
     };
 
     const disconnectDrive = async () => {
@@ -150,7 +152,7 @@ export default function CloudSync() {
         try {
             await axios.post('/api/google-drive/disconnect');
             router.reload();
-        } catch (e) { alert('Disconnect_Failed'); }
+        } catch (e) { toast.error('Disconnect_Failed'); }
     };
 
     const importToLocal = async (fileId) => {
@@ -165,9 +167,9 @@ export default function CloudSync() {
                 is_public: false,
                 is_private: true
             });
-            alert('Node_Replicated: Redirecting to local instance.');
+            toast.success('Node_Replicated: Redirecting to local instance.');
             window.location.href = `/editor/${saveRes.data.slug}`;
-        } catch (e) { alert('Replication_Failed'); }
+        } catch (e) { toast.error('Replication_Failed'); }
         finally { setImportingId(null); }
     };
 
@@ -176,7 +178,7 @@ export default function CloudSync() {
         try {
             await axios.delete(`/api/google-drive/delete/${fileId}`);
             setDriveFiles(driveFiles.filter(f => f.id !== fileId));
-        } catch (e) { alert('Deletion_Failed'); }
+        } catch (e) { toast.error('Deletion_Failed'); }
     };
 
     const filteredFiles = driveFiles.filter(f => 

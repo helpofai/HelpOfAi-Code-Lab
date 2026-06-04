@@ -4,6 +4,47 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ---
 
+## [1.11.0] - SECURITY_HARDENED_&_UI_PROFESSIONAL - 2026-06-04
+
+### 🔐 Security & Payment Hardening
+
+- **Stripe Purchase Verification (Critical Fix):** Replaced blind-trust `firstOrCreate` with real Stripe API session verification. The `verify` method now calls `StripeClient->checkout->sessions->retrieve()` to validate `payment_status === 'paid'` and confirm `metadata.project_id` matches before recording a purchase. Previously, any fabricated `session_id` could unlock paid projects for free.
+- **Pending Purchase Records:** Stripe checkout now creates a `Purchase` record with `status: pending` immediately at session creation — prevents lost purchases if the user closes the browser before the redirect completes.
+- **PhonePe Purchase Checkout:** Implemented the previously-stubbed PhonePe gateway for project purchases, ported from the subscription controller. Supports UAT/PRODUCTION environment switching, SHA256 checksum validation, and pending purchase tracking.
+- **Encrypted OAuth Secrets:** Google Drive `personal_google_client_id` and `personal_google_client_secret` now use Laravel's `encrypted` cast — OAuth secrets are encrypted at rest in the database instead of stored as plaintext.
+- **Rate Limiting:** Added `throttle:10,1` to checkout routes and `throttle:30,1` to purchase verify endpoints. Prevents brute-force attacks on payment endpoints.
+- **.env Protection:** Uncommented `.env` entries in `.gitignore` — the live environment file is now properly excluded from version control, preventing accidental exposure of production secrets.
+
+### 🔄 Update System Resilience
+
+- **Pre-Reset Safety Gate:** The one-click updater now runs `git status --porcelain` before `git reset --hard`. If tracked files have local modifications, the update aborts and lists the changed files — preventing silent data loss from uncommitted hotfixes.
+- **Database Snapshot Before Migration:** `mysqldump` is now executed before `migrate --force`, saving a timestamped backup to `storage/app/backups/pre_update_YYYY-MM-DD_HH-II-SS.sql`. Gracefully falls back if `mysqldump` is unavailable.
+- **Migration Failure Abort:** The updater previously continued to cache operations and reported "completed successfully" even when migrations failed. Now returns immediately on failure, leaving the system in its pre-migration state for recovery.
+
+### 🖥️ Production .htaccess
+
+- **Sensitive File Blocking:** 403 Forbidden on `.env`, `composer.json`, `composer.lock`, `package.json`, `package-lock.json`, `artisan`, `phpunit.xml`, `.git`, `storage/`, `vendor/`.
+- **Security Headers:** `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN` (allows editor iframe previews), `X-XSS-Protection`, `Referrer-Policy`, `Permissions-Policy`. Server signature headers (`X-Powered-By`, `Server`) are unset.
+- **Gzip Compression:** HTML, CSS, JS, JSON, XML, SVG, and font files compressed on-the-fly.
+- **Browser Caching:** Images and fonts cached for 1 year. CSS/JS cached for 1 year with `immutable` directive on Vite-hashed build assets. HTML/JSON set to 0 seconds (Inertia SPA responses must stay fresh).
+- **HTTPS redirect + HSTS:** Commented-out ready — uncomment when SSL certificate is deployed.
+
+### ✨ Professional UI System (5 New Components)
+
+- **Toast Notification System:** Replaced 34 of 36 raw `alert()` calls across the entire application with a proper toast system. Components call `toast.success()`, `toast.error()`, `toast.info()`, or `toast.warning()`. Toasts stack with spring animations, auto-dismiss, and support click-to-close. Wired globally via `ToastProvider` in `GlobalBootWrapper`.
+- **Command Palette (Ctrl+K):** Spotlight-style overlay with fuzzy search across 12 editor commands (Save, Format, New Project, Fork, Toggle Console, Layout switch, Share, Export, Sidebar, Settings). Full keyboard navigation: arrows + enter + esc.
+- **Keyboard Shortcuts:** `useHotkeys` hook registers global shortcuts — `Ctrl+S` (save), `Ctrl+Shift+F` (format), `Ctrl+K` (command palette), `Ctrl+J` (toggle console), `Ctrl+B` (toggle sidebar). Mac `Cmd` key supported.
+- **Tooltip Component:** Delayed hover tooltip with 4-position placement and optional keyboard shortcut badge display. Zero dependencies.
+- **EmptyState Component:** Consistent empty-state UI with configurable icon (Lucide), title, description, and CTA button. Three sizes: `sm`, `md`, `lg`.
+- **Skeleton Loaders:** `ProjectCardSkeleton`, `EditorSkeleton`, `StatCardSkeleton`, `ListRowSkeleton` — content-shaped pulse animations matching real component layouts.
+
+### 🧹 Code Quality
+
+- **Default Template DRY:** Extracted the "Neural Core" default HTML/CSS/JS template from both `useProjectStore.js` and `Welcome.jsx` into a single shared `DEFAULT_TEMPLATE` export.
+- **Dependency Cleanup:** Removed unused `@tailwindcss/vite` (v4) from `package.json`. The project uses Tailwind v3 via PostCSS — the v4 Vite plugin was never configured.
+
+---
+
 ## [1.10.0] - INFRASTRUCTURE_HARDENED - 2026-05-16
 
 ### 🛠️ Added: Resilience Protocol & Execution Matrix
@@ -164,4 +205,4 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ### Node Status: **STABLE**
 ### Core Clearance: **LEVEL_0**
-### Build Signature: **HOA-PRO-1.9.0-FINAL**
+### Build Signature: **HOA-PRO-1.11.0-FINAL**

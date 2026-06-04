@@ -5,7 +5,29 @@
 
     RewriteEngine On
 
-    # Handle Authorization Header
+    # -------------------------------------------------------------------
+    # Force HTTPS (uncomment in production)
+    # -------------------------------------------------------------------
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
+
+    # -------------------------------------------------------------------
+    # Block access to sensitive files and directories
+    # -------------------------------------------------------------------
+    RewriteRule ^\.env - [F,L]
+    RewriteRule ^composer\.(json|lock) - [F,L]
+    RewriteRule ^package(-lock)?\.json - [F,L]
+    RewriteRule ^artisan - [F,L]
+    RewriteRule ^phpunit\.xml - [F,L]
+    RewriteRule ^\.git - [F,L]
+
+    # Block direct access to storage and vendor
+    RewriteRule ^storage/ - [F,L]
+    RewriteRule ^vendor/ - [F,L]
+
+    # -------------------------------------------------------------------
+    # Handle Authorization Header (JWT / Sanctum)
+    # -------------------------------------------------------------------
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
@@ -13,13 +35,103 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
-    # Redirect Trailing Slashes If Not A Folder...
+    # -------------------------------------------------------------------
+    # Remove trailing slashes (except directories)
+    # -------------------------------------------------------------------
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Send Requests To Front Controller...
+    # -------------------------------------------------------------------
+    # Send requests to Laravel front controller
+    # -------------------------------------------------------------------
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# -------------------------------------------------------------------
+# Security Headers
+# -------------------------------------------------------------------
+<IfModule mod_headers.c>
+    # Prevent MIME-type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Prevent clickjacking (allow same-origin frames for editor previews)
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # Enable XSS filter in older browsers
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Referrer policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Permissions policy (restrict sensitive browser features)
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), usb=()"
+
+    # HSTS (uncomment in production with valid HTTPS)
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Remove server signature
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# -------------------------------------------------------------------
+# Gzip Compression
+# -------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
+    AddOutputFilterByType DEFLATE application/javascript application/json application/xml
+    AddOutputFilterByType DEFLATE application/x-font-ttf application/x-font-opentype
+    AddOutputFilterByType DEFLATE image/svg+xml image/x-icon
+    AddOutputFilterByType DEFLATE font/ttf font/otf font/opentype
+</IfModule>
+
+# -------------------------------------------------------------------
+# Browser Caching for Static Assets
+# -------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # Images
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+
+    # Fonts
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/x-font-ttf "access plus 1 year"
+
+    # CSS / JS (Vite builds use hashed filenames, safe to cache aggressively)
+    <FilesMatch "\.(css|js)$">
+        ExpiresDefault "access plus 1 year"
+    </FilesMatch>
+
+    # HTML / JSON — short cache (Inertia responses)
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType application/json "access plus 0 seconds"
+</IfModule>
+
+# -------------------------------------------------------------------
+# Vite / Build Assets — immutable cache for hashed files
+# -------------------------------------------------------------------
+<IfModule mod_headers.c>
+    <FilesMatch "build/assets/.*\.[a-f0-9]{8,}\.(js|css)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+# -------------------------------------------------------------------
+# Custom Error Pages (optional — create these in public/errors/)
+# -------------------------------------------------------------------
+# ErrorDocument 403 /errors/403.html
+# ErrorDocument 404 /errors/404.html
+# ErrorDocument 500 /errors/500.html
+# ErrorDocument 503 /errors/503.html

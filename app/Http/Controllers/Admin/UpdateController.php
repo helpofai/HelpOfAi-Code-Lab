@@ -305,6 +305,25 @@ class UpdateController extends Controller
             $this->sendUpdateLog("Fetching latest code from repository...", 20);
             $fetch = Process::path(base_path())->run('git fetch origin main');
             
+            // Pre-reset safety check: abort if tracked files have local modifications
+            $statusCheck = Process::path(base_path())->run('git status --porcelain');
+            if ($statusCheck->successful()) {
+                $changedFiles = array_values(array_filter(
+                    explode("\n", trim($statusCheck->output())),
+                    fn($line) => !empty(trim($line)) && !str_starts_with(trim($line), '??')
+                ));
+                if (!empty($changedFiles)) {
+                    $this->sendUpdateLog("Aborted: " . count($changedFiles) . " local modification(s) detected. Commit or stash changes first.", 25, 'error');
+                    foreach (array_slice($changedFiles, 0, 10) as $file) {
+                        $this->sendUpdateLog("  " . trim(substr($file, 2)), 25, 'error');
+                    }
+                    if (count($changedFiles) > 10) {
+                        $this->sendUpdateLog("  ... and " . (count($changedFiles) - 10) . " more file(s).", 25, 'error');
+                    }
+                    return;
+                }
+            }
+
             if ($fetch->successful()) {
                 $this->sendUpdateLog("Synchronizing local files...", 25);
                 $reset = Process::path(base_path())->run('git reset --hard origin/main');
@@ -392,6 +411,41 @@ class UpdateController extends Controller
                 return; // Stop if pull fails
             }
 
+            // 1.6 Database backup before migration
+            $this->sendUpdateLog("Creating database snapshot...", 48);
+            try {
+                $dbConnection = config('database.default');
+                $dbConfig = config("database.connections.{$dbConnection}");
+                $backupDir = storage_path('app/backups');
+                
+                if (!File::isDirectory($backupDir)) {
+                    File::makeDirectory($backupDir, 0755, true);
+                }
+                
+                $timestamp = now()->format('Y-m-d_H-i-s');
+                $backupFile = "{$backupDir}/pre_update_{$timestamp}.sql";
+                
+                if ($dbConnection === 'mysql') {
+                    $command = sprintf(
+                        'mysqldump -h%s -P%s -u%s -p%s %s > %s 2>&1',
+                        escapeshellarg($dbConfig['host']),
+                        escapeshellarg($dbConfig['port'] ?? '3306'),
+                        escapeshellarg($dbConfig['username']),
+                        escapeshellarg($dbConfig['password']),
+                        escapeshellarg($dbConfig['database']),
+                        escapeshellarg($backupFile)
+                    );
+                    $dump = Process::path(base_path())->run($command);
+                    if ($dump->successful() && File::exists($backupFile) && File::size($backupFile) > 0) {
+                        $this->sendUpdateLog("Backup saved: pre_update_{$timestamp}.sql", 49, 'success');
+                    } else {
+                        $this->sendUpdateLog("Backup failed — proceeding without snapshot.", 49, 'error');
+                    }
+                }
+            } catch (\Exception $e) {
+                $this->sendUpdateLog("Backup skipped: " . $e->getMessage(), 49, 'error');
+            }
+
             // 2. Migrate
             $this->sendUpdateLog("Running database migrations...", 50);
             $migrate = Process::path(base_path())->run("$php artisan migrate --force");
@@ -400,6 +454,8 @@ class UpdateController extends Controller
                 $this->sendUpdateLog("Database migrated.", 70, 'success');
             } else {
                 $this->sendUpdateLog("Migration failed: " . $migrate->errorOutput(), 70, 'error');
+                $this->sendUpdateLog("Update aborted to prevent system instability.", 100, 'error');
+                return;
             }
 
             // 3. Optimize Clear

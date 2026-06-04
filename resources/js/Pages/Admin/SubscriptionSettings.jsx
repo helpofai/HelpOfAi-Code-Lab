@@ -15,6 +15,7 @@ import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
+import { useToast } from '@/Components/Toast/ToastProvider';
 import axios from 'axios';
 
 export default function SubscriptionSettings({ auth, settings }) {
@@ -25,14 +26,15 @@ export default function SubscriptionSettings({ auth, settings }) {
     const [activeSector, setActiveSector] = useState('monetization');
     const [activeGateway, setActiveGateway] = useState('stripe');
     const [isTesting, setIsTesting] = useState(null);
+    const toast = useToast();
 
     const testGateway = async (gateway) => {
         setIsTesting(gateway);
         try {
             const res = await axios.post(route('admin.subscriptions.test-gateway'), { gateway });
-            alert(res.data.message);
+            toast.success(res.data.message);
         } catch (e) {
-            alert('Handshake_Failed: ' + (e.response?.data?.message || 'Unknown protocol error.'));
+            toast.error('Handshake_Failed: ' + (e.response?.data?.message || 'Unknown protocol error.'));
         } finally {
             setIsTesting(null);
         }

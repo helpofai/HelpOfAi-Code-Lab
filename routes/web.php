@@ -136,7 +136,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/support/{ticket}/reply', [\App\Http\Controllers\SupportController::class, 'reply'])->name('support.reply');
 
     // Project Purchases
-    Route::get('/checkout/project/{project:slug}', [\App\Http\Controllers\PurchaseController::class, 'checkoutPage'])->name('checkout.project');
+    Route::get('/checkout/project/{project:slug}', [\App\Http\Controllers\PurchaseController::class, 'checkoutPage'])->name('checkout.project')->middleware('throttle:10,1');
     Route::get('/purchase/status', [\App\Http\Controllers\PurchaseController::class, 'statusPage'])->name('purchase.status');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

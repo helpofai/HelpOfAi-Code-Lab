@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Razorpay\Api\Api as RazorpayApi;
+use Stripe\StripeClient;
 
 class PurchaseController extends Controller
 {
@@ -76,6 +77,17 @@ class PurchaseController extends Controller
                 ]
             ]);
 
+            // Create a pending purchase record so we don't lose the intent
+            Purchase::create([
+                'user_id' => $user->id,
+                'project_id' => $project->id,
+                'amount' => $project->price,
+                'currency' => 'USD',
+                'payment_id' => $checkout->id,
+                'payment_method' => 'stripe',
+                'status' => 'pending'
+            ]);
+
             return response()->json(['url' => $checkout->url]);
         }
 
@@ -110,7 +122,58 @@ class PurchaseController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'Gateway logic pending implementation.'], 400);
+        // 3. PhonePe Secure Uplink
+        if ($gateway === 'phonepe') {
+            $mId = SiteSetting::where('key', 'phonepe_merchant_id')->first()?->value;
+            $salt = SiteSetting::where('key', 'phonepe_salt_key')->first()?->value;
+            $index = SiteSetting::where('key', 'phonepe_salt_index')->first()?->value ?: '1';
+            $env = SiteSetting::where('key', 'phonepe_env')->first()?->value ?: 'UAT';
+
+            if (!$mId || !$salt) return response()->json(['message' => 'PhonePe node offline.'], 500);
+
+            $txnId = 'PROJ_' . $project->id . '_' . $user->id . '_' . time();
+            $payload = [
+                'merchantId' => $mId,
+                'merchantTransactionId' => $txnId,
+                'merchantUserId' => 'U' . $user->id,
+                'amount' => $price * 100,
+                'redirectUrl' => route('purchase.status') . '?status=success&project_id=' . $project->id . '&gateway=phonepe',
+                'redirectMode' => 'POST',
+                'callbackUrl' => route('api.phonepe.callback'),
+                'paymentInstrument' => ['type' => 'PAY_PAGE'],
+            ];
+
+            $base64 = base64_encode(json_encode($payload));
+            $checksum = hash('sha256', $base64 . '/pg/v1/pay' . $salt) . '###' . $index;
+
+            $apiUrl = ($env === 'PRODUCTION') 
+                ? 'https://api.phonepe.com/apis/hermes/pg/v1/pay' 
+                : 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay';
+
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'X-VERIFY' => $checksum,
+                'accept' => 'application/json'
+            ])->post($apiUrl, ['request' => $base64]);
+
+            if ($response->successful()) {
+                Purchase::create([
+                    'user_id' => $user->id,
+                    'project_id' => $project->id,
+                    'amount' => $project->price,
+                    'currency' => 'INR',
+                    'payment_id' => $txnId,
+                    'payment_method' => 'phonepe',
+                    'status' => 'pending'
+                ]);
+
+                return response()->json(['url' => $response->json()['data']['instrumentResponse']['redirectInfo']['url']]);
+            }
+
+            return response()->json(['message' => 'PhonePe protocol failed.'], 500);
+        }
+
+        return response()->json(['message' => 'Gateway not supported.'], 400);
     }
 
     /**
@@ -171,21 +234,42 @@ class PurchaseController extends Controller
             }
         }
 
-        // Stripe is usually handled via webhooks or return URL check
+        // Stripe: verify with Stripe API before recording purchase
         if ($gateway === 'stripe') {
-             // In a real app, verify session_id via Stripe API
-             Purchase::firstOrCreate([
-                'user_id' => $user->id,
-                'project_id' => $project->id,
-                'payment_id' => $request->session_id,
-             ], [
-                'amount' => $project->price,
-                'currency' => 'USD',
-                'payment_method' => 'stripe',
-                'status' => 'completed'
-             ]);
-             
-             return response()->json(['message' => 'Purchase confirmed.']);
+            $stripeSecret = SiteSetting::where('key', 'stripe_secret')->first()?->value;
+            if (!$stripeSecret) return response()->json(['message' => 'Stripe offline.'], 500);
+
+            $stripe = new StripeClient($stripeSecret);
+
+            try {
+                $session = $stripe->checkout->sessions->retrieve($request->session_id);
+
+                if ($session->payment_status !== 'paid') {
+                    return response()->json(['message' => 'Payment not completed.'], 400);
+                }
+
+                if (!isset($session->metadata->project_id) || (int) $session->metadata->project_id !== $project->id) {
+                    return response()->json(['message' => 'Session mismatch.'], 400);
+                }
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Session verification failed.'], 400);
+            }
+
+            Purchase::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'project_id' => $project->id,
+                ],
+                [
+                    'amount' => $project->price,
+                    'currency' => 'USD',
+                    'payment_id' => $request->session_id,
+                    'payment_method' => 'stripe',
+                    'status' => 'completed'
+                ]
+            );
+
+            return response()->json(['message' => 'Purchase confirmed.']);
         }
 
         return response()->json(['message' => 'Verification protocol unknown.'], 400);

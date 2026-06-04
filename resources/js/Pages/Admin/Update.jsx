@@ -7,12 +7,14 @@ import {
     ArrowUpCircle, Activity, Database, Loader2,
     Box, Layers
 } from 'lucide-react';
+import { useToast } from '@/Components/Toast/ToastProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Update({ currentVersion, buildId, lastCommitDate, commits, localPendingMigrations, systemInfo, gitStatus }) {
     const { flash = {} } = usePage().props;
     const [isChecking, setIsChecking] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const toast = useToast();
     const [updateLogs, setUpdateLogs] = useState([]);
     const [progress, setProgress] = useState(0);
     const [lastCheckedTime, setLastCheckedTime] = useState(null);
@@ -42,7 +44,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
                    || usePage().props.auth?.csrf_token;
 
         if (!token) {
-            alert("Security token missing. Please refresh the page and try again.");
+            toast.error("Security token missing. Please refresh the page and try again.");
             return;
         }
 
@@ -125,7 +127,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
                    || usePage().props.auth?.csrf_token;
 
-        if (!token) return alert("Security token missing.");
+        if (!token) return toast.error("Security token missing.");
 
         setIsUpdating(true);
         setUpdateLogs([{ message: 'Initializing schema migration protocol...', timestamp: new Date().toLocaleTimeString(), status: 'info' }]);
@@ -170,7 +172,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
     const handleInstallDependencies = async () => {
         if (!confirm("Install PHP dependencies (Composer)? This may take a few minutes.")) return;
         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || usePage().props.auth?.csrf_token;
-        if (!token) return alert("Security token missing.");
+        if (!token) return toast.error("Security token missing.");
 
         setIsUpdating(true);
         setUpdateLogs([{ message: 'Initializing Composer...', timestamp: new Date().toLocaleTimeString(), status: 'info' }]);
@@ -190,7 +192,7 @@ export default function Update({ currentVersion, buildId, lastCommitDate, commit
     const handleBuildAssets = async () => {
         if (!confirm("Build Frontend Assets (NPM)? This is resource intensive.")) return;
         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || usePage().props.auth?.csrf_token;
-        if (!token) return alert("Security token missing.");
+        if (!token) return toast.error("Security token missing.");
 
         setIsUpdating(true);
         setUpdateLogs([{ message: 'Initializing Asset Compiler...', timestamp: new Date().toLocaleTimeString(), status: 'info' }]);

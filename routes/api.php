@@ -51,8 +51,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('collections/{collection}/add', [CollectionController::class, 'addProject']);
 
     // Project Purchases
-    Route::post('/purchase/checkout', [\App\Http\Controllers\Api\PurchaseController::class, 'checkout']);
-    Route::post('/purchase/verify', [\App\Http\Controllers\Api\PurchaseController::class, 'verify']);
+    Route::post('/purchase/checkout', [\App\Http\Controllers\Api\PurchaseController::class, 'checkout'])->middleware('throttle:10,1');
+    Route::post('/purchase/verify', [\App\Http\Controllers\Api\PurchaseController::class, 'verify'])->middleware('throttle:30,1');
     Route::get('/purchases/my-purchases', [\App\Http\Controllers\Api\PurchaseController::class, 'myPurchases']);
 
     Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);

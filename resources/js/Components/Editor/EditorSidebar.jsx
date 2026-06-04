@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, PlusCircle, Lock, Unlock, Crown, Cloud, CloudOff, RefreshCw, Globe, Server, Code, Shield, Users, Settings, Layers, Activity, Tag, CreditCard } from 'lucide-react';
 import { usePage, Link } from '@inertiajs/react';
+import { useToast } from '@/Components/Toast/ToastProvider';
 import useProjectStore from '@/Stores/useProjectStore';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 import axios from 'axios';
@@ -62,6 +63,7 @@ export default function EditorSidebar({
     const [userAssets, setUserAssets] = useState([]);
     const [isLoadingAssets, setIsLoadingAssets] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const toast = useToast();
 
     useEffect(() => {
         if (activeSidebar === 'history' && projectData?.id) {
@@ -89,9 +91,9 @@ export default function EditorSidebar({
         try {
             const res = await axios.post(`/api/projects/${projectData.id}/revisions/${id}/restore`);
             setProject(res.data);
-            alert('Core_Restoration_Complete');
+            toast.success('Core_Restoration_Complete');
         } catch (e) {
-            alert('Restoration_Protocol_Failed');
+            toast.error('Restoration_Protocol_Failed');
         }
     };
 
@@ -124,7 +126,7 @@ export default function EditorSidebar({
             await axios.post('/api/assets', formData);
             fetchAssets();
         } catch (e) {
-            alert('Asset_Transmission_Failed');
+            toast.error('Asset_Transmission_Failed');
         } finally {
             setIsUploading(false);
         }
@@ -132,7 +134,7 @@ export default function EditorSidebar({
 
     const copyAssetUrl = (url) => {
         navigator.clipboard.writeText(url);
-        alert('URL_Copied_to_Buffer');
+        toast.success('URL_Copied_to_Buffer');
     };
 
     const deleteAsset = async (id) => {
@@ -141,7 +143,7 @@ export default function EditorSidebar({
             await axios.delete(`/api/assets/${id}`);
             setUserAssets(userAssets.filter(a => a.id !== id));
         } catch (e) {
-            alert('Purge_Failed');
+            toast.error('Purge_Failed');
         }
     };
 

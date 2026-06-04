@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CreditCard, Zap, ShieldCheck, ArrowRight, Activity } from 'lucide-react';
+import { useToast } from '@/Components/Toast/ToastProvider';
 import axios from 'axios';
 
 export default function PaymentModal({ isOpen, onClose, user }) {
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedGateway, setSelectedGateway] = useState('stripe');
+    const toast = useToast();
 
     const handlePayment = async () => {
         setIsProcessing(true);
@@ -36,7 +38,7 @@ export default function PaymentModal({ isOpen, onClose, user }) {
                             });
                             window.location.href = '/dashboard?payment=success';
                         } catch (e) {
-                            alert('Payment verification failed.');
+                            toast.error('Payment verification failed.');
                         }
                     },
                     prefill: {
@@ -50,7 +52,7 @@ export default function PaymentModal({ isOpen, onClose, user }) {
                 onClose();
             }
         } catch (e) {
-            alert(e.response?.data?.message || 'Uplink failed.');
+            toast.error(e.response?.data?.message || 'Uplink failed.');
         } finally {
             setIsProcessing(false);
         }

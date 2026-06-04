@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share2, Copy, Code, FolderPlus, Lock, Globe, ArrowLeft, GitCompare, ArrowRight, Tag, CreditCard } from 'lucide-react';
 import { DiffEditor } from '@monaco-editor/react';
+import { useToast } from '@/Components/Toast/ToastProvider';
 import useProjectStore from '@/Stores/useProjectStore';
 
 export default function EditorModals({ 
@@ -16,6 +17,7 @@ export default function EditorModals({
     const [newCollectionTitle, setNewCollectionTitle] = useState('');
     const [diffType, setDiffType] = useState('html');
     const { isPrivate, setIsPrivate, isForSale, setIsForSale, price, setPrice, html, css, js } = useProjectStore();
+    const toast = useToast();
 
     const handleCreateCollection = () => {
         if (!newCollectionTitle) return;
@@ -104,7 +106,7 @@ export default function EditorModals({
                                             {project?.slug ? `${window.location.origin}/editor/${project.slug}` : 'Save project to generate link'}
                                         </code>
                                         {project?.slug && (
-                                            <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/editor/${project.slug}`); alert('Link Copied.'); }} className="p-2 hover:bg-[var(--bg-elevated)] rounded text-[var(--text-main)] transition-all">
+                                            <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/editor/${project.slug}`); toast.success('Link Copied.'); }} className="p-2 hover:bg-[var(--bg-elevated)] rounded text-[var(--text-main)] transition-all">
                                                 <Copy size={14} />
                                             </button>
                                         )}
@@ -195,7 +197,7 @@ export default function EditorModals({
                                     <button onClick={() => setActiveModal('share')} className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-2 transition-colors">
                                         <ArrowLeft size={14} /> Back
                                     </button>
-                                    <button onClick={() => { navigator.clipboard.writeText(`<iframe src="${window.location.origin}/editor/${project?.slug}" style="width:100%; height:500px; border:none; border-radius: 8px; overflow:hidden;" sandbox="allow-scripts allow-same-origin"></iframe>`); alert('Embed Code Copied.'); }} className="text-[10px] font-bold uppercase tracking-widest text-cyan-500 hover:text-cyan-400 flex items-center gap-2 transition-colors">
+                                    <button onClick={() => { navigator.clipboard.writeText(`<iframe src="${window.location.origin}/editor/${project?.slug}" style="width:100%; height:500px; border:none; border-radius: 8px; overflow:hidden;" sandbox="allow-scripts allow-same-origin"></iframe>`); toast.success('Embed Code Copied.'); }} className="text-[10px] font-bold uppercase tracking-widest text-cyan-500 hover:text-cyan-400 flex items-center gap-2 transition-colors">
                                         <Copy size={14} /> Copy Code
                                     </button>
                                 </div>

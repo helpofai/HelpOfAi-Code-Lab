@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import ScrollToTop from '@/Components/Visuals/ScrollToTop';
 import useThemeStore from '@/Stores/useThemeStore';
+import { ToastProvider } from '@/Components/Toast/ToastProvider';
 
 export default function GlobalBootWrapper({ children }) {
     const { theme } = useThemeStore();
@@ -43,16 +44,18 @@ export default function GlobalBootWrapper({ children }) {
     if (!isMounted) return <div className="min-h-screen bg-black" />;
 
     return (
-        <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans transition-colors duration-300">
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="min-h-screen flex flex-col"
-            >
-                {children}
-                <ScrollToTop />
-            </motion.div>
-        </div>
+        <ToastProvider>
+            <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans transition-colors duration-300">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="min-h-screen flex flex-col"
+                >
+                    {children}
+                    <ScrollToTop />
+                </motion.div>
+            </div>
+        </ToastProvider>
     );
 }

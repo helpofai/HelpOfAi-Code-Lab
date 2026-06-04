@@ -82,6 +82,8 @@ class User extends Authenticatable
                 'password' => 'hashed',
                 'is_blocked' => 'boolean',
                 'pro_expires_at' => 'datetime',
+                'personal_google_client_id' => 'encrypted',
+                'personal_google_client_secret' => 'encrypted',
             ];
         }
     /**

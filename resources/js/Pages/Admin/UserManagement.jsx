@@ -14,12 +14,14 @@ import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import TextInput from '@/Components/TextInput';
 import PrimaryButton from '@/Components/PrimaryButton';
 import InputLabel from '@/Components/InputLabel';
+import { useToast } from '@/Components/Toast/ToastProvider';
 import ProBackground from '@/Components/Visuals/ProBackground';
 
 export default function UserManagement() {
     const { auth } = usePage().props;
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const toast = useToast();
     const [search, setSearch] = useState('');
     const [updatingId, setUpdatingId] = useState(null);
     const [showModal, setShowModal] = useState(null); 
@@ -45,7 +47,7 @@ export default function UserManagement() {
             await axios.put(`/api/admin/users/${id}/role`, { role: newRole });
             setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
         } catch (e) {
-            alert('Failed to update clearance.');
+            toast.error('Failed to update clearance.');
         } finally {
             setUpdatingId(null);
         }
@@ -57,7 +59,7 @@ export default function UserManagement() {
             await axios.post(`/api/admin/users/${id}/block`);
             setUsers(users.map(u => u.id === id ? { ...u, is_blocked: !u.is_blocked } : u));
         } catch (e) {
-            alert('Blocking protocol failed.');
+            toast.error('Blocking protocol failed.');
         } finally {
             setUpdatingId(null);
         }
@@ -71,7 +73,7 @@ export default function UserManagement() {
             const isPro = user.role === 'paid-user';
             setUsers(users.map(u => u.id === id ? { ...u, role: isPro ? 'user' : 'paid-user' } : u));
         } catch (e) {
-            alert('Pro status toggle failed.');
+            toast.error('Pro status toggle failed.');
         } finally {
             setUpdatingId(null);
         }
@@ -83,7 +85,7 @@ export default function UserManagement() {
             await axios.delete(`/api/admin/users/${id}`);
             setUsers(users.filter(u => u.id !== id));
         } catch (e) {
-            alert('Deletion protocol failed.');
+            toast.error('Deletion protocol failed.');
         }
     };
 
@@ -100,7 +102,7 @@ export default function UserManagement() {
             setShowModal(null);
             setFormData({ name: '', email: '', password: '', role: 'user' });
         } catch (e) {
-            alert('Protocol error: Check unique constraints.');
+            toast.error('Protocol error: Check unique constraints.');
         }
     };
 

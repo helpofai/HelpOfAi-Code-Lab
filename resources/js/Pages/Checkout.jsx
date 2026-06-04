@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ShoppingBag, ShieldCheck, Zap, ArrowLeft, CreditCard, Wallet, Lock, Sparkles, CheckCircle2, FlaskConical } from 'lucide-react';
+import { useToast } from '@/Components/Toast/ToastProvider';
 import axios from 'axios';
 
 export default function Checkout({ auth, project, stripeKey, enabledGateways = [] }) {
     const [processing, setProcessing] = useState(false);
     const [selectedGateway, setSelectedGateway] = useState(enabledGateways[0] || 'stripe');
+    const toast = useToast();
 
     const gatewayMeta = {
         test: { name: 'Neural_Test_Bridge', icon: FlaskConical },
@@ -17,7 +19,7 @@ export default function Checkout({ auth, project, stripeKey, enabledGateways = [
     };
 
     const handlePurchase = async () => {
-        if (!selectedGateway) return alert('Please select a payment protocol.');
+        if (!selectedGateway) return toast.warning('Please select a payment protocol.');
         setProcessing(true);
         try {
             const res = await axios.post('/api/purchase/checkout', {
@@ -57,10 +59,10 @@ export default function Checkout({ auth, project, stripeKey, enabledGateways = [
                 rzp.open();
             } else {
                 // Implement other gateways if needed
-                alert(`${selectedGateway} protocol implementation pending.`);
+                toast.info(`${selectedGateway} protocol implementation pending.`);
             }
         } catch (e) {
-            alert(e.response?.data?.message || 'Handshake failed.');
+            toast.error(e.response?.data?.message || 'Handshake failed.');
         } finally {
             setProcessing(false);
         }
