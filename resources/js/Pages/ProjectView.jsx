@@ -24,7 +24,7 @@ export default function ProjectView({ project, canEdit }) {
 
     // Get an ad for the locked content block
     // globalAds is grouped by location so it's an object, not an array.
-    const lockAd = globalAds?.video_reward?.[0] || globalAds?.in_feed?.[0] || Object.values(globalAds || {})[0]?.[0];
+    const lockAd = globalAds?.adsLock?.[0] || globalAds?.video_reward?.[0] || globalAds?.in_feed?.[0] || Object.values(globalAds || {})[0]?.[0];
 
     useEffect(() => {
         const compile = async () => {

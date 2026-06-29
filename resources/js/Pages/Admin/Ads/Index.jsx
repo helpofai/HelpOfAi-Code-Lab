@@ -379,6 +379,7 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                             <option value="in_feed">In-Feed (Between Projects)</option>
                                             <option value="footer">Footer</option>
                                             <option value="video_reward">Video Reward Ad</option>
+                                            <option value="adsLock">Ads Lock</option>
                                         </select>
                                     </div>
                                     {data.provider !== 'custom' && (

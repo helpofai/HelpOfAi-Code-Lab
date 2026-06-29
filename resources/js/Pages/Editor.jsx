@@ -23,7 +23,7 @@ export default function Editor({ auth, project: initialProject }) {
         externalLibraries, setGoogleDriveFileId, preprocessors 
     } = useProjectStore();
     const { globalAds } = usePage().props;
-    const lockAd = globalAds?.video_reward?.[0] || globalAds?.in_feed?.[0] || Object.values(globalAds || {})[0]?.[0];
+    const lockAd = globalAds?.adsLock?.[0] || globalAds?.video_reward?.[0] || globalAds?.in_feed?.[0] || Object.values(globalAds || {})[0]?.[0];
     const [previewContent, setPreviewContent] = useState('');
     const [activeSidebar, setActiveSidebar] = useState(null);
     const [activeModal, setActiveModal] = useState(null);
