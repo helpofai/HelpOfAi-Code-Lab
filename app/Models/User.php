@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Cashier\Billable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, Billable;
@@ -29,6 +29,12 @@ class User extends Authenticatable
             'pm_type',
             'pm_last_four',
             'trial_ends_at',
+            'identity_status',
+            'identity_selfie_path',
+            'identity_document_path',
+            'identity_rejected_reason',
+            'level',
+            'manual_level',
         ];
     
         /**
@@ -58,6 +64,15 @@ class User extends Authenticatable
         public function isPaid(): bool
         {
             return $this->role === self::ROLE_PAID_USER || $this->role === self::ROLE_ADMIN;
+        }
+
+        public function hasVerifiedEmail()
+        {
+            $enabled = \App\Models\SiteSetting::get('feature_user_verification', '0');
+            if ($enabled === '0') {
+                return true;
+            }
+            return ! is_null($this->email_verified_at);
         }
     
         /**
@@ -150,5 +165,15 @@ class User extends Authenticatable
                 'personal_team' => true,
             ]);
         });
+    }
+
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\VerifyEmailNotification);
     }
 }

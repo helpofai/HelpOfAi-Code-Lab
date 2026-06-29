@@ -22,11 +22,13 @@ import {
     Settings,
     Info,
     ShoppingBag,
-    Tag
+    Tag,
+    BadgeCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 import NotificationDropdown from '@/Components/Visuals/NotificationDropdown';
+import UserLevelBadge from '@/Components/Visuals/UserLevelBadge';
 import Dropdown from '@/Components/Dropdown';
 
 export default function AuthenticatedLayout({ header, children }) {
@@ -64,6 +66,7 @@ export default function AuthenticatedLayout({ header, children }) {
         { name: 'SMTP Config', icon: Settings, href: route('admin.email.settings'), active: route().current('admin.email.settings') },
         { name: 'Support Queue', icon: LifeBuoy, href: route('admin.support'), active: route().current('admin.support') },
         { name: 'Front Management', icon: LayoutDashboard, href: route('admin.front-management'), active: route().current('admin.front-management') },
+        { name: 'Feature Management', icon: Shield, href: route('admin.features'), active: route().current('admin.features') },
         { name: 'Page Manager', icon: FileText, href: route('admin.pages.index'), active: route().current('admin.pages.*') },
         { name: 'System Update', icon: Terminal, href: route('admin.update'), active: route().current('admin.update') },
         { name: 'System Info', icon: Info, href: route('admin.info'), active: route().current('admin.info') },
@@ -151,7 +154,13 @@ export default function AuthenticatedLayout({ header, children }) {
                             <Dropdown.Trigger>
                                 <button className="flex items-center gap-3 group focus:outline-none">
                                     <div className="text-right hidden xl:block">
-                                        <p className="text-[10px] font-black uppercase text-[var(--text-main)] leading-none">{user.name}</p>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <p className="text-[10px] font-black uppercase text-[var(--text-main)] leading-none flex items-center justify-end gap-1">
+                                                {user.name}
+                                                {user.identity_status === 'verified' && <BadgeCheck className="text-emerald-500" size={12} title="Verified" />}
+                                            </p>
+                                            <UserLevelBadge level={user.level} size="sm" showText={false} />
+                                        </div>
                                         <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase mt-1">Online</p>
                                     </div>
                                     <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-all shadow-lg overflow-hidden">

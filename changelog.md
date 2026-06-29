@@ -4,6 +4,20 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ---
 
+## [1.12.0] - IDENTITY_AND_LEVELS - 2026-06-29
+
+### 🛡️ Identity & Verification
+- **Advanced Identity Verification Protocol**: Users can now upload a selfie and a national ID document to verify their identity. 
+- **Admin Verification Portal**: Administrators can review uploaded identity documents through a secure modal in the User Matrix and approve or reject identities with custom rejection reasons.
+- **Neural Verification Email**: Overhauled the email verification layout. Uses a custom cyberpunk aesthetic `VerifyEmailNotification` and a dark-theme email template for maximum professionalism.
+
+### 🌟 Leveling System
+- **Dynamic User Levels**: Automated level progression (Levels 1-10) based on project activity and view counts.
+- **Professional Badge UI**: Added a beautiful 10-level color-coded badge system with gradients and unique icons (Novice, Apprentice, Adept, Veteran, Elite, Master, Grandmaster, Legend, Mythic, Cosmic).
+- **Admin Level Control**: Admins can manually override a user's level via the User Matrix, automatically locking the level from daily recalculations.
+
+---
+
 ## [1.11.0] - SECURITY_HARDENED_&_UI_PROFESSIONAL - 2026-06-04
 
 ### 🔐 Security & Payment Hardening
@@ -205,4 +219,4 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ### Node Status: **STABLE**
 ### Core Clearance: **LEVEL_0**
-### Build Signature: **HOA-PRO-1.11.0-FINAL**
+### Build Signature: **HOA-PRO-1.12.0-FINAL**

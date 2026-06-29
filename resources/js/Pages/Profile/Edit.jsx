@@ -3,9 +3,11 @@ import { Head, usePage } from '@inertiajs/react';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
+import IdentityVerificationForm from './Partials/IdentityVerificationForm';
+import UserLevelBadge from '@/Components/Visuals/UserLevelBadge';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
-import { User, Shield, AlertTriangle, Fingerprint, Crown, Zap, CreditCard } from 'lucide-react';
+import { User, Shield, AlertTriangle, Fingerprint, Crown, Zap, CreditCard, BadgeCheck } from 'lucide-react';
 
 export default function Edit({ mustVerifyEmail, status }) {
     const user = usePage().props.auth.user;
@@ -41,8 +43,14 @@ export default function Edit({ mustVerifyEmail, status }) {
                                     <div className="w-24 h-24 rounded-full bg-[var(--bg-elevated)] border-2 border-cyan-500/30 flex items-center justify-center text-cyan-500 mb-6 shadow-lg shadow-cyan-500/10">
                                         <User size={48} strokeWidth={1.5} />
                                     </div>
-                                    <h3 className="text-xl font-black uppercase tracking-tight text-[var(--text-main)]">{user.name}</h3>
-                                    <p className="text-xs font-mono text-[var(--text-muted)] mt-1">{user.email}</p>
+                                    <h3 className="text-xl font-black uppercase tracking-tight text-[var(--text-main)] flex items-center justify-center gap-2">
+                                        {user.name}
+                                        {user.identity_status === 'verified' && <BadgeCheck className="text-emerald-500" size={20} title="Verified Identity" />}
+                                    </h3>
+                                    <div className="flex justify-center mt-2">
+                                        <UserLevelBadge level={user.level} size="md" />
+                                    </div>
+                                    <p className="text-xs font-mono text-[var(--text-muted)] mt-2">{user.email}</p>
                                     
                                     <div className="mt-8 w-full space-y-4">
                                         <div className="flex justify-between items-center p-3 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border)]">
@@ -100,6 +108,10 @@ export default function Edit({ mustVerifyEmail, status }) {
 
                         {/* Forms Column */}
                         <div className="lg:col-span-2 space-y-8">
+                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[2rem] p-8 shadow-xl">
+                                <IdentityVerificationForm className="max-w-xl" />
+                            </div>
+
                             <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[2rem] p-8 shadow-xl">
                                 <UpdateProfileInformationForm
                                     mustVerifyEmail={mustVerifyEmail}

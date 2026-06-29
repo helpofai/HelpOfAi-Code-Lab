@@ -5,8 +5,9 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { 
     ShieldCheck, Users, Database, Activity, 
-    Cpu, Terminal, Code2, TrendingUp, DollarSign
+    Cpu, Terminal, Code2, TrendingUp, DollarSign, AlertCircle, ArrowRight
 } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ProBackground from '@/Components/Visuals/ProBackground';
 
@@ -76,6 +77,25 @@ export default function AdminDashboard() {
                 <div className="relative min-h-full p-8 lg:p-12 overflow-y-auto">
                     <div className="max-w-7xl mx-auto relative z-10 space-y-10">
                         
+                        {/* Pending Verifications Alert */}
+                        {stats.users.pending_verifications > 0 && (
+                            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 flex items-center justify-between shadow-[0_0_30px_rgba(245,158,11,0.15)] relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-4 opacity-5"><ShieldCheck size={100} /></div>
+                                <div className="flex items-center gap-4 relative z-10">
+                                    <div className="p-3 bg-amber-500/20 text-amber-500 rounded-xl">
+                                        <AlertCircle size={24} className="animate-pulse" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-black uppercase tracking-widest text-amber-500">Identity Verifications Pending</h3>
+                                        <p className="text-xs font-bold text-[var(--text-muted)] mt-1">{stats.users.pending_verifications} user(s) have submitted identity documents requiring admin approval.</p>
+                                    </div>
+                                </div>
+                                <Link href={route('admin.users')} className="relative z-10 flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-white transition-all shadow-lg">
+                                    Review Documents <ArrowRight size={14} />
+                                </Link>
+                            </motion.div>
+                        )}
+
                         {/* Stats Row */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             {[

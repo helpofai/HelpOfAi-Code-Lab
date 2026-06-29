@@ -86,6 +86,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/admin/front-management', [FrontManagementController::class, 'index'])->name('admin.front-management');
     Route::post('/admin/front-management', [FrontManagementController::class, 'update'])->name('admin.front-management.update');
 
+    Route::get('/admin/features', [\App\Http\Controllers\Admin\FeatureManagementController::class, 'index'])->name('admin.features');
+    Route::post('/admin/features', [\App\Http\Controllers\Admin\FeatureManagementController::class, 'update'])->name('admin.features.update');
+
     Route::get('/admin/update', [\App\Http\Controllers\Admin\UpdateController::class, 'index'])->name('admin.update');
     Route::post('/admin/update/check', [\App\Http\Controllers\Admin\UpdateController::class, 'check'])->name('admin.update.check');
     Route::post('/admin/update/start', [\App\Http\Controllers\Admin\UpdateController::class, 'start'])->name('admin.update.start');

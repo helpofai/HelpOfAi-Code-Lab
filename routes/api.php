@@ -23,6 +23,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('/admin/users/{user}/role', [\App\Http\Controllers\Api\AdminController::class, 'updateRole']);
     Route::post('/admin/users/{user}/block', [\App\Http\Controllers\Api\AdminController::class, 'toggleBlock']);
     Route::post('/admin/users/{user}/toggle-pro', [\App\Http\Controllers\Api\AdminController::class, 'togglePro']);
+    Route::post('/admin/users/{user}/verify-identity', [\App\Http\Controllers\Api\AdminController::class, 'verifyIdentity']);
+    Route::post('/admin/users/{user}/update-level', [\App\Http\Controllers\Api\AdminController::class, 'updateLevel']);
     Route::delete('/admin/users/{user}', [\App\Http\Controllers\Api\AdminController::class, 'destroyUser']);
 });
 
@@ -60,6 +62,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::put('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
 
     Route::post('/media/upload', [\App\Http\Controllers\Api\MediaController::class, 'upload']);
+    
+    // User Identity Verification
+    Route::post('/profile/identity', [\App\Http\Controllers\Api\ProfileIdentityController::class, 'uploadIdentity']);
 
     // Google Drive Sync
     Route::get('/google-drive/auth', [\App\Http\Controllers\Api\GoogleDriveController::class, 'auth']);

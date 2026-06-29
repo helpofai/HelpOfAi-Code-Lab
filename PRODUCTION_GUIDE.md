@@ -3,15 +3,17 @@
 This guide details how to configure **HOACodeLab** for a production environment, specifically focusing on handling main domains (e.g., `hoacodelab.com`) and subdomains (e.g., `admin.hoacodelab.com` or `project.hoacodelab.com`).
 
 **repository Strategy: "Easy Mode"**
+
 - **Tracked:** `/vendor` (PHP Dependencies), `/node_modules` (JS Dependencies), `/public/build` (Compiled Assets).
 - **Ignored:** `.env` (Secrets/Configuration).
-- **Benefit:** You do *not* need to run `composer install` or `npm run build` on your production server.
+- **Benefit:** You do _not_ need to run `composer install` or `npm run build` on your production server.
 
 ## 1. Environment Configuration (.env)
 
 **CRITICAL:** The `.env` file is **NOT** in Git. You must manually create this file on your production server.
 
 ### Base Configuration
+
 ```ini
 APP_ENV=production
 APP_DEBUG=false
@@ -19,6 +21,7 @@ APP_URL=https://hoacodelab.com
 ```
 
 ### Session Sharing (Critical for Subdomains)
+
 To allow users to stay logged in across `hoacodelab.com` and `sub.hoacodelab.com`, you must set the `SESSION_DOMAIN` to the root domain with a leading dot.
 
 ```ini
@@ -26,6 +29,7 @@ SESSION_DOMAIN=.hoacodelab.com
 ```
 
 ### Sanctum (Authentication)
+
 If you are using API-based authentication (SPA mode) across subdomains, list them here.
 
 ```ini
@@ -33,6 +37,7 @@ SANCTUM_STATEFUL_DOMAINS=hoacodelab.com,admin.hoacodelab.com,www.hoacodelab.com
 ```
 
 ### Secure Cookies
+
 Ensure cookies are only sent over HTTPS.
 
 ```ini
@@ -44,6 +49,7 @@ SESSION_SECURE_COOKIE=true
 If you are on shared hosting or a restricted server where `node`, `npm`, or `composer` are not in the global system path, you must specify their absolute paths in your `.env`.
 
 ### Common Hosting Path Examples
+
 ```ini
 # For cPanel / Node.js Selector
 NODE_BINARY=/opt/alt/node20/usr/bin/node
@@ -52,7 +58,8 @@ NPM_BINARY=/opt/alt/node20/usr/bin/npm
 # For local Composer
 COMPOSER_BINARY="php /home/user/public_html/composer.phar"
 ```
-*Note: You can use the **Manual_Override** terminal at `/setup` to save these paths directly.*
+
+_Note: You can use the **Manual_Override** terminal at `/setup` to save these paths directly._
 
 ## 3. Web Server Configuration (Nginx)
 
@@ -71,10 +78,10 @@ server {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    
+
     # Handle main domain and all subdomains
     server_name hoacodelab.com *.hoacodelab.com;
-    
+
     root /var/www/hoacodelab/public;
     index index.php;
 
@@ -87,7 +94,7 @@ server {
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-XSS-Protection "1; mode=block";
     add_header X-Content-Type-Options "nosniff";
-    
+
     # Charset
     charset utf-8;
 
@@ -120,7 +127,7 @@ In `bootstrap/app.php`:
 ```php
 ->withMiddleware(function (Middleware $middleware): void {
     // ... other middleware
-    
+
     // Trust all proxies (standard for AWS/Cloudflare)
     $middleware->trustProxies(at: '*');
 })
@@ -154,16 +161,19 @@ Then edit `config/cors.php`:
 Since you are committing `vendor` and `node_modules` to Git, your deployment on the server is much faster.
 
 1.  **Pull Latest Code**:
+
     ```bash
     cd /var/www/hoacodelab
     git pull origin main
     ```
-    *Note: If you get "local changes" errors, you can run `git reset --hard origin/main` (WARNING: This deletes any changes you made directly on the server).*
+
+    _Note: If you get "local changes" errors, you can run `git reset --hard origin/main` (WARNING: This deletes any changes you made directly on the server)._
 
 2.  **Verify .env**:
     Ensure your `.env` file exists and has the correct database credentials. It is NOT updated by git pull.
 
 3.  **Optimize & Cache**:
+
     ```bash
     php artisan config:cache
     php artisan route:cache
@@ -172,6 +182,7 @@ Since you are committing `vendor` and `node_modules` to Git, your deployment on 
     ```
 
 4.  **Run Migrations**:
+
     ```bash
     php artisan migrate --force
     ```
@@ -196,4 +207,57 @@ Route::domain('{user}.hoacodelab.com')->group(function ($user) {
 ```
 
 ---
+
+The hosting has old locally-installed node_modules files that conflict with the
+▏ repo-tracked ones. Since you rely on repo-tracked deps (no npm/composer on hosting),
+▏ just remove them and pull clean:  
+▏  
+ rm -rf node_modules vendor  
+ git pull origin main  
+▏  
+▏ This nukes the locally-installed copies and lets git bring in the repo-tracked  
+▏ versions. If you also have a stale composer.lock or package-lock.json conflict, add:
+▏  
+ rm -rf node_modules vendor  
+ git checkout -- composer.lock package-lock.json  
+ git pull origin main  
+▏  
+▏ After the pull, run:  
+▏  
+ php artisan migrate --force  
+ php artisan optimize:clear
+
+    The pull succeeded but node_modules and vendor are now missing from disk — you rm
+
+▏ -rf'd them and the second pull didn't restore them because it was already  
+▏ up-to-date. Restore them from the repo:  
+▏  
+ git checkout HEAD -- node_modules vendor  
+▏  
+▏ Or simpler:  
+▏  
+ git reset --hard HEAD  
+▏  
+▏ Then verify your site loads:  
+▏  
+ php artisan --version
+
+    The pull updated the git index but the files are gone from disk. Run:
+
+▏  
+ git reset --hard HEAD  
+▏  
+▏ This restores every tracked file — including node_modules/ and vendor/. Your .env is
+▏ safe (it's gitignored now). This will take a minute or two on shared hosting — let  
+▏ it finish.  
+▏  
+▏ After it completes:  
+▏  
+ php artisan migrate --force  
+ php artisan optimize:clear
+
+---
+
+---
+
 **Note:** For the iframe `srcdoc` preview feature to work securely, ensure your `Content-Security-Policy` headers allow the iframe to load resources as needed, but restrict it from executing malicious actions on the parent window.

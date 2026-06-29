@@ -23,6 +23,7 @@ class AdminController extends Controller
             ->pluck('total', 'role');
 
         $latestUsers = User::latest()->take(5)->get();
+        $pendingVerifications = User::where('identity_status', 'pending')->count();
 
         // Revenue Analytics (Simplified calculation)
         $proPrice = (float) \App\Models\SiteSetting::where('key', 'pro_monthly_price')->first()?->value ?: 9.99;
@@ -43,7 +44,8 @@ class AdminController extends Controller
             'users' => [
                 'total' => $usersTotal,
                 'roles' => $roles,
-                'latest' => $latestUsers
+                'latest' => $latestUsers,
+                'pending_verifications' => $pendingVerifications
             ],
             'projects' => [
                 'total' => $projectsTotal,
@@ -64,7 +66,7 @@ class AdminController extends Controller
      */
     public function users()
     {
-        return User::orderBy('created_at', 'desc')->get(['id', 'name', 'email', 'role', 'is_blocked', 'created_at']);
+        return User::orderBy('created_at', 'desc')->get(['id', 'name', 'email', 'role', 'is_blocked', 'created_at', 'identity_status', 'identity_selfie_path', 'identity_document_path', 'identity_rejected_reason', 'level', 'manual_level']);
     }
 
     /**
@@ -164,5 +166,40 @@ class AdminController extends Controller
         $user->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Admin verifies or rejects identity documents.
+     */
+    public function verifyIdentity(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:verified,rejected',
+            'reason' => 'required_if:status,rejected|nullable|string|max:255'
+        ]);
+
+        $user->update([
+            'identity_status' => $validated['status'],
+            'identity_rejected_reason' => $validated['reason'] ?? null
+        ]);
+
+        return response()->json(['message' => 'Identity status updated successfully']);
+    }
+
+    public function updateLevel(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'level' => 'required|integer|min:1|max:10'
+        ]);
+
+        $user->update([
+            'level' => $validated['level'],
+            'manual_level' => true
+        ]);
+
+        return response()->json([
+            'message' => 'User level updated manually',
+            'user' => $user->fresh()
+        ]);
     }
 }
