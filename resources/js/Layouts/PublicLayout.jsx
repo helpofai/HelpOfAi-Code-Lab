@@ -9,9 +9,10 @@ import {
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import NotificationDropdown from '@/Components/Visuals/NotificationDropdown';
+import AdUnit from '@/Components/AdUnit';
 
 export default function PublicLayout({ children }) {
-    const { auth, siteSettings } = usePage().props;
+    const { auth, siteSettings, globalAds } = usePage().props;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
@@ -75,6 +76,13 @@ export default function PublicLayout({ children }) {
                 </div>
             </nav>
 
+            {/* Top Banner Ad */}
+            {globalAds?.top_banner && (
+                <div className="pt-24 max-w-7xl mx-auto px-6 relative z-10">
+                    {globalAds.top_banner.map(ad => <AdUnit key={ad.id} ad={ad} />)}
+                </div>
+            )}
+
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <>
@@ -114,6 +122,13 @@ export default function PublicLayout({ children }) {
             <main className="relative z-10 min-h-[calc(100vh-400px)]">
                 {children}
             </main>
+
+            {/* Footer Ad */}
+            {globalAds?.footer && (
+                <div className="max-w-7xl mx-auto px-6 py-6 relative z-10 border-t border-[var(--border)]">
+                    {globalAds.footer.map(ad => <AdUnit key={ad.id} ad={ad} />)}
+                </div>
+            )}
 
             <footer className="py-24 bg-[var(--bg-main)] border-t border-[var(--border)] px-6 relative z-10">
                 <div className="max-w-7xl mx-auto">

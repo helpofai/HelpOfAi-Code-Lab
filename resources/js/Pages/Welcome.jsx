@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import PublicLayout from '@/Layouts/PublicLayout';
+import AdUnit from '@/Components/AdUnit';
 import { useToast } from '@/Components/Toast/ToastProvider';
 import useProjectStore, { DEFAULT_TEMPLATE } from '@/Stores/useProjectStore';
 import MonacoWrapper from '@/Components/Editor/MonacoWrapper';
@@ -248,6 +249,7 @@ export default function Welcome({ auth, siteSettings }) {
     const [globalStats, setGlobalStats] = useState({ projects: 0, users: 0, public_projects: 0 });
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const toast = useToast();
+    const { globalAds } = usePage().props;
 
     useEffect(() => {
         // Load Compilers for Dynamic Previews
@@ -345,8 +347,15 @@ export default function Welcome({ auth, siteSettings }) {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {featured.length > 0 ? featured.slice(0, 3).map((project) => (
-                            <ProjectPreview key={project.id} project={project} />
+                        {featured.length > 0 ? featured.slice(0, 3).map((project, idx) => (
+                            <React.Fragment key={project.id}>
+                                <ProjectPreview project={project} />
+                                {idx === 0 && globalAds?.in_feed && (
+                                    <div className="md:col-span-3 my-8">
+                                        {globalAds.in_feed.map(ad => <AdUnit key={ad.id} ad={ad} />)}
+                                    </div>
+                                )}
+                            </React.Fragment>
                         )) : [1, 2, 3].map((i) => (
                             <div key={i} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden">
                                 <div className="aspect-video bg-[var(--bg-elevated)]" />

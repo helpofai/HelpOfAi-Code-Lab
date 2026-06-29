@@ -23,7 +23,8 @@ import {
     Info,
     ShoppingBag,
     Tag,
-    BadgeCheck
+    BadgeCheck,
+    Megaphone
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -67,6 +68,7 @@ export default function AuthenticatedLayout({ header, children }) {
         { name: 'Support Queue', icon: LifeBuoy, href: route('admin.support'), active: route().current('admin.support') },
         { name: 'Front Management', icon: LayoutDashboard, href: route('admin.front-management'), active: route().current('admin.front-management') },
         { name: 'Feature Management', icon: Shield, href: route('admin.features'), active: route().current('admin.features') },
+        { name: 'Ad Management', icon: Megaphone, href: route('admin.ads'), active: route().current('admin.ads') },
         { name: 'Page Manager', icon: FileText, href: route('admin.pages.index'), active: route().current('admin.pages.*') },
         { name: 'System Update', icon: Terminal, href: route('admin.update'), active: route().current('admin.update') },
         { name: 'System Info', icon: Info, href: route('admin.info'), active: route().current('admin.info') },
