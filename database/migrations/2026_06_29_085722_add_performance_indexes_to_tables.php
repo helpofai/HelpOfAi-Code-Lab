@@ -12,28 +12,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexesFound = $sm->listTableIndexes('users');
-            
-            if (!array_key_exists('users_role_index', $indexesFound)) {
+            if (!Schema::hasIndex('users', 'users_role_index')) {
                 $table->index('role');
             }
-            if (!array_key_exists('users_created_at_index', $indexesFound)) {
+            if (!Schema::hasIndex('users', 'users_created_at_index')) {
                 $table->index('created_at');
             }
         });
 
         Schema::table('projects', function (Blueprint $table) {
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexesFound = $sm->listTableIndexes('projects');
-            
-            if (!array_key_exists('projects_is_public_index', $indexesFound)) {
+            if (!Schema::hasIndex('projects', 'projects_is_public_index')) {
                 $table->index('is_public');
             }
-            if (!array_key_exists('projects_is_for_sale_index', $indexesFound)) {
+            if (!Schema::hasIndex('projects', 'projects_is_for_sale_index')) {
                 $table->index('is_for_sale');
             }
-            if (!array_key_exists('projects_created_at_index', $indexesFound)) {
+            if (!Schema::hasIndex('projects', 'projects_created_at_index')) {
                 $table->index('created_at');
             }
         });
@@ -45,14 +39,24 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropIndex(['role']);
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('users', 'users_role_index')) {
+                $table->dropIndex(['role']);
+            }
+            if (Schema::hasIndex('users', 'users_created_at_index')) {
+                $table->dropIndex(['created_at']);
+            }
         });
 
         Schema::table('projects', function (Blueprint $table) {
-            $table->dropIndex(['is_public']);
-            $table->dropIndex(['is_for_sale']);
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('projects', 'projects_is_public_index')) {
+                $table->dropIndex(['is_public']);
+            }
+            if (Schema::hasIndex('projects', 'projects_is_for_sale_index')) {
+                $table->dropIndex(['is_for_sale']);
+            }
+            if (Schema::hasIndex('projects', 'projects_created_at_index')) {
+                $table->dropIndex(['created_at']);
+            }
         });
     }
 };
