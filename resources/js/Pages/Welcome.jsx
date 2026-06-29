@@ -16,6 +16,7 @@ import AdUnit from '@/Components/AdUnit';
 import { useToast } from '@/Components/Toast/ToastProvider';
 import useProjectStore, { DEFAULT_TEMPLATE } from '@/Stores/useProjectStore';
 import MonacoWrapper from '@/Components/Editor/MonacoWrapper';
+import ProjectPreviewContent from '@/Components/ProjectPreviewContent';
 import PaymentModal from '@/Components/Modals/PaymentModal';
 
 // Fully Functional "Neural_Sandbox" Editor for the Home Page
@@ -167,61 +168,7 @@ const HomeEditor = () => {
     );
 };
 
-const ProjectPreviewContent = ({ project }) => {
-    const [compiled, setCompiled] = useState({ css: '', js: '' });
-    const [isCompiling, setIsCompiling] = useState(true);
 
-    useEffect(() => {
-        const compile = async () => {
-            let cCss = project.code?.css || '';
-            let cJs = project.code?.js || '';
-            const preps = project.settings?.preprocessors || { css: 'css', js: 'js' };
-
-            try {
-                if ((preps.css === 'scss' || preps.css === 'sass') && window.Sass) {
-                    window.Sass.compile(cCss, (result) => {
-                        setCompiled(prev => ({ ...prev, css: result.text || cCss }));
-                    });
-                } else {
-                    setCompiled(prev => ({ ...prev, css: cCss }));
-                }
-
-                if ((preps.js === 'babel' || preps.js === 'typescript') && window.Babel) {
-                    const result = window.Babel.transform(cJs, { presets: ['env', 'react', 'typescript'] }).code;
-                    setCompiled(prev => ({ ...prev, js: result }));
-                } else {
-                    setCompiled(prev => ({ ...prev, js: cJs }));
-                }
-            } catch (e) {
-                console.error("Preview_Sync_Error");
-            } finally {
-                setIsCompiling(false);
-            }
-        };
-        compile();
-    }, [project]);
-
-    const libs = (project.settings?.externalLibraries || []).map(lib => lib.endsWith('.css') ? `<link rel="stylesheet" href="${lib}">` : `<script src="${lib}"></script>`).join('\n');
-    const srcDoc = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; background: white; font-family: sans-serif; } ${compiled.css}</style>${libs}</head><body>${project.code?.html || ''}<script>${compiled.js}</script></body></html>`;
-
-    return (
-        <div className="w-full h-full relative">
-            {!isCompiling ? (
-                <iframe srcDoc={srcDoc} className="w-full h-full border-none pointer-events-none scale-75 origin-top-left" style={{ width: '133.33%', height: '133.33%' }} sandbox="allow-scripts" title={`preview-${project.id}`} />
-            ) : (
-                <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center text-[10px] font-black uppercase text-slate-300">Syncing_Node...</div>
-            )}
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                <div className="p-3 bg-cyan-500 text-black rounded-full shadow-xl transform scale-90 group-hover:scale-100 transition-transform"><Zap size={20} fill="currentColor" /></div>
-            </div>
-            <div className="absolute top-4 right-4">
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[8px] font-black text-white uppercase tracking-widest">Live Preview</span>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 const ProjectPreview = ({ project }) => {
     const targetRoute = project.is_for_sale ? route('project.show', { slug: project.slug }) : route('editor', { slug: project.slug });
@@ -434,11 +381,13 @@ export default function Welcome({ auth, siteSettings }) {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {privateProjects.map((project) => (
-                                <Link href={route('project.view', project.slug)} key={project.id} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-rose-500/30 transition-all hover:-translate-y-1 shadow-xl flex flex-col">
-                                    <div className="aspect-video bg-black/50 relative overflow-hidden flex items-center justify-center">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent z-10" />
-                                        <Lock className="text-rose-500/30 w-16 h-16 z-20 group-hover:scale-110 transition-transform" />
-                                        <div className="absolute top-4 right-4 px-3 py-1 bg-rose-500/20 text-rose-500 border border-rose-500/50 text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg z-30">
+                                <Link href={route('project.show', project.slug)} key={project.id} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-rose-500/30 transition-all hover:-translate-y-1 shadow-xl flex flex-col">
+                                    <div className="aspect-video bg-white relative overflow-hidden">
+                                        <ProjectPreviewContent project={project} />
+                                        <div className="absolute inset-0 bg-rose-500/10 backdrop-blur-[1px] z-20 pointer-events-none flex items-center justify-center">
+                                            <Lock className="text-rose-500/50 w-16 h-16" />
+                                        </div>
+                                        <div className="absolute top-4 right-4 px-3 py-1 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg z-30">
                                             Restricted
                                         </div>
                                     </div>

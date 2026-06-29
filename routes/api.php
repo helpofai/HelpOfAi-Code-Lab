@@ -38,6 +38,12 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/teams-list', function() {
         return auth()->user()->teams()->get()->merge(auth()->user()->ownedTeams()->get());
     });
+
+    // Access Requests
+    Route::post('projects/{project}/request-access', [\App\Http\Controllers\Api\ProjectAccessRequestController::class, 'requestAccess']);
+    Route::get('projects/access-requests', [\App\Http\Controllers\Api\ProjectAccessRequestController::class, 'getRequests']);
+    Route::post('projects/access-requests/{accessRequest}/approve', [\App\Http\Controllers\Api\ProjectAccessRequestController::class, 'approve']);
+    Route::post('projects/access-requests/{accessRequest}/reject', [\App\Http\Controllers\Api\ProjectAccessRequestController::class, 'reject']);
     Route::apiResource('assets', AssetController::class)->only(['index', 'store', 'destroy']);
     
     // Subscription system (Stripe & Multi-Gateway)

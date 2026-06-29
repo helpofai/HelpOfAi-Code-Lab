@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Plus, Code2, ExternalLink, Trash2, Clock, 
     Database, Search, LayoutGrid, List,
-    Share2, Check, Settings, Save, X, Activity, Briefcase
+    Share2, Check, Settings, Save, X, Activity, Briefcase, Bell
 } from 'lucide-react';
 import ProBackground from '@/Components/Visuals/ProBackground';
+import { useToast } from '@/Components/Toast/ToastProvider';
 
 function ProjectThumbnail({ project }) {
     const [fullProject, setFullProject] = useState(null);
@@ -135,17 +136,84 @@ function ProjectSettingsModal({ project, teams, onClose, onUpdate }) {
     );
 }
 
+function AccessRequestsModal({ onClose }) {
+    const [requests, setRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const toast = useToast();
+
+    useEffect(() => {
+        fetchRequests();
+    }, []);
+
+    const fetchRequests = async () => {
+        try {
+            const res = await axios.get('/api/projects/access-requests');
+            setRequests(res.data);
+        } catch (e) {
+            toast.error('Failed to load requests.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAction = async (id, action) => {
+        try {
+            await axios.post(`/api/projects/access-requests/${id}/${action}`);
+            toast.success(`Request ${action}d successfully.`);
+            setRequests(requests.filter(r => r.id !== id));
+        } catch (e) {
+            toast.error(`Failed to ${action} request.`);
+        }
+    };
+
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+                <div className="p-6 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg-elevated)]">
+                    <h3 className="text-sm font-black text-[var(--text-main)] uppercase tracking-widest italic flex items-center">
+                        <Bell className="mr-3 text-cyan-500" size={16} /> Access Requests
+                    </h3>
+                    <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-main)]"><X size={20} /></button>
+                </div>
+                <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+                    {loading ? (
+                        <div className="flex justify-center p-8"><div className="w-6 h-6 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" /></div>
+                    ) : requests.length === 0 ? (
+                        <div className="text-center p-8 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest">No pending requests.</div>
+                    ) : (
+                        <div className="space-y-4">
+                            {requests.map(req => (
+                                <div key={req.id} className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <div>
+                                        <div className="text-sm font-black text-[var(--text-main)] uppercase italic tracking-tighter">{req.project.title}</div>
+                                        <div className="text-[10px] text-[var(--text-muted)] font-bold">Requested by: <span className="text-cyan-500">{req.user.name}</span></div>
+                                    </div>
+                                    <div className="flex gap-2 w-full md:w-auto">
+                                        <button onClick={() => handleAction(req.id, 'approve')} className="flex-1 md:flex-none px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-black rounded text-[10px] font-black uppercase tracking-widest transition-all">Approve</button>
+                                        <button onClick={() => handleAction(req.id, 'reject')} className="flex-1 md:flex-none px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white rounded text-[10px] font-black uppercase tracking-widest transition-all">Reject</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+}
+
 export default function MyProjects() {
     const { auth } = usePage().props;
     const [projects, setProjects] = useState([]);
     const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [copySlug, setCopyStatus] = useState(null);
-    const [editingProject, setEditingProject] = useState(null);
-    const [viewMode, setViewMode] = useState('grid');
     const [activeCategory, setActiveCategory] = useState('ALL');
     const [activeTeam, setActiveTeam] = useState('ALL');
+    const [viewMode, setViewMode] = useState('grid');
+    const [editingProject, setEditingProject] = useState(null);
+    const [copyStatus, setCopyStatus] = useState(null);
+    const [showRequestsModal, setShowRequestsModal] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -201,6 +269,7 @@ export default function MyProjects() {
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={14} />
                                 <input type="text" placeholder="Filter_Data..." value={search} onChange={(e) => setSearch(e.target.value)} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded pl-10 pr-4 py-2 text-[10px] font-bold uppercase tracking-widest focus:border-cyan-500/50 w-full" />
                             </div>
+                            <button onClick={() => setShowRequestsModal(true)} className="btn-secondary whitespace-nowrap"><Bell className="mr-2 inline" size={14} /> Requests</button>
                             <Link href={route('editor')} className="btn-primary whitespace-nowrap"><Plus className="mr-2 inline" size={14} /> New_Module</Link>
                         </div>
                     </div>
@@ -271,6 +340,7 @@ export default function MyProjects() {
                 </div>
             </AuthenticatedLayout>
             <AnimatePresence>{editingProject && <ProjectSettingsModal project={editingProject} teams={teams} onClose={() => setEditingProject(null)} onUpdate={(upd) => setProjects(projects.map(p => p.id === upd.id ? upd : p))} />}</AnimatePresence>
+            <AnimatePresence>{showRequestsModal && <AccessRequestsModal onClose={() => setShowRequestsModal(false)} />}</AnimatePresence>
         </div>
     );
 }

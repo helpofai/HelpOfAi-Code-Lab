@@ -77,9 +77,6 @@ class ExploreController extends Controller
         $projects = $query->paginate(12);
         
         $projects->getCollection()->transform(function ($project) {
-            $isRestricted = false;
-            // Similar to ProjectView, but we can't assume auth here easily. Let frontend handle it or just scrub code always for explore endpoint.
-            $project->code = ['html' => '', 'css' => '', 'js' => ''];
             $project->is_restricted = !$project->is_public && !$project->is_for_sale;
             $project->makeVisible(['code', 'settings']);
             return $project;

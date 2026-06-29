@@ -287,6 +287,7 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                             <option value="sidebar">Sidebar</option>
                                             <option value="in_feed">In-Feed (Between Projects)</option>
                                             <option value="footer">Footer</option>
+                                            <option value="video_reward">Video Reward Ad</option>
                                         </select>
                                     </div>
                                     {data.provider !== 'custom' && (
@@ -298,6 +299,7 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                                 <option value="horizontal">Horizontal</option>
                                                 <option value="vertical">Vertical</option>
                                                 <option value="rectangle">Rectangle</option>
+                                                <option value="video">Video</option>
                                             </select>
                                         </div>
                                     )}

@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Code2, ExternalLink, Shield, Zap, Lock, ShoppingCart, User, Clock, CheckCircle2, Download, Bookmark } from 'lucide-react';
+import { Code2, ExternalLink, Shield, Zap, Lock, ShoppingCart, User, Clock, CheckCircle2, Download, Bookmark, Loader2 } from 'lucide-react';
 import AdUnit from '@/Components/AdUnit';
+import axios from 'axios';
+import { useToast } from '@/Components/Toast/ToastProvider';
 
 export default function ProjectView({ project, canEdit }) {
     const { globalAds } = usePage().props;
+    const { auth } = usePage().props;
     const [compiled, setCompiled] = useState({ css: '', js: '' });
     const [isCompiling, setIsCompiling] = useState(true);
     const [activeTab, setActiveTab] = useState('html');
+    const [isRequesting, setIsRequesting] = useState(false);
+    const [accessRequestStatus, setAccessRequestStatus] = useState(project.access_request_status || null);
+    
+    // Reward Ads State
+    const [rewardAdsCompleted, setRewardAdsCompleted] = useState(0);
+    const [isPlayingAd, setIsPlayingAd] = useState(false);
+    const [adTimeLeft, setAdTimeLeft] = useState(0);
+
+    const toast = useToast();
 
     // Get an ad for the locked content block
     const lockAd = globalAds?.find(a => a.location === 'in_feed' && a.is_active) || globalAds?.[0];
@@ -42,6 +54,24 @@ export default function ProjectView({ project, canEdit }) {
         };
         compile();
     }, [project]);
+
+    useEffect(() => {
+        let timer;
+        if (isPlayingAd && adTimeLeft > 0) {
+            timer = setTimeout(() => {
+                setAdTimeLeft(prev => prev - 1);
+            }, 1000);
+        } else if (isPlayingAd && adTimeLeft === 0) {
+            setIsPlayingAd(false);
+            setRewardAdsCompleted(prev => prev + 1);
+        }
+        return () => clearTimeout(timer);
+    }, [isPlayingAd, adTimeLeft]);
+
+    const playRewardAd = () => {
+        setIsPlayingAd(true);
+        setAdTimeLeft(5); // 5 seconds ad duration
+    };
 
     const libs = (project.settings?.externalLibraries || []).map(lib => lib.endsWith('.css') ? `<link rel="stylesheet" href="${lib}">` : `<script src="${lib}"></script>`).join('\n');
     const srcDoc = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; background: white; font-family: sans-serif; } ${compiled.css}</style>${libs}</head><body>${project.code?.html || ''}<script>${compiled.js}</script></body></html>`;
@@ -77,6 +107,19 @@ export default function ProjectView({ project, canEdit }) {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    };
+
+    const handleRequestAccess = async () => {
+        setIsRequesting(true);
+        try {
+            const res = await axios.post(`/api/projects/${project.id}/request-access`);
+            setAccessRequestStatus(res.data.status);
+            toast.success(res.data.message);
+        } catch (error) {
+            toast.error('Failed to request access.');
+        } finally {
+            setIsRequesting(false);
+        }
     };
 
     const isLocked = !canEdit && (project.is_for_sale || project.is_restricted);
@@ -186,37 +229,85 @@ export default function ProjectView({ project, canEdit }) {
                                     {/* Lock Overlay with Ads */}
                                     {isLocked && (
                                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md p-6">
-                                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-3xl max-w-sm w-full text-center space-y-6 shadow-2xl">
-                                                <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
-                                                    <Lock size={24} className="text-rose-500" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <h4 className="text-lg font-black uppercase text-[var(--text-main)] italic tracking-tighter">
-                                                        {lockType === 'private' ? 'Access Restricted' : 'Code Locked'}
+                                            {lockType === 'private' && rewardAdsCompleted < 2 ? (
+                                                <div className="bg-black border border-[var(--border)] p-6 rounded-3xl max-w-md w-full text-center space-y-4 shadow-2xl relative overflow-hidden">
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/20 to-transparent pointer-events-none" />
+                                                    <h4 className="text-lg font-black uppercase text-white tracking-widest flex items-center justify-center gap-2">
+                                                        <Zap size={18} className="text-cyan-500" /> Unlock Protocol
                                                     </h4>
-                                                    <p className="text-xs text-[var(--text-muted)] font-medium leading-relaxed">
-                                                        {lockType === 'private' 
-                                                            ? 'This is a private module. The creator has restricted code access.' 
-                                                            : 'Purchase this premium module to unlock the full source code, export options, and commercial usage rights.'}
+                                                    <p className="text-xs text-gray-400 font-medium">
+                                                        This module is restricted. Complete {2 - rewardAdsCompleted} more sponsor ad{2 - rewardAdsCompleted > 1 ? 's' : ''} to reveal the request access protocol.
                                                     </p>
+                                                    
+                                                    {isPlayingAd ? (
+                                                        <div className="w-full aspect-video bg-[#1a1a1a] rounded-xl border border-white/10 flex flex-col items-center justify-center relative overflow-hidden">
+                                                            <div className="absolute inset-0 bg-cyan-500/10 animate-pulse" />
+                                                            <span className="text-xs font-black uppercase tracking-widest text-white/50 mb-2">Sponsor Advertisement</span>
+                                                            <div className="text-4xl font-black text-white z-10">{adTimeLeft}s</div>
+                                                            <div className="absolute bottom-0 left-0 h-1 bg-cyan-500 transition-all duration-1000" style={{ width: `${((5 - adTimeLeft) / 5) * 100}%` }} />
+                                                        </div>
+                                                    ) : (
+                                                        <button 
+                                                            onClick={playRewardAd}
+                                                            className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+                                                        >
+                                                            Initialize Ad Sequence ({rewardAdsCompleted}/2)
+                                                        </button>
+                                                    )}
                                                 </div>
-                                                
-                                                {lockType === 'paid' && (
-                                                    <Link 
-                                                        href={route('checkout.project', project.slug)}
-                                                        className="w-full flex items-center justify-center gap-3 py-3 bg-cyan-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)]"
-                                                    >
-                                                        <ShoppingCart size={16} /> Unlock Now for ${project.price}
-                                                    </Link>
-                                                )}
-                                                
-                                                {/* Ad Block inside lock screen */}
-                                                {lockAd && (
-                                                    <div className="pt-4 border-t border-[var(--border)] mt-4 opacity-80 scale-90 origin-top">
-                                                        <AdUnit ad={lockAd} />
+                                            ) : (
+                                                <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-3xl max-w-sm w-full text-center space-y-6 shadow-2xl">
+                                                    <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
+                                                        <Lock size={24} className="text-rose-500" />
                                                     </div>
-                                                )}
-                                            </div>
+                                                    <div className="space-y-2">
+                                                        <h4 className="text-lg font-black uppercase text-[var(--text-main)] italic tracking-tighter">
+                                                            {lockType === 'private' ? 'Access Restricted' : 'Code Locked'}
+                                                        </h4>
+                                                        <p className="text-xs text-[var(--text-muted)] font-medium leading-relaxed">
+                                                            {lockType === 'private' 
+                                                                ? 'This is a private module. The creator has restricted code access.' 
+                                                                : 'Purchase this premium module to unlock the full source code, export options, and commercial usage rights.'}
+                                                        </p>
+                                                        {lockType === 'private' && (
+                                                            <div className="pt-2">
+                                                                {!auth?.user ? (
+                                                                    <Link href={route('login')} className="w-full py-2 bg-rose-500 text-white rounded-lg text-[10px] font-black uppercase inline-block text-center hover:bg-rose-600 transition-colors">Login to Request Access</Link>
+                                                                ) : !accessRequestStatus ? (
+                                                                    <button onClick={handleRequestAccess} disabled={isRequesting} className="w-full py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-black uppercase flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
+                                                                        {isRequesting ? <Loader2 size={14} className="animate-spin" /> : null}
+                                                                        {isRequesting ? 'Requesting...' : 'Request Code Access'}
+                                                                    </button>
+                                                                ) : accessRequestStatus === 'pending' ? (
+                                                                    <div className="w-full py-2 border border-rose-500/30 text-rose-500 rounded-lg text-[10px] font-black uppercase bg-rose-500/10">
+                                                                        Access Request Pending
+                                                                    </div>
+                                                                ) : accessRequestStatus === 'rejected' ? (
+                                                                    <div className="w-full py-2 bg-black text-rose-500 border border-rose-500/30 rounded-lg text-[10px] font-black uppercase">
+                                                                        Access Rejected by Author
+                                                                    </div>
+                                                                ) : null}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    {lockType === 'paid' && (
+                                                        <Link 
+                                                            href={route('checkout.project', project.slug)}
+                                                            className="w-full flex items-center justify-center gap-3 py-3 bg-cyan-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+                                                        >
+                                                            <ShoppingCart size={16} /> Unlock Now for ${project.price}
+                                                        </Link>
+                                                    )}
+                                                    
+                                                    {/* Ad Block inside lock screen */}
+                                                    {lockAd && (
+                                                        <div className="pt-4 border-t border-[var(--border)] mt-4 opacity-80 scale-90 origin-top">
+                                                            <AdUnit ad={lockAd} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

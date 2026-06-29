@@ -43,19 +43,31 @@ Route::get('/editor/{slug?}', function ($slug = null) {
                         $user->teams()->where('teams.id', $project->team_id)->exists();
 
         $isRestricted = false;
+        $accessRequestStatus = null;
         // Security Guard: Private Projects
         if (!$project->is_public && !$isOwner && !$isTeamMember && !$hasPurchased) {
             $isRestricted = true;
+            
+            if ($user) {
+                $accessRequest = \App\Models\ProjectAccessRequest::where('project_id', $project->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+                    
+                if ($accessRequest) {
+                    $accessRequestStatus = $accessRequest->status;
+                    if ($accessRequestStatus === 'approved') {
+                        $isRestricted = false;
+                    }
+                }
+            }
         }
 
         // Add metadata for frontend logic
         $project->has_purchased = $hasPurchased;
         $project->is_restricted = $isRestricted;
+        $project->access_request_status = $accessRequestStatus;
 
-        // Force visibility of code and settings for Live Previews, unless restricted
-        if ($isRestricted) {
-            $project->code = ['html' => '', 'css' => '', 'js' => ''];
-        }
+        // Force visibility of code and settings for Live Previews
         $project->makeVisible(['code', 'settings']);
     }
     return Inertia::render('Editor', [
@@ -79,16 +91,29 @@ Route::get('/project/{slug}', function ($slug) {
                     $user->teams()->where('teams.id', $project->team_id)->exists();
 
     $isRestricted = false;
+    $accessRequestStatus = null;
+    
     if (!$project->is_public && !$isOwner && !$isTeamMember && !$hasPurchased) {
         $isRestricted = true;
+        
+        if ($user) {
+            $accessRequest = \App\Models\ProjectAccessRequest::where('project_id', $project->id)
+                ->where('user_id', $user->id)
+                ->first();
+                
+            if ($accessRequest) {
+                $accessRequestStatus = $accessRequest->status;
+                if ($accessRequestStatus === 'approved') {
+                    $isRestricted = false;
+                }
+            }
+        }
     }
 
     $project->has_purchased = $hasPurchased;
     $project->is_restricted = $isRestricted;
+    $project->access_request_status = $accessRequestStatus;
 
-    if ($isRestricted) {
-        $project->code = ['html' => '', 'css' => '', 'js' => ''];
-    }
     $project->makeVisible(['code', 'settings']);
 
     return Inertia::render('ProjectView', [

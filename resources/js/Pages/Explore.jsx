@@ -3,6 +3,7 @@ import { Head, Link, usePage, router } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Search, Filter, SlidersHorizontal, ChevronRight, LayoutGrid, Code2, Tag, ArrowRight, User, Eye, Lock, ShoppingBag, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import ProjectPreviewContent from '@/Components/ProjectPreviewContent';
 
 export default function Explore({ auth, siteSettings }) {
     const { globalAds } = usePage().props;
@@ -204,21 +205,21 @@ export default function Explore({ auth, siteSettings }) {
                             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {projects.map((project) => (
                                     <Link href={route('project.show', project.slug)} key={project.id} className={`group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden transition-all hover:-translate-y-1 shadow-xl flex flex-col ${project.is_restricted ? 'hover:border-rose-500/30' : 'hover:border-cyan-500/30'}`}>
-                                        <div className={`aspect-video relative overflow-hidden flex items-center justify-center ${project.is_restricted ? 'bg-black/50' : 'bg-white'}`}>
+                                        <div className={`aspect-video relative overflow-hidden flex items-center justify-center ${project.is_restricted ? 'bg-white' : 'bg-white'}`}>
+                                            
+                                            <ProjectPreviewContent project={project} />
                                             
                                             {project.is_restricted ? (
                                                 <>
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent z-10" />
-                                                    <Lock className="text-rose-500/30 w-16 h-16 z-20 group-hover:scale-110 transition-transform" />
-                                                    <div className="absolute top-4 right-4 px-3 py-1 bg-rose-500/20 text-rose-500 border border-rose-500/50 text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg z-30">
+                                                    <div className="absolute inset-0 bg-rose-500/10 backdrop-blur-[1px] z-20 pointer-events-none flex items-center justify-center">
+                                                        <Lock className="text-rose-500/50 w-16 h-16" />
+                                                    </div>
+                                                    <div className="absolute top-4 right-4 px-3 py-1 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg z-30">
                                                         Restricted
                                                     </div>
                                                 </>
                                             ) : (
                                                 <>
-                                                    {/* We can use iframe preview here if we had full html, but since it's just explore, maybe a placeholder or iframe is too heavy. Let's just show an icon */}
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent z-10" />
-                                                    <Code2 className="text-cyan-500/20 w-16 h-16 z-20 group-hover:scale-110 transition-transform" />
                                                     {project.is_for_sale && (
                                                         <div className="absolute top-4 right-4 px-3 py-1 bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg z-30">
                                                             ${project.price}

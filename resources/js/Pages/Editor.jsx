@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
@@ -32,6 +32,38 @@ export default function Editor({ auth, project: initialProject }) {
     const [hasPurchased, setHasPurchased] = useState(initialProject?.has_purchased || false);
     const [paletteOpen, setPaletteOpen] = useState(false);
     const toast = useToast();
+
+    const isNewProject = !initialProject;
+    const isOwner = useMemo(() => {
+        if (!auth.user) return false;
+        if (!initialProject) return true; 
+        return initialProject.user_id === auth.user.id;
+    }, [auth.user, initialProject]);
+
+    const isVerifiedOrHighLevel = auth?.user && (auth.user.identity_status === 'verified' || auth.user.level > 4);
+    const requiresVideoAd = !isNewProject && !isOwner && initialProject.is_public && !initialProject.is_for_sale && !isVerifiedOrHighLevel;
+
+    const [hasCompletedVideoAd, setHasCompletedVideoAd] = useState(!requiresVideoAd);
+    const [isPlayingAd, setIsPlayingAd] = useState(false);
+    const [adTimeLeft, setAdTimeLeft] = useState(0);
+
+    useEffect(() => {
+        let timer;
+        if (isPlayingAd && adTimeLeft > 0) {
+            timer = setTimeout(() => {
+                setAdTimeLeft(prev => prev - 1);
+            }, 1000);
+        } else if (isPlayingAd && adTimeLeft === 0) {
+            setIsPlayingAd(false);
+            setHasCompletedVideoAd(true);
+        }
+        return () => clearTimeout(timer);
+    }, [isPlayingAd, adTimeLeft]);
+
+    const playRewardAd = () => {
+        setIsPlayingAd(true);
+        setAdTimeLeft(5); // 5 seconds ad duration
+    };
 
     // Initialize Store
     useEffect(() => {
@@ -223,12 +255,6 @@ export default function Editor({ auth, project: initialProject }) {
         return () => { window.removeEventListener('message', handleMessage); clearTimeout(timeout); };
     }, [html, css, js, externalLibraries, preprocessors]);
 
-    const isOwner = useMemo(() => {
-        if (!auth.user) return false;
-        if (!projectData) return true; 
-        return projectData.user_id === auth.user.id;
-    }, [auth.user, projectData]);
-
     const handleExport = () => {
         const blob = new Blob([previewContent], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
@@ -272,6 +298,39 @@ export default function Editor({ auth, project: initialProject }) {
                 <meta name="twitter:image" content={ogImage} />
             </Head>
             
+            {/* Video Reward Ad Overlay */}
+            {!hasCompletedVideoAd && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+                    <div className="bg-[#111] border border-[var(--border)] p-8 rounded-3xl max-w-md w-full text-center space-y-6 shadow-2xl relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 to-transparent pointer-events-none" />
+                        <h4 className="text-xl font-black uppercase text-white tracking-widest flex items-center justify-center gap-2">
+                            <svg className="w-6 h-6 text-cyan-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> 
+                            Unlock Code Editor
+                        </h4>
+                        <p className="text-sm text-gray-400 font-medium">
+                            To view the source code of this public module, please watch a short sponsor message. (Verified users and Level 5+ bypass this automatically).
+                        </p>
+                        
+                        {isPlayingAd ? (
+                            <div className="w-full aspect-video bg-[#000] rounded-xl border border-white/10 flex flex-col items-center justify-center relative overflow-hidden">
+                                <div className="absolute inset-0 bg-cyan-500/5 animate-pulse" />
+                                <span className="text-xs font-black uppercase tracking-widest text-white/50 mb-2">Sponsor Advertisement</span>
+                                <div className="text-5xl font-black text-white z-10">{adTimeLeft}s</div>
+                                <div className="absolute bottom-0 left-0 h-1 bg-cyan-500 transition-all duration-1000" style={{ width: `${((5 - adTimeLeft) / 5) * 100}%` }} />
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={playRewardAd}
+                                className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+                            >
+                                Play Video Ad to Unlock
+                            </button>
+                        )}
+                        <Link href={route('explore')} className="block text-xs font-bold text-gray-500 hover:text-white transition-colors pt-4">Return to Explore</Link>
+                    </div>
+                </div>
+            )}
+
             <EditorHeader 
                 handleSave={handleSave} 
                 handleCloudSave={handleCloudSave}
