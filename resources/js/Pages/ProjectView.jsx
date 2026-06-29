@@ -79,7 +79,8 @@ export default function ProjectView({ project, canEdit }) {
         URL.revokeObjectURL(url);
     };
 
-    const isLocked = !canEdit && project.is_for_sale;
+    const isLocked = !canEdit && (project.is_for_sale || project.is_restricted);
+    const lockType = project.is_restricted ? 'private' : (project.is_for_sale ? 'paid' : 'none');
     
     // Obfuscate code if locked
     const displayCode = {
@@ -101,7 +102,7 @@ export default function ProjectView({ project, canEdit }) {
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-cyan-500 font-bold tracking-widest uppercase text-xs">
                                 <Zap size={14} className="fill-current" />
-                                <span>{project.is_for_sale ? 'Premium Module' : 'Open Source Component'}</span>
+                                <span>{project.is_restricted ? 'Private Module' : (project.is_for_sale ? 'Premium Module' : 'Open Source Component')}</span>
                             </div>
                             <h1 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">
                                 {project.title}
@@ -190,17 +191,24 @@ export default function ProjectView({ project, canEdit }) {
                                                     <Lock size={24} className="text-rose-500" />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <h4 className="text-lg font-black uppercase text-[var(--text-main)] italic tracking-tighter">Code Locked</h4>
+                                                    <h4 className="text-lg font-black uppercase text-[var(--text-main)] italic tracking-tighter">
+                                                        {lockType === 'private' ? 'Access Restricted' : 'Code Locked'}
+                                                    </h4>
                                                     <p className="text-xs text-[var(--text-muted)] font-medium leading-relaxed">
-                                                        Purchase this premium module to unlock the full source code, export options, and commercial usage rights.
+                                                        {lockType === 'private' 
+                                                            ? 'This is a private module. The creator has restricted code access.' 
+                                                            : 'Purchase this premium module to unlock the full source code, export options, and commercial usage rights.'}
                                                     </p>
                                                 </div>
-                                                <Link 
-                                                    href={route('checkout.project', project.slug)}
-                                                    className="w-full flex items-center justify-center gap-3 py-3 bg-cyan-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)]"
-                                                >
-                                                    <ShoppingCart size={16} /> Unlock Now for ${project.price}
-                                                </Link>
+                                                
+                                                {lockType === 'paid' && (
+                                                    <Link 
+                                                        href={route('checkout.project', project.slug)}
+                                                        className="w-full flex items-center justify-center gap-3 py-3 bg-cyan-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+                                                    >
+                                                        <ShoppingCart size={16} /> Unlock Now for ${project.price}
+                                                    </Link>
+                                                )}
                                                 
                                                 {/* Ad Block inside lock screen */}
                                                 {lockAd && (
@@ -222,9 +230,11 @@ export default function ProjectView({ project, canEdit }) {
                         {/* Action Card */}
                         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-8 space-y-8 shadow-xl sticky top-32">
                             <div className="space-y-2 text-center border-b border-[var(--border)] pb-8">
-                                <h4 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Acquisition_Cost</h4>
+                                <h4 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">
+                                    {project.is_restricted ? 'Access_Level' : 'Acquisition_Cost'}
+                                </h4>
                                 <div className="text-5xl font-black text-cyan-500 font-mono tracking-tighter">
-                                    {project.is_for_sale ? `$${project.price}` : 'FREE'}
+                                    {project.is_restricted ? 'PRIVATE' : (project.is_for_sale ? `$${project.price}` : 'FREE')}
                                 </div>
                             </div>
                             
@@ -236,6 +246,10 @@ export default function ProjectView({ project, canEdit }) {
                                     >
                                         <Code2 size={18} /> Open in Editor
                                     </Link>
+                                ) : project.is_restricted ? (
+                                    <div className="w-full flex items-center justify-center gap-3 py-5 bg-[var(--bg-main)] text-rose-500 border border-rose-500/20 font-black uppercase text-xs tracking-widest rounded-xl opacity-80 cursor-not-allowed">
+                                        <Lock size={18} /> Code Restricted
+                                    </div>
                                 ) : project.is_for_sale ? (
                                     <Link 
                                         href={route('checkout.project', project.slug)}

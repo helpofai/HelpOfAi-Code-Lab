@@ -13,6 +13,7 @@ Route::get('/user', function (Request $request) {
 // Public stats & featured projects for Welcome page
 Route::get('explore/featured', [\App\Http\Controllers\Api\ExploreController::class, 'featured']);
 Route::get('explore/paid', [\App\Http\Controllers\Api\ExploreController::class, 'paid']);
+Route::get('explore/private', [\App\Http\Controllers\Api\ExploreController::class, 'privateProjects']);
 Route::get('explore/stats', [\App\Http\Controllers\Api\ExploreController::class, 'stats']);
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {

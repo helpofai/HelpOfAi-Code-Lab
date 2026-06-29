@@ -255,6 +255,7 @@ const ProjectPreview = ({ project }) => {
 export default function Welcome({ auth, siteSettings }) {
     const [featured, setFeatured] = useState([]);
     const [paidProjects, setPaidProjects] = useState([]);
+    const [privateProjects, setPrivateProjects] = useState([]);
     const [globalStats, setGlobalStats] = useState({ projects: 0, users: 0, public_projects: 0 });
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const toast = useToast();
@@ -275,6 +276,7 @@ export default function Welcome({ auth, siteSettings }) {
 
         axios.get('/api/explore/featured').then(res => setFeatured(res.data));
         axios.get('/api/explore/paid').then(res => setPaidProjects(res.data));
+        axios.get('/api/explore/private').then(res => setPrivateProjects(res.data));
         axios.get('/api/explore/stats').then(res => setGlobalStats(res.data));
     }, []);
 
@@ -412,6 +414,48 @@ export default function Welcome({ auth, siteSettings }) {
                                         </div>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* Private Projects Section */}
+            {privateProjects.length > 0 && (
+                <section className="py-32 px-6 border-b border-[var(--border)] bg-[var(--bg-main)]">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex justify-between items-end mb-16">
+                            <div className="space-y-2 text-left">
+                                <div className="flex items-center gap-2 text-rose-500"><Lock size={16} /><span className="text-[10px] font-black uppercase tracking-[0.3em]">Restricted</span></div>
+                                <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Private Projects</h2>
+                                <p className="text-sm text-[var(--text-muted)] mt-2">Code view is restricted for these projects.</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {privateProjects.map((project) => (
+                                <Link href={route('project.view', project.slug)} key={project.id} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-rose-500/30 transition-all hover:-translate-y-1 shadow-xl flex flex-col">
+                                    <div className="aspect-video bg-black/50 relative overflow-hidden flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent z-10" />
+                                        <Lock className="text-rose-500/30 w-16 h-16 z-20 group-hover:scale-110 transition-transform" />
+                                        <div className="absolute top-4 right-4 px-3 py-1 bg-rose-500/20 text-rose-500 border border-rose-500/50 text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg z-30">
+                                            Restricted
+                                        </div>
+                                    </div>
+                                    <div className="p-6 space-y-4 text-left flex-1 flex flex-col">
+                                        <div className="flex justify-between items-start">
+                                            <h3 className="text-lg font-black text-[var(--text-main)] uppercase italic tracking-tighter truncate">{project.title}</h3>
+                                        </div>
+                                        <div className="flex items-center gap-4 text-[10px] text-[var(--text-muted)] font-mono">
+                                            <span className="flex items-center gap-1 uppercase font-bold"><User size={10} className="text-rose-500/40" /> {project.user?.name || 'Unknown'}</span>
+                                        </div>
+                                        <div className="pt-4 mt-auto">
+                                            <div className="w-full py-3 bg-[var(--bg-elevated)] text-[var(--text-muted)] group-hover:text-rose-500 border border-[var(--border)] group-hover:border-rose-500/50 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2">
+                                                <Eye size={14} /> View Restricted Project
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
                             ))}
                         </div>
                     </div>

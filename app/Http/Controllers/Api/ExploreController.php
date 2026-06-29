@@ -113,6 +113,25 @@ class ExploreController extends Controller
     }
 
     /**
+     * Get private projects for welcome page.
+     */
+    public function privateProjects()
+    {
+        $projects = Project::where('is_public', false)
+            ->where('is_for_sale', false)
+            ->with('user:id,name')
+            ->orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get();
+
+        foreach ($projects as $project) {
+            $project->makeVisible(['code', 'settings']);
+        }
+
+        return $projects;
+    }
+
+    /**
      * Get global system stats for welcome page.
      */
     public function stats()

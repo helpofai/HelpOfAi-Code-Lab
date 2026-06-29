@@ -37,17 +37,20 @@ Route::get('/editor/{slug?}', function ($slug = null) {
         $isTeamMember = $project->team_id && $user && 
                         $user->teams()->where('teams.id', $project->team_id)->exists();
 
+        $isRestricted = false;
         // Security Guard: Private Projects
-        if (!$project->is_public) {
-            if (!$isOwner && !$isTeamMember) {
-                abort(403, 'Unauthorized. Restricted Neural Core.');
-            }
+        if (!$project->is_public && !$isOwner && !$isTeamMember && !$hasPurchased) {
+            $isRestricted = true;
         }
 
         // Add metadata for frontend logic
         $project->has_purchased = $hasPurchased;
+        $project->is_restricted = $isRestricted;
 
-        // Force visibility of code and settings for Live Previews
+        // Force visibility of code and settings for Live Previews, unless restricted
+        if ($isRestricted) {
+            $project->code = ['html' => '', 'css' => '', 'js' => ''];
+        }
         $project->makeVisible(['code', 'settings']);
     }
     return Inertia::render('Editor', [
@@ -70,11 +73,17 @@ Route::get('/project/{slug}', function ($slug) {
     $isTeamMember = $project->team_id && $user && 
                     $user->teams()->where('teams.id', $project->team_id)->exists();
 
+    $isRestricted = false;
     if (!$project->is_public && !$isOwner && !$isTeamMember && !$hasPurchased) {
-        abort(403, 'Unauthorized. Restricted Neural Core.');
+        $isRestricted = true;
     }
 
     $project->has_purchased = $hasPurchased;
+    $project->is_restricted = $isRestricted;
+
+    if ($isRestricted) {
+        $project->code = ['html' => '', 'css' => '', 'js' => ''];
+    }
     $project->makeVisible(['code', 'settings']);
 
     return Inertia::render('ProjectView', [
