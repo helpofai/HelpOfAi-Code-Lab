@@ -57,6 +57,19 @@ class AdsController extends Controller
         return response()->json(['status' => 'logged']);
     }
 
+    public function settings(Request $request)
+    {
+        $request->validate([
+            'settings' => 'required|array'
+        ]);
+
+        foreach ($request->settings as $key => $value) {
+            \App\Models\SiteSetting::set($key, $value, 'ads');
+        }
+
+        return back()->with('success', 'Ad network settings updated successfully.');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

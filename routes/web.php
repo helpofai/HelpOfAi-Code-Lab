@@ -155,6 +155,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/admin/features', [\App\Http\Controllers\Admin\FeatureManagementController::class, 'update'])->name('admin.features.update');
     
     Route::get('/admin/ads', [\App\Http\Controllers\Admin\AdsController::class, 'index'])->name('admin.ads');
+    Route::post('/admin/ads/settings', [\App\Http\Controllers\Admin\AdsController::class, 'settings'])->name('admin.ads.settings');
     Route::post('/admin/ads', [\App\Http\Controllers\Admin\AdsController::class, 'store'])->name('admin.ads.store');
     Route::put('/admin/ads/{ad}', [\App\Http\Controllers\Admin\AdsController::class, 'update'])->name('admin.ads.update');
     Route::delete('/admin/ads/{ad}', [\App\Http\Controllers\Admin\AdsController::class, 'destroy'])->name('admin.ads.destroy');

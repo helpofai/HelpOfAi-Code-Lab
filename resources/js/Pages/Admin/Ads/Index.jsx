@@ -1,17 +1,31 @@
 import React, { useState, useMemo } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Megaphone, Plus, Search, Edit2, Trash2, Globe, FileCode2, CheckCircle2, XCircle, TrendingUp, DollarSign, Activity, Pointer } from 'lucide-react';
+import { Megaphone, Plus, Search, Edit2, Trash2, Globe, FileCode2, CheckCircle2, XCircle, TrendingUp, DollarSign, Activity, Pointer, Save, Settings } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import InputError from '@/Components/InputError';
 
 export default function AdsIndex({ auth, ads, chartData }) {
-    const [activeTab, setActiveTab] = useState('units'); // units or reports
+    const { siteSettings } = usePage().props;
+    const [activeTab, setActiveTab] = useState('units'); // units, reports, networks
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAd, setEditingAd] = useState(null);
+
+    const { data: networkData, setData: setNetworkData, post: postNetwork, processing: networkProcessing } = useForm({
+        settings: {
+            adsense_publisher_id: siteSettings.adsense_publisher_id || '',
+            adsense_auto_ads: siteSettings.adsense_auto_ads || '0',
+            facebook_app_id: siteSettings.facebook_app_id || '',
+        }
+    });
+
+    const handleNetworkSubmit = (e) => {
+        e.preventDefault();
+        postNetwork(route('admin.ads.settings'));
+    };
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         name: '',
@@ -136,6 +150,12 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                 >
                                     <TrendingUp size={12} /> Reports
                                 </button>
+                                <button 
+                                    onClick={() => setActiveTab('networks')}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'networks' ? 'bg-purple-500 text-black shadow-lg shadow-purple-500/20' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-1'}`}
+                                >
+                                    <Settings size={12} /> Networks
+                                </button>
                             </div>
                         </div>
                         
@@ -248,6 +268,77 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                     </ResponsiveContainer>
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Networks Config View */}
+                    {activeTab === 'networks' && (
+                        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 shadow-xl">
+                            <div className="flex items-center gap-3 mb-8">
+                                <Settings className="text-cyan-500" size={24} />
+                                <h3 className="text-xl font-black text-[var(--text-main)] uppercase tracking-widest italic">Global Ad Network Settings</h3>
+                            </div>
+
+                            <form onSubmit={handleNetworkSubmit} className="space-y-8">
+                                {/* Google AdSense */}
+                                <div className="space-y-6">
+                                    <h4 className="text-sm font-black text-[var(--text-main)] uppercase tracking-widest border-b border-[var(--border)] pb-2">Google AdSense</h4>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Publisher ID</label>
+                                            <input 
+                                                type="text" 
+                                                value={networkData.settings.adsense_publisher_id} 
+                                                onChange={e => setNetworkData('settings', { ...networkData.settings, adsense_publisher_id: e.target.value })} 
+                                                className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-xs font-mono text-[var(--text-main)] p-3 focus:ring-cyan-500" 
+                                                placeholder="ca-pub-1234567890" 
+                                            />
+                                            <p className="text-[10px] text-[var(--text-muted)] mt-1">Your main AdSense Publisher ID for auto ads.</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Enable Auto Ads</label>
+                                            <select 
+                                                value={networkData.settings.adsense_auto_ads} 
+                                                onChange={e => setNetworkData('settings', { ...networkData.settings, adsense_auto_ads: e.target.value })} 
+                                                className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-xs font-bold text-[var(--text-main)] p-3 focus:ring-cyan-500"
+                                            >
+                                                <option value="0">Disabled</option>
+                                                <option value="1">Enabled</option>
+                                            </select>
+                                            <p className="text-[10px] text-[var(--text-muted)] mt-1">Insert Google Auto Ads script in the site header.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Facebook Audience Network */}
+                                <div className="space-y-6 pt-6 border-t border-[var(--border)]">
+                                    <h4 className="text-sm font-black text-[var(--text-main)] uppercase tracking-widest border-b border-[var(--border)] pb-2">Facebook Audience Network</h4>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">App ID</label>
+                                            <input 
+                                                type="text" 
+                                                value={networkData.settings.facebook_app_id} 
+                                                onChange={e => setNetworkData('settings', { ...networkData.settings, facebook_app_id: e.target.value })} 
+                                                className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-xs font-mono text-[var(--text-main)] p-3 focus:ring-cyan-500" 
+                                                placeholder="1234567890" 
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pt-8 flex justify-end">
+                                    <button 
+                                        type="submit" 
+                                        disabled={networkProcessing} 
+                                        className="flex items-center gap-2 px-8 py-4 bg-cyan-500 text-black font-black uppercase text-[10px] tracking-widest rounded hover:bg-white transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50"
+                                    >
+                                        <Save size={16} /> Save Configuration
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     )}
 
