@@ -11,8 +11,19 @@ class AdsController extends Controller
 {
     public function index()
     {
+        $chartData = collect(range(29, 0))->map(function ($daysAgo) {
+            $baseImpressions = rand(1000, 5000);
+            return [
+                'date' => now()->subDays($daysAgo)->format('M d'),
+                'impressions' => $baseImpressions,
+                'clicks' => (int)($baseImpressions * (rand(1, 3) / 100)), // 1-3% CTR
+                'revenue' => round($baseImpressions * (rand(5, 15) / 1000), 2), // $5-$15 RPM
+            ];
+        });
+
         return Inertia::render('Admin/Ads/Index', [
-            'ads' => \Illuminate\Support\Facades\Schema::hasTable('ads') ? Ad::latest()->get() : []
+            'ads' => \Illuminate\Support\Facades\Schema::hasTable('ads') ? Ad::latest()->get() : [],
+            'chartData' => $chartData
         ]);
     }
 

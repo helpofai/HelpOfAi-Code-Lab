@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Megaphone, Plus, Search, Edit2, Trash2, Globe, FileCode2, CheckCircle2, XCircle } from 'lucide-react';
+import { Megaphone, Plus, Search, Edit2, Trash2, Globe, FileCode2, CheckCircle2, XCircle, TrendingUp, DollarSign, Activity, Pointer } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import InputError from '@/Components/InputError';
 
-export default function AdsIndex({ auth, ads }) {
+export default function AdsIndex({ auth, ads, chartData }) {
+    const [activeTab, setActiveTab] = useState('units'); // units or reports
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAd, setEditingAd] = useState(null);
@@ -75,6 +77,28 @@ export default function AdsIndex({ auth, ads }) {
         });
     };
 
+    const totals = useMemo(() => {
+        if (!chartData) return { impressions: 0, clicks: 0, revenue: 0 };
+        return chartData.reduce((acc, curr) => ({
+            impressions: acc.impressions + curr.impressions,
+            clicks: acc.clicks + curr.clicks,
+            revenue: acc.revenue + curr.revenue
+        }), { impressions: 0, clicks: 0, revenue: 0 });
+    }, [chartData]);
+
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-[#050505] border border-[var(--border)] rounded-xl p-4 shadow-2xl">
+                    <p className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">{label}</p>
+                    <p className="text-cyan-500 font-black text-sm">Impressions: {payload[0].value.toLocaleString()}</p>
+                    <p className="text-emerald-500 font-black text-sm">Revenue: ${payload[1].value.toFixed(2)}</p>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <AuthenticatedLayout user={auth.user} header={<h2 className="font-black text-xl text-[var(--text-main)] uppercase tracking-widest italic">Ad Management</h2>}>
             <Head title="Ad Management" />
@@ -86,32 +110,56 @@ export default function AdsIndex({ auth, ads }) {
                     {/* Header Controls */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-2xl shadow-2xl backdrop-blur-md relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-emerald-500 opacity-50" />
-                        <div className="flex items-center gap-4 w-full md:w-auto">
-                            <div className="p-3 bg-cyan-500/20 text-cyan-500 rounded-xl"><Megaphone size={24} /></div>
-                            <div>
-                                <h3 className="font-black text-sm uppercase tracking-widest text-[var(--text-main)]">Global Ads</h3>
-                                <p className="text-xs font-bold text-[var(--text-muted)] mt-1">Manage AdSense, Facebook, and Custom Ads</p>
+                        
+                        <div className="flex items-center gap-6 w-full md:w-auto">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-cyan-500/20 text-cyan-500 rounded-xl"><Megaphone size={24} /></div>
+                                <div>
+                                    <h3 className="font-black text-sm uppercase tracking-widest text-[var(--text-main)]">Global Ads</h3>
+                                    <p className="text-xs font-bold text-[var(--text-muted)] mt-1">Manage Units & Performance</p>
+                                </div>
+                            </div>
+
+                            <div className="hidden md:block h-8 w-px bg-[var(--border)] mx-2"></div>
+
+                            {/* Tabs */}
+                            <div className="flex bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-1">
+                                <button 
+                                    onClick={() => setActiveTab('units')}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'units' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
+                                >
+                                    Ad Units
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('reports')}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'reports' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-1'}`}
+                                >
+                                    <TrendingUp size={12} /> Reports
+                                </button>
                             </div>
                         </div>
                         
-                        <div className="flex items-center gap-4 w-full md:w-auto">
-                            <div className="relative flex-1 md:w-64">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
-                                <input
-                                    type="text"
-                                    placeholder="SEARCH ADS..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl pl-10 pr-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--text-main)] focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                                />
+                        {activeTab === 'units' && (
+                            <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
+                                <div className="relative flex-1 md:w-64">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
+                                    <input
+                                        type="text"
+                                        placeholder="SEARCH ADS..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl pl-10 pr-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--text-main)] focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                                    />
+                                </div>
+                                <button onClick={() => openModal()} className="flex items-center gap-2 px-6 py-2 bg-cyan-500 text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-white transition-all shadow-lg shadow-cyan-500/20 whitespace-nowrap">
+                                    <Plus size={14} /> New Ad
+                                </button>
                             </div>
-                            <button onClick={() => openModal()} className="flex items-center gap-2 px-6 py-2 bg-cyan-500 text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-white transition-all shadow-lg shadow-cyan-500/20 whitespace-nowrap">
-                                <Plus size={14} /> New Ad
-                            </button>
-                        </div>
+                        )}
                     </div>
 
-                    {/* Ads List */}
+                    {/* Ads List View */}
+                    {activeTab === 'units' && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {filteredAds.map(ad => (
                             <motion.div key={ad.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 relative overflow-hidden transition-all hover:border-cyan-500/50 ${!ad.is_active && 'opacity-70 grayscale'}`}>
@@ -149,6 +197,59 @@ export default function AdsIndex({ auth, ads }) {
                             </div>
                         )}
                     </div>
+                    )}
+
+                    {/* Reports View */}
+                    {activeTab === 'reports' && (
+                        <div className="space-y-8">
+                            {/* Key Metrics */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10"><Activity size={64} className="text-cyan-500" /></div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Total Impressions (30 Days)</p>
+                                    <p className="text-4xl font-black text-cyan-500 tracking-tighter italic">{totals.impressions.toLocaleString()}</p>
+                                </div>
+                                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10"><Pointer size={64} className="text-purple-500" /></div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Total Clicks (30 Days)</p>
+                                    <p className="text-4xl font-black text-purple-500 tracking-tighter italic">{totals.clicks.toLocaleString()}</p>
+                                </div>
+                                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10"><DollarSign size={64} className="text-emerald-500" /></div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Est. Revenue (30 Days)</p>
+                                    <p className="text-4xl font-black text-emerald-500 tracking-tighter italic">${totals.revenue.toFixed(2)}</p>
+                                </div>
+                            </div>
+
+                            {/* Chart */}
+                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 shadow-xl">
+                                <h4 className="text-sm font-black text-[var(--text-main)] uppercase tracking-widest italic mb-8">Performance Trajectory</h4>
+                                <div className="h-[400px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="colorImpressions" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                                                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                                                </linearGradient>
+                                                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                                            <XAxis dataKey="date" stroke="var(--text-muted)" fontSize={10} tickMargin={10} axisLine={false} tickLine={false} />
+                                            <YAxis yAxisId="left" stroke="var(--text-muted)" fontSize={10} tickMargin={10} axisLine={false} tickLine={false} />
+                                            <YAxis yAxisId="right" orientation="right" stroke="var(--text-muted)" fontSize={10} tickMargin={10} axisLine={false} tickLine={false} />
+                                            <Tooltip content={<CustomTooltip />} />
+                                            <Area yAxisId="left" type="monotone" dataKey="impressions" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorImpressions)" />
+                                            <Area yAxisId="right" type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             </div>
