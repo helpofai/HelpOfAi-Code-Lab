@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ad_stats', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ad_id')->constrained('ads')->onDelete('cascade');
-            $table->date('date');
-            $table->unsignedBigInteger('impressions')->default(0);
-            $table->unsignedBigInteger('clicks')->default(0);
-            $table->decimal('revenue', 10, 4)->default(0);
-            $table->timestamps();
+        if (!Schema::hasTable('ad_stats')) {
+            Schema::create('ad_stats', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('ad_id')->constrained('ads')->onDelete('cascade');
+                $table->date('date');
+                $table->unsignedBigInteger('impressions')->default(0);
+                $table->unsignedBigInteger('clicks')->default(0);
+                $table->decimal('revenue', 10, 4)->default(0);
+                $table->timestamps();
 
-            $table->unique(['ad_id', 'date']); // One record per ad per day
-            $table->index('date');
-        });
+                $table->unique(['ad_id', 'date']); // One record per ad per day
+                $table->index('date');
+            });
+        }
     }
 
     /**

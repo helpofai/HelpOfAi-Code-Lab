@@ -4,6 +4,24 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ---
 
+## [1.14.0] - ADS_AND_ACCESS_REQUESTS - 2026-06-29
+
+### 📢 Monetization & Ad Network Integration
+- **Global Ad System**: Added comprehensive Ad units management in the admin dashboard supporting Google AdSense, Facebook Audience Network, and custom scripts.
+- **Global Network Config**: Added a dedicated "Networks" tab to the admin page to globally configure AdSense Publisher IDs, Auto Ads toggles, and Facebook App IDs.
+- **Video Reward Ads**: Implemented mandatory video reward ads for users attempting to view the source code of public projects they don't own. 
+- **Ad Bypass for Elite Users**: Verified users and high-ranking users (Level 5+) automatically bypass video reward ads when viewing public code.
+
+### 🔒 Private Projects & Access Requests
+- **Public Previews for Private Projects**: Private project thumbnails and live previews are now visible publicly to drive engagement, while the source code remains strictly protected.
+- **Access Request Workflow**: Users can now request access to private projects from the author. To unlock the request button, users must first complete watching 2 reward video ads.
+- **Author Approval UI**: Added a dedicated modal for project authors (in My Projects) to review, approve, or reject incoming access requests.
+
+### 🛠 Database & Stability
+- **Migration Safety**: Retrofitted recent database migrations with `Schema::hasTable` and `Schema::hasColumn` conditional logic to prevent "Table already exists" errors during complex deployments.
+
+---
+
 ## [1.13.0] - UI_PROFESSIONALIZATION_&_MY_ACCOUNT - 2026-06-29
 
 ### 💼 My Account & User Dashboard

@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ads', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('provider')->default('adsense'); // adsense, facebook, custom
-            $table->string('location')->index(); // top_banner, sidebar, footer, in_feed
-            $table->string('client_id')->nullable();
-            $table->string('slot_id')->nullable();
-            $table->string('format')->default('auto');
-            $table->text('custom_code')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('ads')) {
+            Schema::create('ads', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('provider')->default('adsense'); // adsense, facebook, custom
+                $table->string('location')->index(); // top_banner, sidebar, footer, in_feed
+                $table->string('client_id')->nullable();
+                $table->string('slot_id')->nullable();
+                $table->string('format')->default('auto');
+                $table->text('custom_code')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+            });
+        }
     }
 
     /**
