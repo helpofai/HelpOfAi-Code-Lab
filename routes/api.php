@@ -10,6 +10,10 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+// Explore Endpoints
+Route::get('explore', [\App\Http\Controllers\Api\ExploreController::class, 'index']);
+Route::get('explore/categories', [\App\Http\Controllers\Api\ExploreController::class, 'categories']);
+
 // Public stats & featured projects for Welcome page
 Route::get('explore/featured', [\App\Http\Controllers\Api\ExploreController::class, 'featured']);
 Route::get('explore/paid', [\App\Http\Controllers\Api\ExploreController::class, 'paid']);

@@ -203,7 +203,7 @@ export default function Explore({ auth, siteSettings }) {
                         <>
                             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {projects.map((project) => (
-                                    <Link href={route('project.view', project.slug)} key={project.id} className={`group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden transition-all hover:-translate-y-1 shadow-xl flex flex-col ${project.is_restricted ? 'hover:border-rose-500/30' : 'hover:border-cyan-500/30'}`}>
+                                    <Link href={route('project.show', project.slug)} key={project.id} className={`group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden transition-all hover:-translate-y-1 shadow-xl flex flex-col ${project.is_restricted ? 'hover:border-rose-500/30' : 'hover:border-cyan-500/30'}`}>
                                         <div className={`aspect-video relative overflow-hidden flex items-center justify-center ${project.is_restricted ? 'bg-black/50' : 'bg-white'}`}>
                                             
                                             {project.is_restricted ? (
