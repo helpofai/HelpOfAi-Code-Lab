@@ -46,12 +46,17 @@ class ExploreController extends Controller
             $query->where('category', $request->category);
         }
 
-        // Price Filter (for paid items)
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
+        // Price Filter
+        if ($request->filled('min_price') || $request->filled('max_price')) {
+            $min = $request->min_price ?? 0;
+            $max = $request->max_price ?? 999999;
+            
+            $query->where(function($q) use ($min, $max) {
+                $q->whereBetween('price', [$min, $max]);
+                if ($min <= 0) {
+                    $q->orWhereNull('price');
+                }
+            });
         }
 
         // Sorting
