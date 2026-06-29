@@ -23,7 +23,8 @@ export default function ProjectView({ project, canEdit }) {
     const toast = useToast();
 
     // Get an ad for the locked content block
-    const lockAd = globalAds?.find(a => a.location === 'in_feed' && a.is_active) || globalAds?.[0];
+    // globalAds is grouped by location so it's an object, not an array.
+    const lockAd = globalAds?.video_reward?.[0] || globalAds?.in_feed?.[0] || Object.values(globalAds || {})[0]?.[0];
 
     useEffect(() => {
         const compile = async () => {
