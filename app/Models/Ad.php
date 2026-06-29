@@ -17,6 +17,11 @@ class Ad extends Model
         'is_active',
     ];
 
+    public function stats()
+    {
+        return $this->hasMany(AdStat::class);
+    }
+
     protected $casts = [
         'is_active' => 'boolean',
     ];

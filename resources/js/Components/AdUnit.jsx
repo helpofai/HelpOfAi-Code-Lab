@@ -1,9 +1,13 @@
 import React, { useEffect } from 'react';
+import axios from 'axios';
 
 export default function AdUnit({ ad }) {
     if (!ad || !ad.is_active) return null;
 
     useEffect(() => {
+        // Log Impression Analytics
+        axios.post(`/ads/${ad.id}/impression`).catch(e => console.error('Ad tracking blocked:', e));
+
         if (ad.provider === 'adsense' && ad.client_id && ad.slot_id) {
             try {
                 (window.adsbygoogle = window.adsbygoogle || []).push({});

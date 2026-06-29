@@ -183,6 +183,7 @@ Route::get('/p/{slug}', function ($slug) {
 })->name('pages.show');
 
 // Production Installer (Setup) Routes
+Route::post('/ads/{ad}/impression', [\App\Http\Controllers\Admin\AdsController::class, 'logImpression'])->name('ads.impression');
 Route::get('/setup', [\App\Http\Controllers\SetupController::class, 'index'])->name('setup.index');
 Route::post('/setup/run', [\App\Http\Controllers\SetupController::class, 'run'])->name('setup.run');
 Route::post('/setup/save-env', [\App\Http\Controllers\SetupController::class, 'saveEnv'])->name('setup.save-env');

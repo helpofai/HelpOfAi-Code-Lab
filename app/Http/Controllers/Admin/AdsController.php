@@ -11,20 +11,50 @@ class AdsController extends Controller
 {
     public function index()
     {
-        $chartData = collect(range(29, 0))->map(function ($daysAgo) {
-            $baseImpressions = rand(1000, 5000);
-            return [
-                'date' => now()->subDays($daysAgo)->format('M d'),
-                'impressions' => $baseImpressions,
-                'clicks' => (int)($baseImpressions * (rand(1, 3) / 100)), // 1-3% CTR
-                'revenue' => round($baseImpressions * (rand(5, 15) / 1000), 2), // $5-$15 RPM
-            ];
-        });
+        $chartData = [];
+        
+        if (\Illuminate\Support\Facades\Schema::hasTable('ad_stats')) {
+            $stats = \App\Models\AdStat::where('date', '>=', now()->subDays(29)->toDateString())
+                ->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(revenue) as revenue')
+                ->groupBy('date')
+                ->orderBy('date', 'asc')
+                ->get();
+
+            // Fill in missing days
+            $chartData = collect(range(29, 0))->map(function ($daysAgo) use ($stats) {
+                $dateStr = now()->subDays($daysAgo)->toDateString();
+                $stat = $stats->firstWhere('date', $dateStr);
+                return [
+                    'date' => now()->subDays($daysAgo)->format('M d'),
+                    'impressions' => $stat ? (int)$stat->impressions : 0,
+                    'clicks' => $stat ? (int)$stat->clicks : 0,
+                    'revenue' => $stat ? (float)$stat->revenue : 0,
+                ];
+            });
+        }
 
         return Inertia::render('Admin/Ads/Index', [
             'ads' => \Illuminate\Support\Facades\Schema::hasTable('ads') ? Ad::latest()->get() : [],
             'chartData' => $chartData
         ]);
+    }
+
+    public function logImpression(Ad $ad)
+    {
+        if (\Illuminate\Support\Facades\Schema::hasTable('ad_stats')) {
+            \App\Models\AdStat::firstOrCreate(
+                ['ad_id' => $ad->id, 'date' => now()->toDateString()],
+                ['impressions' => 0, 'clicks' => 0, 'revenue' => 0]
+            )->increment('impressions');
+
+            // Optionally calculate estimated revenue per impression here if desired
+            // Example: $0.005 per impression ( $5 eCPM )
+            \App\Models\AdStat::where('ad_id', $ad->id)
+                ->where('date', now()->toDateString())
+                ->update(['revenue' => \Illuminate\Support\Facades\DB::raw('impressions * 0.005')]);
+        }
+        
+        return response()->json(['status' => 'logged']);
     }
 
     public function store(Request $request)
