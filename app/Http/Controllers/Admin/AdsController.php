@@ -12,7 +12,7 @@ class AdsController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Ads/Index', [
-            'ads' => Ad::latest()->get()
+            'ads' => \Illuminate\Support\Facades\Schema::hasTable('ads') ? Ad::latest()->get() : []
         ]);
     }
 
