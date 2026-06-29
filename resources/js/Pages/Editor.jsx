@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
+import AdUnit from '@/Components/AdUnit';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 import useProjectStore from '@/Stores/useProjectStore';
@@ -21,6 +22,8 @@ export default function Editor({ auth, project: initialProject }) {
         isForSale, price,
         externalLibraries, setGoogleDriveFileId, preprocessors 
     } = useProjectStore();
+    const { globalAds } = usePage().props;
+    const lockAd = globalAds?.video_reward?.[0] || globalAds?.in_feed?.[0] || Object.values(globalAds || {})[0]?.[0];
     const [previewContent, setPreviewContent] = useState('');
     const [activeSidebar, setActiveSidebar] = useState(null);
     const [activeModal, setActiveModal] = useState(null);
@@ -312,11 +315,26 @@ export default function Editor({ auth, project: initialProject }) {
                         </p>
                         
                         {isPlayingAd ? (
-                            <div className="w-full aspect-video bg-[#000] rounded-xl border border-white/10 flex flex-col items-center justify-center relative overflow-hidden">
-                                <div className="absolute inset-0 bg-cyan-500/5 animate-pulse" />
-                                <span className="text-xs font-black uppercase tracking-widest text-white/50 mb-2">Sponsor Advertisement</span>
-                                <div className="text-5xl font-black text-white z-10">{adTimeLeft}s</div>
-                                <div className="absolute bottom-0 left-0 h-1 bg-cyan-500 transition-all duration-1000" style={{ width: `${((5 - adTimeLeft) / 5) * 100}%` }} />
+                            <div className="w-full relative bg-[#000] rounded-xl border border-white/10 flex flex-col items-center justify-center overflow-hidden min-h-[150px]">
+                                {lockAd ? (
+                                    <div className="w-full max-h-[250px] overflow-hidden flex items-center justify-center">
+                                        <AdUnit ad={lockAd} />
+                                    </div>
+                                ) : (
+                                    <div className="absolute inset-0 bg-cyan-500/5 animate-pulse" />
+                                )}
+                                
+                                <div className="absolute top-2 right-2 bg-black/80 backdrop-blur px-2 py-1 rounded text-white text-xs font-bold z-20 border border-white/10 shadow-lg">
+                                    {adTimeLeft}s
+                                </div>
+                                
+                                {!lockAd && (
+                                    <>
+                                        <span className="text-xs font-black uppercase tracking-widest text-white/50 mb-2">Sponsor Advertisement</span>
+                                        <div className="text-5xl font-black text-white z-10">{adTimeLeft}s</div>
+                                    </>
+                                )}
+                                <div className="absolute bottom-0 left-0 h-1 bg-cyan-500 transition-all duration-1000 z-20" style={{ width: `${((5 - adTimeLeft) / 5) * 100}%` }} />
                             </div>
                         ) : (
                             <button 
