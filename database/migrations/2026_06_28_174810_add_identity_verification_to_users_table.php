@@ -12,10 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('identity_status')->default('unverified');
-            $table->string('identity_selfie_path')->nullable();
-            $table->string('identity_document_path')->nullable();
-            $table->text('identity_rejected_reason')->nullable();
+            if (!Schema::hasColumn('users', 'identity_status')) {
+                $table->string('identity_status')->default('unverified');
+            }
+            if (!Schema::hasColumn('users', 'identity_selfie_path')) {
+                $table->string('identity_selfie_path')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'identity_document_path')) {
+                $table->string('identity_document_path')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'identity_rejected_reason')) {
+                $table->text('identity_rejected_reason')->nullable();
+            }
         });
     }
 

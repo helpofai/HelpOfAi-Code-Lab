@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->integer('level')->default(1);
-            $table->boolean('manual_level')->default(false);
+            if (!Schema::hasColumn('users', 'level')) {
+                $table->integer('level')->default(1);
+            }
+            if (!Schema::hasColumn('users', 'manual_level')) {
+                $table->boolean('manual_level')->default(false);
+            }
         });
     }
 

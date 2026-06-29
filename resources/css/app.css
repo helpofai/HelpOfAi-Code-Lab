@@ -179,4 +179,23 @@
     .btn-secondary {
         @apply px-6 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-main)] font-bold uppercase text-[10px] tracking-widest rounded hover:bg-opacity-80 transition-all active:scale-95;
     }
+
+    /* Professional NProgress Gradient Override */
+    #nprogress .bar {
+        background: linear-gradient(to right, #22d3ee, #10b981, #22d3ee) !important;
+        background-size: 200% 200% !important;
+        animation: loadingGradient 2s ease infinite !important;
+        height: 3px !important;
+        z-index: 99999 !important;
+    }
+
+    #nprogress .peg {
+        box-shadow: 0 0 10px #22d3ee, 0 0 5px #10b981 !important;
+    }
+
+    @keyframes loadingGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
 }
