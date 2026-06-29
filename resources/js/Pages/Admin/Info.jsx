@@ -92,7 +92,7 @@ export default function AdminInfo({ infoFiles }) {
                                         remarkPlugins={[remarkGfm]} 
                                         rehypePlugins={[rehypeRaw]}
                                     >
-                                        {activeContent || "# Node Empty\nThis module contains no data."}
+                                        {activeContent || "# Empty\nThis page contains no data."}
                                     </ReactMarkdown>
                                 </motion.div>
                             </AnimatePresence>

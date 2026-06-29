@@ -53,7 +53,7 @@ export default function ConsolePanel({ logs, setLogs }) {
                     value={command}
                     onChange={(e) => setCommand(e.target.value)}
                     onKeyDown={handleExecute}
-                    placeholder="Execute_Neural_Command..."
+                    placeholder="Enter command..."
                     className="w-full bg-transparent border-none outline-none text-[10px] text-cyan-500 placeholder:text-cyan-500/20 lowercase tracking-widest"
                 />
             </div>

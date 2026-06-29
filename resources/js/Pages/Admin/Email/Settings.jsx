@@ -132,7 +132,7 @@ export default function EmailSettings({ settings }) {
                                         disabled={testProcessing}
                                         className="w-full py-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center gap-2"
                                     >
-                                        <ShieldCheck size={14} /> Verify_Uplink
+                                        <ShieldCheck size={14} /> Test Connection
                                     </button>
                                 </form>
                             </div>
@@ -240,7 +240,7 @@ export default function EmailSettings({ settings }) {
 
                                     <div className="pt-8 border-t border-[var(--border)]">
                                         <p className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em] italic text-center">
-                                            System_Uplink // CodePen_Advanced_Core
+                                            System Notification
                                         </p>
                                     </div>
                                 </div>

@@ -18,14 +18,14 @@ const PaidOverlay = ({ price, projectId, slug }) => {
                     <Lock size={30} />
                 </div>
                 <div>
-                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Neural Lock</h3>
+                    <h3 className="text-lg font-black uppercase tracking-widest text-[var(--text-main)] italic">Lock Settings</h3>
                     <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-2 leading-relaxed">This source code is protected. Purchase access to unlock the full logic matrix.</p>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-2xl font-black text-cyan-500 font-mono">
                     <span className="text-xs opacity-50">$</span>{price}
                 </div>
                 <PrimaryButton onClick={handlePurchase} className="w-full">
-                    <ShoppingBag size={14} className="mr-2" /> Unlock Node
+                    <ShoppingBag size={14} className="mr-2" /> Unlock Project
                 </PrimaryButton>
                 <div className="flex items-center justify-center gap-4 text-[8px] font-black text-[var(--text-muted)] uppercase tracking-widest">
                     <div className="flex items-center gap-1"><Sparkles size={10} className="text-cyan-500" /> Full Code</div>

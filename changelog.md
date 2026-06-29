@@ -4,6 +4,19 @@ Systematic documentation of all protocol upgrades, module injections, and core o
 
 ---
 
+## [1.13.0] - UI_PROFESSIONALIZATION_&_MY_ACCOUNT - 2026-06-29
+
+### 💼 My Account & User Dashboard
+- **Dedicated My Account Page**: Created a highly professional, tabbed `My Account` interface consolidating User Profile, My Projects, Purchase History, and Security settings into one clean sidebar-based view.
+- **Enhanced Verification UI**: Added immediate visual indicators (green verified badges and dynamic User Level badges) directly into the user's profile mini-card in the sidebar.
+- **Navigation Integrations**: Added `My Account` link into the main authenticated dropdown menu for seamless user access.
+- **Purchase History Fixes**: Corrected display issues when rendering integer transaction IDs in the purchase history table.
+
+### 🎨 Clean UI & Terminology Standardisation
+- **Jargon Removal**: Conducted a platform-wide code sweep (across all 23 React components) to strip all "sci-fi" / "neural" terminology (e.g., "Neural Uplink", "Admin Command Center", "Node"), replacing it with clean, standardized, and professional language (e.g., "Secure Connection", "Admin Dashboard", "Project").
+
+---
+
 ## [1.12.0] - IDENTITY_AND_LEVELS - 2026-06-29
 
 ### 🛡️ Identity & Verification

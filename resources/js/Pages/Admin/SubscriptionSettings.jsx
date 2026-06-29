@@ -184,7 +184,7 @@ export default function SubscriptionSettings({ auth, settings }) {
                                                                     <h4 className="text-xs font-black text-white uppercase tracking-[0.2em]">Neural_Test_Bridge</h4>
                                                                 </div>
                                                                 <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest leading-relaxed">
-                                                                    This bridge allows for instant purchase verification without external ciphers. Use this for testing the "Neural Lock" and "Marketplace" flows in development.
+                                                                    This bridge allows for instant purchase verification without external ciphers. Use this for testing the "Lock Settings" and "Marketplace" flows in development.
                                                                 </p>
                                                                 <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 rounded-lg text-amber-500 text-[9px] font-black uppercase tracking-widest">
                                                                     <AlertTriangle size={14} /> Warning: Do not enable in production environments.

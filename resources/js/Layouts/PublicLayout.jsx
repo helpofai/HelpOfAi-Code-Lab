@@ -112,7 +112,7 @@ export default function PublicLayout({ children }) {
                             </nav>
                             <div className="pt-8 border-t border-[var(--border)] space-y-4">
                                 <ThemeSwitcher />
-                                <p className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em]">HOACodeLab // Neural_Core</p>
+                                <p className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em]">HOACodeLab</p>
                             </div>
                         </motion.div>
                     </>

@@ -182,7 +182,7 @@ export default function TiptapEditor({ content, onChange }) {
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">Neural_Core_Active</span>
+                        <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">Editor Active</span>
                     </div>
                     <div className="h-4 w-px bg-[var(--border)]" />
                     <div className="flex items-center gap-2 text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest">

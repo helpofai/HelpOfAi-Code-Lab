@@ -177,6 +177,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('/my-account', function (\Illuminate\Http\Request $request) {
+        return Inertia::render('MyAccount', [
+            'mustVerifyEmail' => $request->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail,
+            'status' => session('status'),
+        ]);
+    })->name('my-account');
+
     // Personal Google Drive Config
     Route::post('/api/google-drive/config', function (\Illuminate\Http\Request $request) {
         $validated = $request->validate([

@@ -24,7 +24,8 @@ import {
     ShoppingBag,
     Tag,
     BadgeCheck,
-    Megaphone
+    Megaphone,
+    User
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -39,8 +40,8 @@ export default function AuthenticatedLayout({ header, children }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
         const userItems = [
-
             { name: 'Dashboard', icon: LayoutDashboard, href: route('dashboard'), active: route().current('dashboard') },
+            { name: 'My Account', icon: User, href: route('my-account'), active: route().current('my-account') },
 
             { name: 'Cloud Sync', icon: Cloud, href: route('cloud-sync'), active: route().current('cloud-sync') },
 
@@ -172,9 +173,10 @@ export default function AuthenticatedLayout({ header, children }) {
                             </Dropdown.Trigger>
                             <Dropdown.Content align="right" width="48">
                                 <Dropdown.Link href={route('dashboard')}>Dashboard</Dropdown.Link>
+                                <Dropdown.Link href={route('my-account')}>My Account</Dropdown.Link>
                                 <Dropdown.Link href={route('my-projects')}>My Projects</Dropdown.Link>
                                 <div className="border-t border-[var(--border)] my-1" />
-                                <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                <Dropdown.Link href={route('profile.edit')}>Profile Settings</Dropdown.Link>
                                 <Dropdown.Link href={route('support.index')}>Support</Dropdown.Link>
                                 <div className="border-t border-[var(--border)] my-1" />
                                 <Dropdown.Link href={route('logout')} method="post" as="button" className="text-rose-500 hover:bg-rose-500/10">Log Out</Dropdown.Link>

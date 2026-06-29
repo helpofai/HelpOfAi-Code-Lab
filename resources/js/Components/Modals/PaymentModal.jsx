@@ -52,7 +52,7 @@ export default function PaymentModal({ isOpen, onClose, user }) {
                 onClose();
             }
         } catch (e) {
-            toast.error(e.response?.data?.message || 'Uplink failed.');
+            toast.error(e.response?.data?.message || 'Connection failed.');
         } finally {
             setIsProcessing(false);
         }
@@ -113,7 +113,7 @@ export default function PaymentModal({ isOpen, onClose, user }) {
                                     {isProcessing ? 'Synchronizing...' : 'Authorize Transaction'} <ArrowRight size={16} />
                                 </button>
                                 <div className="mt-6 flex items-center justify-center gap-2 text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">
-                                    <ShieldCheck size={12} className="text-emerald-500" /> AES-256 Encrypted Neural Uplink
+                                    <ShieldCheck size={12} className="text-emerald-500" /> Secure Encrypted Connection
                                 </div>
                             </div>
                         </div>

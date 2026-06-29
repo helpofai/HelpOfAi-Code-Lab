@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function SystemBoot({ onComplete }) {
     const [status, setStatus] = useState([]);
     const messages = [
-        "> INITIALIZING NEURAL_LINK...",
-        "> SCANNING GLOBAL NODES [OK]",
+        "> INITIALIZING SYSTEM...",
+        "> SCANNING SYSTEM [OK]",
         "> BYPASSING LATENCY FIREWALL...",
         "> INJECTING CORE DRIVERS...",
         "> PROTOCOL V4.2 ACTIVATED",

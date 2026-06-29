@@ -48,7 +48,7 @@ export default function CreateEdit({ page = null }) {
                                 <ArrowLeft size={20} />
                             </Link>
                             <div className="text-left">
-                                <h2 className="text-lg font-black tracking-tighter uppercase italic leading-none">{isEdit ? 'Update_Protocol' : 'Initialize_Node'}</h2>
+                                <h2 className="text-lg font-black tracking-tighter uppercase italic leading-none">{isEdit ? 'Update Page' : 'Create Page'}</h2>
                                 <p className="text-[8px] text-cyan-500 uppercase tracking-[0.4em] font-bold mt-1">{isEdit ? page.title : 'New Substrate Module'}</p>
                             </div>
                         </div>
@@ -62,7 +62,7 @@ export default function CreateEdit({ page = null }) {
                         <div className="lg:col-span-2 space-y-6">
                             <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[2rem] p-8 shadow-2xl space-y-6">
                                 <div className="space-y-2">
-                                    <InputLabel value="Node_Identity (Title)" />
+                                    <InputLabel value="Page Title" />
                                     <TextInput 
                                         value={data.title} 
                                         onChange={e => setData('title', e.target.value)} 

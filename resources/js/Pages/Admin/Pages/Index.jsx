@@ -10,7 +10,7 @@ export default function PageIndex({ pages }) {
     const [search, setSearch] = useState('');
 
     const handleDelete = (id) => {
-        if (confirm('De-replicate this page node from the system?')) {
+        if (confirm('Are you sure you want to delete this page?')) {
             router.delete(route('admin.pages.destroy', id));
         }
     };

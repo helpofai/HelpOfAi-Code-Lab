@@ -44,13 +44,13 @@ export default function EditorSidebar({
         if (!confirm('This protocol will overwrite current buffers. Proceed?')) return;
 
         if (id === '3d-card') {
-            setHtml(`<div class="neural-container">\n  <div class="card">\n    <div class="glow"></div>\n    <div class="content">\n      <div class="header">\n        <span class="version">Build v1.5.0</span>\n        <div class="pulse-icon"></div>\n      </div>\n      <h2>HOA_CodeLab</h2>\n      <p>Technical_Prototyping_Node</p>\n      <div class="footer">\n        <span id="status">Protocol: Active</span>\n        <div class="latency">0.04ms</div>\n      </div>\n    </div>\n  </div>\n</div>`);
+            setHtml(`<div class="neural-container">\n  <div class="card">\n    <div class="glow"></div>\n    <div class="content">\n      <div class="header">\n        <span class="version">Build v1.5.0</span>\n        <div class="pulse-icon"></div>\n      </div>\n      <h2>HOA_CodeLab</h2>\n      <p>Prototyping Environment</p>\n      <div class="footer">\n        <span id="status">Status: Active</span>\n        <div class="latency">0.04ms</div>\n      </div>\n    </div>\n  </div>\n</div>`);
             setCss(`body {\n  background: #050505 !important;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 100vh;\n  margin: 0;\n}\n\n.neural-container {\n  perspective: 1000px;\n}\n\n.card {\n  width: 320px;\n  background: rgba(255, 255, 255, 0.03);\n  backdrop-filter: blur(10px);\n  border: 1px solid rgba(255, 255, 255, 0.1);\n  border-radius: 24px;\n  padding: 30px;\n  position: relative;\n  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);\n  overflow: hidden;\n  cursor: crosshair;\n}\n\n.glow {\n  position: absolute;\n  top: 0; left: 0; width: 100%; height: 100%;\n  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(6, 182, 212, 0.2) 0%, transparent 50%);\n  pointer-events: none;\n}\n\nh2 {\n  color: white;\n  font-family: sans-serif;\n  font-weight: 900;\n  font-style: italic;\n  letter-spacing: -1px;\n  margin: 20px 0 5px;\n}\n\np {\n  color: #64748b;\n  font-size: 10px;\n  font-weight: 800;\n  text-transform: uppercase;\n  letter-spacing: 2px;\n  font-family: sans-serif;\n}\n\n.header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n\n.version {\n  color: #06b6d4;\n  font-size: 8px;\n  font-weight: 900;\n  text-transform: uppercase;\n}\n\n.pulse-icon {\n  width: 6px; height: 6px;\n  background: #10b981;\n  border-radius: 50%;\n  box-shadow: 0 0 10px #10b981;\n  animation: pulse 2s infinite;\n}\n\n.footer {\n  margin-top: 40px;\n  padding-top: 20px;\n  border-top: 1px solid rgba(255, 255, 255, 0.05);\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  font-size: 8px;\n  font-weight: 900;\n  color: #475569;\n  text-transform: uppercase;\n  font-family: monospace;\n}\n\n.latency { color: #06b6d4; }\n\n@keyframes pulse {\n  0% { transform: scale(1); opacity: 1; }\n  50% { transform: scale(1.5); opacity: 0.5; }\n  100% { transform: scale(1); opacity: 1; }\n}`);
-            setJs(`const card = document.querySelector('.card');\nconst container = document.querySelector('.neural-container');\n\nif (container && card) {\n  container.addEventListener('mousemove', (e) => {\n    const rect = card.getBoundingClientRect();\n    const x = e.clientX - rect.left;\n    const y = e.clientY - rect.top;\n    \n    card.style.setProperty('--x', \`\${x}px\`);\n    card.style.setProperty('--y', \`\${y}px\`);\n    \n    const rotateX = (y - rect.height / 2) / 10;\n    const rotateY = (rect.width / 2 - x) / 10;\n    \n    card.style.transform = \`rotateX(\${rotateX}deg) rotateY(\${rotateY}deg)\`;\n  });\n\n  container.addEventListener('mouseleave', () => {\n    card.style.transform = 'rotateX(0deg) rotateY(0deg)';\n  });\n}\n\nconsole.log("Handshake_Successful: 3D Card Engine Online.");`);
+            setJs(`const card = document.querySelector('.card');\nconst container = document.querySelector('.neural-container');\n\nif (container && card) {\n  container.addEventListener('mousemove', (e) => {\n    const rect = card.getBoundingClientRect();\n    const x = e.clientX - rect.left;\n    const y = e.clientY - rect.top;\n    \n    card.style.setProperty('--x', \`\${x}px\`);\n    card.style.setProperty('--y', \`\${y}px\`);\n    \n    const rotateX = (y - rect.height / 2) / 10;\n    const rotateY = (rect.width / 2 - x) / 10;\n    \n    card.style.transform = \`rotateX(\${rotateX}deg) rotateY(\${rotateY}deg)\`;\n  });\n\n  container.addEventListener('mouseleave', () => {\n    card.style.transform = 'rotateX(0deg) rotateY(0deg)';\n  });\n}\n\nconsole.log("Success: 3D Card Engine Online.");`);
         } else if (id === 'neural-matrix') {
-            setHtml(`<div class="neural-substrate">\n  <canvas id="neural-canvas"></canvas>\n  <div class="ui-overlay">\n    <div class="status-bar">\n      <span class="pulse"></span>\n      <span>NODE_STATUS: OPTIMIZED</span>\n    </div>\n    <div class="telemetry">\n      <h1>NEURAL_CORE_v2</h1>\n      <p>INTERACTIVE_PARTICLE_MATRIX</p>\n    </div>\n    <div class="footer-stats">\n      <div class="stat">CORES: 128</div>\n      <div class="stat">LATENCY: 0.02ms</div>\n    </div>\n  </div>\n</div>`);
+            setHtml(`<div class="neural-substrate">\n  <canvas id="neural-canvas"></canvas>\n  <div class="ui-overlay">\n    <div class="status-bar">\n      <span class="pulse"></span>\n      <span>STATUS: OPTIMIZED</span>\n    </div>\n    <div class="telemetry">\n      <h1>SYSTEM CORE</h1>\n      <p>INTERACTIVE MATRIX</p>\n    </div>\n    <div class="footer-stats">\n      <div class="stat">CORES: 128</div>\n      <div class="stat">LATENCY: 0.02ms</div>\n    </div>\n  </div>\n</div>`);
             setCss(`body {\n  background: #050505 !important;\n  margin: 0; overflow: hidden;\n  font-family: 'Inter', sans-serif;\n}\n\n.neural-substrate {\n  position: relative;\n  width: 100vw; height: 100vh;\n}\n\n#neural-canvas {\n  position: absolute;\n  inset: 0; z-index: 1;\n}\n\n.ui-overlay {\n  position: relative;\n  z-index: 2; height: 100%;\n  display: flex; flex-direction: column;\n  justify-content: space-between;\n  padding: 40px; pointer-events: none;\n}\n\n.status-bar {\n  display: flex; items-center: center; gap: 10px;\n  color: #06b6d4; font-size: 10px; font-weight: 900;\n  letter-spacing: 2px;\n}\n\n.pulse {\n  width: 8px; height: 8px; background: #06b6d4;\n  border-radius: 50%; animation: glow 2s infinite;\n}\n\nh1 {\n  color: white; font-size: 4rem; font-weight: 900;\n  margin: 0; letter-spacing: -2px; font-style: italic;\n  text-shadow: 0 0 30px rgba(6,182,212,0.3);\n}\n\np {\n  color: #475569; font-size: 12px; font-weight: 800;\n  letter-spacing: 5px; margin-top: 5px;\n}\n\n.footer-stats {\n  display: flex; gap: 40px;\n  color: #1e293b; font-size: 9px; font-weight: 900;\n  letter-spacing: 2px; border-top: 1px solid #1e293b;\n  padding-top: 20px;\n}\n\n@keyframes glow {\n  0%, 100% { opacity: 1; transform: scale(1); }\n  50% { opacity: 0.3; transform: scale(1.5); }\n}`);
-            setJs(`const canvas = document.getElementById('neural-canvas');\nconst ctx = canvas.getContext('2d');\nlet particles = [];\nconst mouse = { x: null, y: null, radius: 150 };\n\nwindow.addEventListener('resize', resize);\nwindow.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });\n\nfunction resize() {\n  canvas.width = window.innerWidth;\n  canvas.height = window.innerHeight;\n}\n\nclass Particle {\n  constructor() {\n    this.x = Math.random() * canvas.width;\n    this.y = Math.random() * canvas.height;\n    this.size = Math.random() * 2 + 1;\n    this.vx = (Math.random() - 0.5) * 2;\n    this.vy = (Math.random() - 0.5) * 2;\n  }\n  update() {\n    this.x += this.vx; this.y += this.vy;\n    if (this.x > canvas.width || this.x < 0) this.vx *= -1;\n    if (this.y > canvas.height || this.y < 0) this.vy *= -1;\n    \n    let dx = mouse.x - this.x; let dy = mouse.y - this.y;\n    let dist = Math.sqrt(dx*dx + dy*dy);\n    if (dist < mouse.radius) {\n      this.x -= dx/20; this.y -= dy/20;\n    }\n  }\n  draw() {\n    ctx.fillStyle = 'rgba(6,182,212,0.8)';\n    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);\n    ctx.fill();\n  }\n}\n\nfunction init() {\n  particles = [];\n  for (let i=0; i<100; i++) particles.push(new Particle());\n}\n\nfunction animate() {\n  ctx.clearRect(0, 0, canvas.width, canvas.height);\n  particles.forEach(p => {\n    p.update(); p.draw();\n    particles.forEach(other => {\n      let dx = p.x - other.x; let dy = p.y - other.y;\n      let dist = Math.sqrt(dx*dx + dy*dy);\n      if (dist < 100) {\n        ctx.strokeStyle = \`rgba(6, 182, 212, \${1 - dist/100})\`;\n        ctx.lineWidth = 0.5;\n        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(other.x, other.y);\n        ctx.stroke();\n      }\n    });\n  });\n  requestAnimationFrame(animate);\n}\n\nresize(); init(); animate();\nconsole.log("Handshake_Successful: Generative Core Online.");`);
+            setJs(`const canvas = document.getElementById('neural-canvas');\nconst ctx = canvas.getContext('2d');\nlet particles = [];\nconst mouse = { x: null, y: null, radius: 150 };\n\nwindow.addEventListener('resize', resize);\nwindow.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });\n\nfunction resize() {\n  canvas.width = window.innerWidth;\n  canvas.height = window.innerHeight;\n}\n\nclass Particle {\n  constructor() {\n    this.x = Math.random() * canvas.width;\n    this.y = Math.random() * canvas.height;\n    this.size = Math.random() * 2 + 1;\n    this.vx = (Math.random() - 0.5) * 2;\n    this.vy = (Math.random() - 0.5) * 2;\n  }\n  update() {\n    this.x += this.vx; this.y += this.vy;\n    if (this.x > canvas.width || this.x < 0) this.vx *= -1;\n    if (this.y > canvas.height || this.y < 0) this.vy *= -1;\n    \n    let dx = mouse.x - this.x; let dy = mouse.y - this.y;\n    let dist = Math.sqrt(dx*dx + dy*dy);\n    if (dist < mouse.radius) {\n      this.x -= dx/20; this.y -= dy/20;\n    }\n  }\n  draw() {\n    ctx.fillStyle = 'rgba(6,182,212,0.8)';\n    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);\n    ctx.fill();\n  }\n}\n\nfunction init() {\n  particles = [];\n  for (let i=0; i<100; i++) particles.push(new Particle());\n}\n\nfunction animate() {\n  ctx.clearRect(0, 0, canvas.width, canvas.height);\n  particles.forEach(p => {\n    p.update(); p.draw();\n    particles.forEach(other => {\n      let dx = p.x - other.x; let dy = p.y - other.y;\n      let dist = Math.sqrt(dx*dx + dy*dy);\n      if (dist < 100) {\n        ctx.strokeStyle = \`rgba(6, 182, 212, \${1 - dist/100})\`;\n        ctx.lineWidth = 0.5;\n        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(other.x, other.y);\n        ctx.stroke();\n      }\n    });\n  });\n  requestAnimationFrame(animate);\n}\n\nresize(); init(); animate();\nconsole.log("Success: System Online.");`);
         }
         
         setActiveSidebar(null);
@@ -152,7 +152,7 @@ export default function EditorSidebar({
         try {
             window.location.href = '/api/google-drive/auth';
         } catch (e) {
-            console.error("Cloud_Uplink_Refused");
+            console.error("Connection_Refused");
         } finally {
             setIsLinking(false);
         }
@@ -217,7 +217,7 @@ export default function EditorSidebar({
 
                                         <div className="space-y-3">
                                             <div className="flex items-center justify-between">
-                                                <label className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">Neural_Minimap</label>
+                                                <label className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">Minimap</label>
                                                 <button 
                                                     onClick={() => setMinimap(!minimap)}
                                                     className={`relative w-8 h-4 rounded-full transition-colors ${minimap ? 'bg-cyan-500' : 'bg-slate-700'}`}
@@ -378,8 +378,8 @@ export default function EditorSidebar({
                                                         </div>
                                                         <p className="text-[8px] leading-relaxed text-[var(--text-muted)] font-medium uppercase tracking-tighter italic">
                                                             {isPrivate 
-                                                                ? 'Restricted: This node is hidden from the explore grid and search protocols.' 
-                                                                : 'Open: This node is visible to the entire community matrix.'}
+                                                                ? 'Restricted: This project is hidden from the explore page and search.' 
+                                                                : 'Open: This project is visible to the entire community.'}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -482,7 +482,7 @@ export default function EditorSidebar({
                                                 {isUploading ? <RefreshCw className="animate-spin" size={24} /> : <PlusCircle size={24} />}
                                             </div>
                                             <p className="text-[10px] font-black uppercase tracking-widest text-cyan-500">Transmit_Asset</p>
-                                            <p className="text-[8px] text-[var(--text-muted)] uppercase font-medium">Inject images or scripts into node</p>
+                                            <p className="text-[8px] text-[var(--text-muted)] uppercase font-medium">Add images or scripts to your project</p>
                                         </div>
                                     </div>
 
@@ -580,7 +580,7 @@ export default function EditorSidebar({
                                                             </div>
                                                         ))
                                                     ) : (
-                                                        <div className="py-10 text-center text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">No historical nodes found.</div>
+                                                        <div className="py-10 text-center text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">No projects found.</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -612,7 +612,7 @@ export default function EditorSidebar({
                                                 disabled={isLinking}
                                                 className="w-full py-3 bg-white text-black rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-cyan-500 transition-all flex items-center justify-center gap-3"
                                             >
-                                                {isLinking ? <RefreshCw className="animate-spin" size={14} /> : <Server size={14} />} Establish_Uplink
+                                                {isLinking ? <RefreshCw className="animate-spin" size={14} /> : <Server size={14} />} Connect
                                             </button>
                                         ) : (
                                             <div className="space-y-4">
@@ -627,7 +627,7 @@ export default function EditorSidebar({
                                                     onClick={handleCloudSave}
                                                     className="w-full py-3 bg-cyan-500 text-black rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all shadow-lg shadow-cyan-500/20"
                                                 >
-                                                    Sync_Local_Node
+                                                    Sync Data
                                                 </button>
                                             </div>
                                         )}

@@ -23,7 +23,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                             <User size={20} />
                         </div>
                         <div className="text-left">
-                            <h2 className="text-lg font-black tracking-tighter uppercase italic leading-none">Node_Profile</h2>
+                            <h2 className="text-lg font-black tracking-tighter uppercase italic leading-none">User Profile</h2>
                             <p className="text-[8px] text-cyan-500 uppercase tracking-[0.4em] font-bold mt-1">Identity & Security</p>
                         </div>
                     </div>

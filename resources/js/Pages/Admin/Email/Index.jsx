@@ -63,7 +63,7 @@ export default function EmailIndex({ templates, logs, stats }) {
                     </div>
                 }
             >
-                <Head title="Email Command Center" />
+                <Head title="Email Settings" />
                 <div className="relative min-h-full p-6 md:p-12 overflow-y-auto">
                     <AnimatedGrid />
                     

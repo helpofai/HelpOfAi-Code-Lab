@@ -29,7 +29,7 @@ export default function EditorHeader({ handleSave, handleCloudSave, isSaving, is
                         className={`bg-transparent border-none p-0 text-white font-bold text-sm focus:ring-0 placeholder-white/20 truncate leading-none transition-all duration-300 ${isTitleExpanded ? 'w-full block' : 'hidden sm:block'}`}
                         placeholder="Untitled"
                     />
-                    {!isTitleExpanded && <span className="sm:hidden text-cyan-500 font-black text-[10px] uppercase tracking-tighter shrink-0">Node</span>}
+                    {!isTitleExpanded && <span className="sm:hidden text-cyan-500 font-black text-[10px] uppercase tracking-tighter shrink-0">Project</span>}
                     <ChevronRight size={14} className={`text-slate-600 transition-transform duration-300 ${isTitleExpanded ? 'rotate-180' : ''}`} />
                 </div>
             </div>

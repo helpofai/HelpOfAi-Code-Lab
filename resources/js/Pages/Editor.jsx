@@ -202,13 +202,13 @@ export default function Editor({ auth, project: initialProject }) {
         if (!window.Babel) {
             const script = document.createElement('script');
             script.src = "https://unpkg.com/@babel/standalone/babel.min.js";
-            script.onerror = () => setLogs(prev => [...prev, { type: 'ERR', content: 'Uplink_Failed: Babel Compiler Offline.', id: Date.now() }]);
+            script.onerror = () => setLogs(prev => [...prev, { type: 'ERR', content: 'Error: Babel Compiler Offline.', id: Date.now() }]);
             document.head.appendChild(script);
         }
         if (!window.Sass) {
             const script = document.createElement('script');
             script.src = "https://cdn.jsdelivr.net/npm/sass.js@0.11.1/dist/sass.sync.js";
-            script.onerror = () => setLogs(prev => [...prev, { type: 'ERR', content: 'Uplink_Failed: Sass Compiler Offline.', id: Date.now() }]);
+            script.onerror = () => setLogs(prev => [...prev, { type: 'ERR', content: 'Error: Sass Compiler Offline.', id: Date.now() }]);
             document.head.appendChild(script);
         }
 

@@ -93,7 +93,7 @@ export default function Checkout({ auth, project, stripeKey, enabledGateways = [
                                         <span className="text-[10px] font-black uppercase tracking-widest">Premium Node</span>
                                     </div>
                                     <h3 className="text-2xl font-black text-[var(--text-main)] uppercase italic tracking-tighter">{project.title}</h3>
-                                    <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Created by @{project.user.name}</p>
+                                    <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Created by @{project.user?.name || 'Unknown'}</p>
                                 </div>
                             </div>
 
@@ -134,7 +134,7 @@ export default function Checkout({ auth, project, stripeKey, enabledGateways = [
                                     })
                                 ) : (
                                     <div className="col-span-2 p-8 bg-rose-500/5 border border-rose-500/20 rounded-2xl text-center">
-                                        <p className="text-[10px] font-black uppercase text-rose-500 tracking-widest">Uplink_Failed: No active payment bridges detected.</p>
+                                        <p className="text-[10px] font-black uppercase text-rose-500 tracking-widest">Error: No active payment bridges detected.</p>
                                     </div>
                                 )}
                             </div>

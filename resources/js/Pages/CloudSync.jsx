@@ -112,7 +112,7 @@ export default function CloudSync() {
             const res = await axios.get('/api/google-drive/list');
             setDriveFiles(res.data);
         } catch (e) {
-            console.error("Cloud_Uplink_Refused");
+            console.error("Connection_Refused");
         } finally { setIsLoading(false); }
     }, [auth.user.google_drive_token]);
 

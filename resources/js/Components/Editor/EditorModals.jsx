@@ -122,7 +122,7 @@ export default function EditorModals({
                                                             {isPrivate ? 'Private Access' : 'Public Access'}
                                                         </div>
                                                         <div className="text-[9px] text-[var(--text-muted)]">
-                                                            {isPrivate ? 'Only you can view this node.' : 'Visible to the entire network.'}
+                                                            {isPrivate ? 'Only you can view this project.' : 'Visible to everyone.'}
                                                         </div>
                                                     </div>
                                                 </div>

@@ -73,7 +73,7 @@ export default function AdminDashboard() {
                     </div>
                 }
             >
-                <Head title="Admin Command Center" />
+                <Head title="Admin Dashboard" />
                 <div className="relative min-h-full p-8 lg:p-12 overflow-y-auto">
                     <div className="max-w-7xl mx-auto relative z-10 space-y-10">
                         
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
 
                             <div className="lg:col-span-1 bg-[var(--bg-surface)] border border-[var(--border)] p-10 rounded-[2rem] shadow-xl">
                                 <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-10 flex items-center">
-                                    <Cpu size={16} className="mr-3 text-rose-500" /> Neural_Role_Balance
+                                    <Cpu size={16} className="mr-3 text-rose-500" /> User Roles Overview
                                 </h3>
                                 <div className="space-y-8">
                                     {Object.entries(stats.users.roles).map(([role, count]) => (
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                         {/* Recent Users Row */}
                         <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-10 rounded-[2rem] shadow-xl">
                             <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-10 flex items-center">
-                                <Users size={16} className="mr-3 text-cyan-500" /> Recent_Node_Arrivals
+                                <Users size={16} className="mr-3 text-cyan-500" /> Recent Users
                             </h3>
                             <div className="overflow-x-auto">
                                 <table className="w-full">

@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useMemo } from 'react';
 import Editor, { useMonaco } from '@monaco-editor/react';
 import useProjectStore from '@/Stores/useProjectStore';
 
-const EditorLoader = () => <div className="h-full w-full bg-[#050505] flex items-center justify-center font-mono text-[10px] text-cyan-500 uppercase tracking-[0.3em]">Neural_Loading...</div>;
+const EditorLoader = () => <div className="h-full w-full bg-[#050505] flex items-center justify-center font-mono text-[10px] text-cyan-500 uppercase tracking-[0.3em]">Loading...</div>;
 
 export default function MonacoWrapper({ language, value, onChange, fontSize, wordWrap, externalLibraries = [] }) {
     const { theme, minimap } = useProjectStore();
@@ -50,7 +50,7 @@ export default function MonacoWrapper({ language, value, onChange, fontSize, wor
                 }
             };
             script.onerror = () => {
-                console.warn("Uplink_Failed: Emmet Module Offline.");
+                console.warn("Error: Emmet Module Offline.");
             };
             document.head.appendChild(script);
         } else {
