@@ -224,8 +224,9 @@ const ProjectPreviewContent = ({ project }) => {
 };
 
 const ProjectPreview = ({ project }) => {
+    const targetRoute = project.is_for_sale ? route('project.show', { slug: project.slug }) : route('editor', { slug: project.slug });
     return (
-        <Link href={route('editor', { slug: project.slug })} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all hover:-translate-y-1 block shadow-xl">
+        <Link href={targetRoute} className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all hover:-translate-y-1 block shadow-xl">
             <div className="aspect-video bg-white relative overflow-hidden">
                 <ProjectPreviewContent project={project} />
             </div>
@@ -238,6 +239,14 @@ const ProjectPreview = ({ project }) => {
                     <span className="flex items-center gap-1 uppercase font-bold"><User size={10} className="text-cyan-500/40" /> {project.user?.name || 'Unknown'}</span>
                     <span className="flex items-center gap-1 uppercase font-bold"><Clock size={10} className="text-cyan-500/40" /> {new Date(project.created_at).toLocaleDateString()}</span>
                 </div>
+                {project.is_for_sale && (
+                    <div className="pt-4 mt-4 border-t border-[var(--border)] flex justify-between items-center">
+                        <span className="text-lg font-black text-cyan-500 font-mono tracking-tighter">${project.price}</span>
+                        <div className="flex items-center gap-2 px-4 py-2 bg-cyan-500/10 text-cyan-500 font-black text-[10px] uppercase tracking-widest rounded-lg border border-cyan-500/20 group-hover:bg-cyan-500 group-hover:text-black transition-colors">
+                            <Zap size={12} className="fill-current" /> View Details
+                        </div>
+                    </div>
+                )}
             </div>
         </Link>
     );

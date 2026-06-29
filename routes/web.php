@@ -57,6 +57,32 @@ Route::get('/editor/{slug?}', function ($slug = null) {
 
 Route::get('/projects/{slug}/og-image', [\App\Http\Controllers\Api\ProjectImageController::class, 'show'])->name('projects.og-image');
 
+Route::get('/project/{slug}', function ($slug) {
+    $project = Project::with(['user', 'team'])->where('slug', $slug)->firstOrFail();
+    
+    $user = auth()->user();
+    $hasPurchased = false;
+    if ($user) {
+        $hasPurchased = $project->purchases()->where('user_id', $user->id)->exists();
+    }
+
+    $isOwner = $user && $project->user_id === $user->id;
+    $isTeamMember = $project->team_id && $user && 
+                    $user->teams()->where('teams.id', $project->team_id)->exists();
+
+    if (!$project->is_public && !$isOwner && !$isTeamMember && !$hasPurchased) {
+        abort(403, 'Unauthorized. Restricted Neural Core.');
+    }
+
+    $project->has_purchased = $hasPurchased;
+    $project->makeVisible(['code', 'settings']);
+
+    return Inertia::render('ProjectView', [
+        'project' => $project,
+        'canEdit' => $isOwner || $isTeamMember || $hasPurchased
+    ]);
+})->name('project.show');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
