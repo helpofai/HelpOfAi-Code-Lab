@@ -123,8 +123,12 @@ export default function ProjectView({ project, canEdit }) {
         }
     };
 
-    const isLocked = !canEdit && (project.is_for_sale || project.is_restricted);
-    const lockType = project.is_restricted ? 'private' : (project.is_for_sale ? 'paid' : 'none');
+    const isOwner = project ? project.user_id === auth.user?.id : true;
+    const isHighLevelUser = auth?.user && (auth.user.identity_status === 'verified' || auth.user.level > 4);
+    const isPublicAdLocked = !canEdit && project.is_public && !project.is_for_sale && !isHighLevelUser && rewardAdsCompleted < 1;
+
+    const isLocked = !canEdit && (project.is_for_sale || project.is_restricted || isPublicAdLocked);
+    const lockType = project.is_restricted ? 'private' : (project.is_for_sale ? 'paid' : (isPublicAdLocked ? 'public_ad' : 'none'));
     
     // Obfuscate code if locked
     const displayCode = {
@@ -230,14 +234,16 @@ export default function ProjectView({ project, canEdit }) {
                                     {/* Lock Overlay with Ads */}
                                     {isLocked && (
                                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md p-6">
-                                            {lockType === 'private' && rewardAdsCompleted < 2 ? (
+                                            {(lockType === 'private' && rewardAdsCompleted < 2) || lockType === 'public_ad' ? (
                                                 <div className="bg-black border border-[var(--border)] p-6 rounded-3xl max-w-md w-full text-center space-y-4 shadow-2xl relative overflow-hidden">
                                                     <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/20 to-transparent pointer-events-none" />
                                                     <h4 className="text-lg font-black uppercase text-white tracking-widest flex items-center justify-center gap-2">
                                                         <Zap size={18} className="text-cyan-500" /> Unlock Protocol
                                                     </h4>
                                                     <p className="text-xs text-gray-400 font-medium">
-                                                        This module is restricted. Complete {2 - rewardAdsCompleted} more sponsor ad{2 - rewardAdsCompleted > 1 ? 's' : ''} to reveal the request access protocol.
+                                                        {lockType === 'private'
+                                                            ? `This module is restricted. Complete ${2 - rewardAdsCompleted} more sponsor ad${2 - rewardAdsCompleted > 1 ? 's' : ''} to reveal the request access protocol.`
+                                                            : 'This is a public module. Complete 1 sponsor ad to view the code.'}
                                                     </p>
                                                     
                                                     {isPlayingAd ? (
@@ -267,7 +273,9 @@ export default function ProjectView({ project, canEdit }) {
                                                             onClick={playRewardAd}
                                                             className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)]"
                                                         >
-                                                            Initialize Ad Sequence ({rewardAdsCompleted}/2)
+                                                            {lockType === 'private'
+                                                                ? `Initialize Ad Sequence (${rewardAdsCompleted}/2)`
+                                                                : 'Watch Ad to Unlock Code'}
                                                         </button>
                                                     )}
                                                 </div>
