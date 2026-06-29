@@ -29,7 +29,7 @@ export default function PublicLayout({ children }) {
 
             {/* Global Progress Bar */}
             <motion.div 
-                className="fixed top-0 left-0 right-0 h-0.5 bg-cyan-500 z-[200] origin-left"
+                className="fixed top-0 left-0 right-0 h-[3px] bg-rainbow-gradient z-[200] origin-left"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 1 }}

@@ -183,20 +183,25 @@
 
 /* Professional NProgress Gradient Override */
 #nprogress .bar {
-    background: linear-gradient(to right, #22d3ee, #10b981, #22d3ee) !important;
+    background: linear-gradient(to right, #ef4444, #f59e0b, #10b981, #06b6d4, #6366f1, #d946ef, #ef4444) !important;
     background-size: 200% 200% !important;
-    animation: loadingGradient 2s ease infinite !important;
+    animation: loadingGradient 2s linear infinite !important;
     height: 3px !important;
     z-index: 99999 !important;
 }
 
 #nprogress .peg {
-    box-shadow: 0 0 10px #22d3ee, 0 0 5px #10b981 !important;
+    box-shadow: 0 0 10px #06b6d4, 0 0 5px #d946ef !important;
 }
 
 @keyframes loadingGradient {
     0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.bg-rainbow-gradient {
+    background: linear-gradient(to right, #ef4444, #f59e0b, #10b981, #06b6d4, #6366f1, #d946ef, #ef4444) !important;
+    background-size: 200% 200% !important;
+    animation: loadingGradient 2s linear infinite !important;
 }
 
