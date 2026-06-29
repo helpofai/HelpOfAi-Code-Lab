@@ -13,7 +13,23 @@ class ExploreController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Project::where('is_public', true)->with('user:id,name');
+        $query = Project::with('user:id,name');
+
+        // Type Filter (All, Public, Paid, Private)
+        $type = $request->get('type', 'public');
+        if ($type === 'public') {
+            $query->where('is_public', true)->where('is_for_sale', false);
+        } elseif ($type === 'paid') {
+            $query->where('is_for_sale', true);
+        } elseif ($type === 'private') {
+            $query->where('is_public', false)->where('is_for_sale', false);
+        } else {
+            // 'all' includes public and paid, but usually we should just let them see all they have access to. 
+            // We'll show all public and paid projects for 'all' by default.
+            $query->where(function($q) {
+                $q->where('is_public', true)->orWhere('is_for_sale', true);
+            });
+        }
 
         // Search
         if ($request->filled('search')) {
@@ -30,15 +46,41 @@ class ExploreController extends Controller
             $query->where('category', $request->category);
         }
 
+        // Price Filter (for paid items)
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
         // Sorting
         $sort = $request->get('sort', 'latest');
         if ($sort === 'latest') {
             $query->orderBy('created_at', 'desc');
+        } elseif ($sort === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($sort === 'price_low') {
+            $query->orderBy('price', 'asc');
+        } elseif ($sort === 'price_high') {
+            $query->orderBy('price', 'desc');
         } elseif ($sort === 'random') {
             $query->inRandomOrder();
         }
 
-        return $query->limit(24)->get();
+        // Force visibility for frontend
+        $projects = $query->paginate(12);
+        
+        $projects->getCollection()->transform(function ($project) {
+            $isRestricted = false;
+            // Similar to ProjectView, but we can't assume auth here easily. Let frontend handle it or just scrub code always for explore endpoint.
+            $project->code = ['html' => '', 'css' => '', 'js' => ''];
+            $project->is_restricted = !$project->is_public && !$project->is_for_sale;
+            $project->makeVisible(['code', 'settings']);
+            return $project;
+        });
+
+        return $projects;
     }
 
     /**

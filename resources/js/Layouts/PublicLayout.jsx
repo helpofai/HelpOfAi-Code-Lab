@@ -51,6 +51,7 @@ export default function PublicLayout({ children }) {
                         </Link>
                         <div className="hidden sm:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] border-l border-[var(--border)] pl-6 h-6">
                             <a href="/#features" className="hover:text-cyan-500 transition-colors">Features</a>
+                            <Link href={route('explore')} className="hover:text-cyan-500 transition-colors">Explore</Link>
                             <Link href={route('blog.index')} className="hover:text-cyan-500 transition-colors">Blog</Link>
                             <Link href="/p/about" className="hover:text-cyan-500 transition-colors">About</Link>
                         </div>

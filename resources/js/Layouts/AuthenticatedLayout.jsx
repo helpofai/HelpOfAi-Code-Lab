@@ -25,7 +25,8 @@ import {
     Tag,
     BadgeCheck,
     Megaphone,
-    User
+    User,
+    Compass
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -41,6 +42,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
         const userItems = [
             { name: 'Dashboard', icon: LayoutDashboard, href: route('dashboard'), active: route().current('dashboard') },
+            { name: 'Explore', icon: Compass, href: route('explore'), active: route().current('explore') },
             { name: 'My Account', icon: User, href: route('my-account'), active: route().current('my-account') },
 
             { name: 'Cloud Sync', icon: Cloud, href: route('cloud-sync'), active: route().current('cloud-sync') },

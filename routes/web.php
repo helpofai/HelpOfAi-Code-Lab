@@ -19,8 +19,13 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
         'siteSettings' => $settings,
+        'siteSettings' => $settings,
     ]);
 });
+
+Route::get('/explore', function () {
+    return Inertia::render('Explore');
+})->name('explore');
 
 Route::get('/editor/{slug?}', function ($slug = null) {
     $project = null;
