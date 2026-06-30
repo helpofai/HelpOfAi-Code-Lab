@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Code2, ExternalLink, Shield, Zap, Lock, ShoppingCart, User, Clock, CheckCircle2, Download, Bookmark, Loader2 } from 'lucide-react';
+import { Code2, ExternalLink, Shield, Zap, Lock, ShoppingCart, User, Clock, CheckCircle2, Download, Bookmark, Loader2, Copy } from 'lucide-react';
 import AdUnit from '@/Components/AdUnit';
 import axios from 'axios';
 import { useToast } from '@/Components/Toast/ToastProvider';
@@ -110,6 +110,13 @@ export default function ProjectView({ project, canEdit }) {
         URL.revokeObjectURL(url);
     };
 
+    const handleCopyCode = () => {
+        if (!isLocked && displayCode[activeTab]) {
+            navigator.clipboard.writeText(displayCode[activeTab]);
+            toast.success('Code copied to clipboard!');
+        }
+    };
+
     const handleRequestAccess = async () => {
         setIsRequesting(true);
         try {
@@ -213,16 +220,28 @@ export default function ProjectView({ project, canEdit }) {
 
                             <div className="bg-[#1e1e1e] rounded-2xl overflow-hidden border border-white/10 relative">
                                 {/* Tabs */}
-                                <div className="flex border-b border-white/10 bg-black/40">
-                                    {['html', 'css', 'js'].map(tab => (
-                                        <button
-                                            key={tab}
-                                            onClick={() => setActiveTab(tab)}
-                                            className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${activeTab === tab ? 'text-cyan-500 border-b-2 border-cyan-500 bg-white/5' : 'text-white/50 hover:text-white/80'}`}
+                                <div className="flex items-center justify-between border-b border-white/10 bg-black/40">
+                                    <div className="flex">
+                                        {['html', 'css', 'js'].map(tab => (
+                                            <button
+                                                key={tab}
+                                                onClick={() => setActiveTab(tab)}
+                                                className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${activeTab === tab ? 'text-cyan-500 border-b-2 border-cyan-500 bg-white/5' : 'text-white/50 hover:text-white/80'}`}
+                                            >
+                                                {tab}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    
+                                    {!isLocked && (
+                                        <button 
+                                            onClick={handleCopyCode} 
+                                            className="mr-4 text-white/50 hover:text-white transition-colors p-2 rounded-lg bg-white/5 hover:bg-white/10"
+                                            title="Copy Code"
                                         >
-                                            {tab}
+                                            <Copy size={14} />
                                         </button>
-                                    ))}
+                                    )}
                                 </div>
                                 
                                 {/* Editor Content */}
