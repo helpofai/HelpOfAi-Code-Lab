@@ -39,7 +39,7 @@ export default function MyAccount({ mustVerifyEmail, status }) {
         setIsUpdatingPayout(true);
         try {
             const payload = type === 'stripe' ? { stripe_account_id: stripeId } : { razorpay_account_id: razorpayId };
-            await axios.post('/api/vendor/payout-accounts', payload);
+            await axios.post('/api/vendors/payout-accounts', payload);
             toast.success(`${type.toUpperCase()} account linked successfully!`);
         } catch (error) {
             toast.error(error.response?.data?.message || `Failed to link ${type} account.`);

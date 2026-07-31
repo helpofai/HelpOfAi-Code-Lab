@@ -96,13 +96,13 @@ Route::post('/license/verify', [\App\Http\Controllers\Api\LicenseValidationContr
 
 // Vendor Endpoints
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/vendor/payout-accounts', [\App\Http\Controllers\Api\VendorController::class, 'updatePayoutAccounts']);
-    Route::post('/vendor/request-payout', [\App\Http\Controllers\Api\VendorController::class, 'requestPayout']);
-    Route::get('/vendor/connections', [\App\Http\Controllers\Api\VendorController::class, 'getConnections']);
-    Route::post('/vendor/connections', [\App\Http\Controllers\Api\VendorController::class, 'storeConnection']);
-    Route::post('/vendor/connections/{id}/verify', [\App\Http\Controllers\Api\VendorController::class, 'verifyConnection']);
-    Route::delete('/vendor/connections/{id}', [\App\Http\Controllers\Api\VendorController::class, 'deleteConnection']);
-    Route::post('/vendor/github/fetch-md', [\App\Http\Controllers\Api\VendorController::class, 'fetchMarkdownFiles']);
+    Route::post('/vendors/payout-accounts', [\App\Http\Controllers\Api\VendorController::class, 'updatePayoutAccounts']);
+    Route::post('/vendors/request-payout', [\App\Http\Controllers\Api\VendorController::class, 'requestPayout']);
+    Route::get('/vendors/connections', [\App\Http\Controllers\Api\VendorController::class, 'getConnections']);
+    Route::post('/vendors/connections', [\App\Http\Controllers\Api\VendorController::class, 'storeConnection']);
+    Route::post('/vendors/connections/{id}/verify', [\App\Http\Controllers\Api\VendorController::class, 'verifyConnection']);
+    Route::delete('/vendors/connections/{id}', [\App\Http\Controllers\Api\VendorController::class, 'deleteConnection']);
+    Route::post('/vendors/github/fetch-md', [\App\Http\Controllers\Api\VendorController::class, 'fetchMarkdownFiles']);
 });
 
 // Secure Download Endpoint

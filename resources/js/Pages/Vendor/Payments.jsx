@@ -22,7 +22,7 @@ export default function VendorPayments({ sales, totalEarnings }) {
         e.preventDefault();
         setIsSaving(true);
         try {
-            await axios.post('/api/vendor/payout-accounts', formData);
+            await axios.post('/api/vendors/payout-accounts', formData);
             toast.success("Payout rules saved successfully.");
         } catch (e) {
             toast.error(e.response?.data?.message || "Failed to save settings.");
@@ -207,7 +207,7 @@ export default function VendorPayments({ sales, totalEarnings }) {
                                         if (!amount || isNaN(amount) || amount < 10) return alert('Invalid amount.');
                                         
                                         try {
-                                            await axios.post('/api/vendor/request-payout', { amount: parseFloat(amount) });
+                                            await axios.post('/api/vendors/request-payout', { amount: parseFloat(amount) });
                                             toast.success('Withdrawal requested successfully!');
                                             window.location.reload();
                                         } catch (e) {

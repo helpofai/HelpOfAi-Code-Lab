@@ -240,7 +240,7 @@ export default function Sell() {
                                             onClick={async () => {
                                                 if (!formData.github_repo_url) return toast.error("Please enter a GitHub URL first.");
                                                 try {
-                                                    const res = await axios.post('/api/vendor/github/fetch-md', { repo_url: formData.github_repo_url });
+                                                    const res = await axios.post('/api/vendors/github/fetch-md', { repo_url: formData.github_repo_url });
                                                     setFormData({...formData, markdown_files: res.data.markdown_files});
                                                     toast.success(`Fetched ${res.data.markdown_files.length} markdown file(s)!`);
                                                 } catch (e) {

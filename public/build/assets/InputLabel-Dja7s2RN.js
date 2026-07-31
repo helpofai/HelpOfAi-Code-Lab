@@ -1,0 +1,1 @@
+import{j as r}from"./app-3iQS0q2Y.js";function s({value:t,className:e="",children:a,...n}){return r.jsx("label",{...n,className:"block text-[10px] font-black uppercase tracking-[0.3em] text-cyan-500/60 "+e,children:t||a})}export{s as I};

@@ -26,7 +26,7 @@ export default function VendorDashboard() {
 
     const fetchConnections = async () => {
         try {
-            const { data } = await axios.get('/api/vendor/connections');
+            const { data } = await axios.get('/api/vendors/connections');
             setConnections(data);
         } catch (e) {
             console.error("Failed to load connections");
@@ -37,7 +37,7 @@ export default function VendorDashboard() {
         e.preventDefault();
         setIsSaving(true);
         try {
-            await axios.post('/api/vendor/payout-accounts', formData);
+            await axios.post('/api/vendors/payout-accounts', formData);
             toast.success("Vendor settings saved successfully.");
         } catch (e) {
             toast.error(e.response?.data?.message || "Failed to save settings.");
@@ -50,7 +50,7 @@ export default function VendorDashboard() {
         e.preventDefault();
         setIsAddingConnection(true);
         try {
-            await axios.post('/api/vendor/connections', newConnection);
+            await axios.post('/api/vendors/connections', newConnection);
             toast.success("Connection added and verified!");
             setNewConnection({ provider: 'github', name: '', token: '' });
             fetchConnections();
@@ -63,7 +63,7 @@ export default function VendorDashboard() {
 
     const handleVerifyConnection = async (id) => {
         try {
-            const { data } = await axios.post(`/api/vendor/connections/${id}/verify`);
+            const { data } = await axios.post(`/api/vendors/connections/${id}/verify`);
             if (data.is_valid) toast.success("Connection verified successfully!");
             else toast.error("Connection failed.");
             fetchConnections();
@@ -76,7 +76,7 @@ export default function VendorDashboard() {
     const handleDeleteConnection = async (id) => {
         if (!confirm("Remove this integration?")) return;
         try {
-            await axios.delete(`/api/vendor/connections/${id}`);
+            await axios.delete(`/api/vendors/connections/${id}`);
             toast.success("Connection removed.");
             fetchConnections();
         } catch (e) {
