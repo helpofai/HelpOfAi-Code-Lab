@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
-import { ShoppingCart, ShoppingBag, ExternalLink, Github, Zap, Shield, Key, Download, CheckCircle2, User, Clock, Code2, Package } from 'lucide-react';
+import { ShoppingCart, ShoppingBag, ExternalLink, Github, Zap, Shield, Key, Download, CheckCircle2, User, Clock, Code2, Package, ShieldCheck, Star, FileCode } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -146,25 +146,62 @@ export default function MarketplaceProduct({ project, canEdit }) {
 
                     {/* Sidebar / Checkout Card */}
                     <div className="space-y-8">
-                        <div className="bg-[var(--bg-surface)] border border-emerald-500/30 rounded-3xl p-8 space-y-8 shadow-xl sticky top-32">
+                        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-8 shadow-2xl sticky top-32">
                             
-                            <div className="flex items-center gap-4 border-b border-[var(--border)] pb-6">
-                                <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/30 text-emerald-500">
-                                    <User size={20} />
+                            {/* Vendor Profile */}
+                            <div className="flex items-center gap-4 pb-6 border-b border-[var(--border)]">
+                                <div className="w-12 h-12 bg-[var(--bg-main)] rounded-xl flex items-center justify-center border border-[var(--border)] relative shadow-inner shrink-0">
+                                    <User size={20} className="text-emerald-500" />
+                                    {project.user?.identity_status === 'verified' && (
+                                        <div className="absolute -bottom-1.5 -right-1.5 bg-emerald-500 rounded-full p-0.5 border-2 border-[var(--bg-surface)]" title="Verified Identity">
+                                            <ShieldCheck size={10} className="text-black" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
-                                    <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">Vendors</p>
-                                    <p className="text-sm font-bold text-[var(--text-main)]">@{project.user?.name}</p>
+                                    <p className="text-sm font-black text-[var(--text-main)] uppercase tracking-tight flex items-center gap-2">
+                                        @{project.user?.name}
+                                    </p>
+                                    <div className="flex items-center gap-1 mt-1">
+                                        <Star size={10} className="text-amber-400 fill-amber-400" />
+                                        <span className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-[0.2em]">
+                                            {project.user?.level ? `Level ${project.user.level} Vendor` : 'New Vendor'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div className="space-y-2 text-center">
+                            {/* Product Metadata */}
+                            <div className="bg-[var(--bg-elevated)] p-5 rounded-2xl border border-[var(--border)] mt-6 mb-6 space-y-4 shadow-inner">
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-[var(--text-muted)] font-bold uppercase tracking-wider flex items-center gap-2">
+                                        <FileCode size={14} className="text-cyan-500"/> License
+                                    </span>
+                                    <span className="text-[var(--text-main)] font-black uppercase bg-[var(--bg-main)] px-2 py-1 rounded border border-[var(--border)] shadow-sm">Standard</span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-[var(--text-muted)] font-bold uppercase tracking-wider flex items-center gap-2">
+                                        <Clock size={14} className="text-purple-500"/> Updated
+                                    </span>
+                                    <span className="text-[var(--text-main)] font-black uppercase bg-[var(--bg-main)] px-2 py-1 rounded border border-[var(--border)] shadow-sm">Recently</span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-[var(--text-muted)] font-bold uppercase tracking-wider flex items-center gap-2">
+                                        <Package size={14} className="text-emerald-500"/> Version
+                                    </span>
+                                    <span className="text-[var(--text-main)] font-black uppercase bg-[var(--bg-main)] px-2 py-1 rounded border border-[var(--border)] shadow-sm">{project.version || '1.0.0'}</span>
+                                </div>
+                            </div>
+
+                            {/* Price */}
+                            <div className="space-y-2 text-center mb-6 mt-8">
                                 <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">Purchase Price</h4>
                                 <div className="text-5xl font-black text-[var(--text-main)] tracking-tighter">
                                     ${project.price}
                                 </div>
                             </div>
                             
+                            {/* Buy Button */}
                             <div className="space-y-4">
                                 {isOwner ? (
                                     <div className="w-full flex items-center justify-center gap-3 py-5 bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] font-black uppercase text-xs tracking-widest rounded-xl">
@@ -187,12 +224,13 @@ export default function MarketplaceProduct({ project, canEdit }) {
                                 )}
                             </div>
 
-                            <div className="space-y-3 pt-4 border-t border-[var(--border)]">
+                            {/* Features list */}
+                            <div className="space-y-3 pt-6 border-t border-[var(--border)] mt-6">
                                 {[
                                     'Full Source Code Download',
                                     'RSA Digital License Key',
-                                    'Direct from Vendors Repo',
-                                    'Secure Stripe / Razorpay'
+                                    'Quality Assured',
+                                    'Secure Payment Escrow'
                                 ].map((perk, i) => (
                                     <div key={i} className="flex items-center gap-3 text-[10px] uppercase font-bold text-[var(--text-muted)]">
                                         <CheckCircle2 size={14} className="text-emerald-500" />
