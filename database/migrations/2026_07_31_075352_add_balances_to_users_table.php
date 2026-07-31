@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->decimal('available_balance', 12, 2)->default(0)->after('paytm_merchant_id');
-            $table->decimal('pending_balance', 12, 2)->default(0)->after('available_balance');
+            if (!Schema::hasColumn('users', 'available_balance')) {
+                $table->decimal('available_balance', 12, 2)->default(0);
+            }
+            if (!Schema::hasColumn('users', 'pending_balance')) {
+                $table->decimal('pending_balance', 12, 2)->default(0);
+            }
         });
     }
 

@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('phonepe_merchant_id')->nullable()->after('razorpay_account_id');
-            $table->string('paytm_merchant_id')->nullable()->after('phonepe_merchant_id');
+            if (!Schema::hasColumn('users', 'phonepe_merchant_id')) {
+                $table->string('phonepe_merchant_id')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'paytm_merchant_id')) {
+                $table->string('paytm_merchant_id')->nullable();
+            }
         });
     }
 

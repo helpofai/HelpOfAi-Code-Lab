@@ -9,9 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('projects', function (Blueprint $table) {
-            $table->string('project_type')->default('editor')->after('id'); // editor, downloadable, github_repo
-            $table->string('github_repo_url')->nullable()->after('code');
-            $table->string('version')->nullable()->after('github_repo_url');
+            if (!Schema::hasColumn('projects', 'project_type')) {
+                $table->string('project_type')->default('editor'); // editor, downloadable, github_repo
+            }
+            if (!Schema::hasColumn('projects', 'github_repo_url')) {
+                $table->string('github_repo_url')->nullable();
+            }
+            if (!Schema::hasColumn('projects', 'version')) {
+                $table->string('version')->nullable();
+            }
         });
     }
 

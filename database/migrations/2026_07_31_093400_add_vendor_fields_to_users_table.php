@@ -9,9 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_vendor')->default(false)->after('role');
-            $table->string('stripe_account_id')->nullable()->after('is_vendor');
-            $table->string('razorpay_account_id')->nullable()->after('stripe_account_id');
+            if (!Schema::hasColumn('users', 'is_vendor')) {
+                $table->boolean('is_vendor')->default(false);
+            }
+            if (!Schema::hasColumn('users', 'stripe_account_id')) {
+                $table->string('stripe_account_id')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'razorpay_account_id')) {
+                $table->string('razorpay_account_id')->nullable();
+            }
         });
     }
 
