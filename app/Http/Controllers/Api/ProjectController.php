@@ -62,6 +62,13 @@ class ProjectController extends Controller
             return response()->json(['message' => 'Private projects are restricted to Pro clearance.'], 403);
         }
 
+        // Level 4+ Marketplace Gate
+        if (!$user->isAdmin() && $user->level < 4) {
+            if (isset($validated['is_for_sale']) && $validated['is_for_sale']) {
+                return response()->json(['message' => 'You must reach Level 4 and verify your identity to list products for sale.'], 403);
+            }
+        }
+
         $slug = Str::slug($validated['title']) . '-' . Str::random(6);
         
         $project = $user->projects()->create([
@@ -155,6 +162,16 @@ class ProjectController extends Controller
         // SaaS Logic: Gating private projects
         if (isset($validated['is_private']) && $validated['is_private'] && !Auth::user()->isPro()) {
             return response()->json(['message' => 'Private visibility restricted to Pro accounts.'], 403);
+        }
+
+        // Level 4+ (Verified) Marketplace Gate
+        if (!Auth::user()->isAdmin() && Auth::user()->level < 4) {
+            if (isset($validated['is_for_sale']) && $validated['is_for_sale']) {
+                return response()->json(['message' => 'You must reach Level 4 and verify your identity to list products for sale.'], 403);
+            }
+            if (isset($validated['github_repo_url']) && !empty($validated['github_repo_url'])) {
+                return response()->json(['message' => 'Linking private repositories requires Level 4.'], 403);
+            }
         }
 
         // Prepare update data

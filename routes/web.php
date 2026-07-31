@@ -84,6 +84,17 @@ Route::get('/projects/{slug}/og-image', [\App\Http\Controllers\Api\ProjectImageC
 Route::get('/project/{slug}', function ($slug) {
     $project = Project::with(['user', 'team'])->where('slug', $slug)->firstOrFail();
     
+    // Unique IP-based View Tracking
+    $viewKey = 'project_viewed_' . $project->id . '_' . request()->ip();
+    if (!\Illuminate\Support\Facades\Cache::has($viewKey)) {
+        $project->increment('views');
+        \Illuminate\Support\Facades\Cache::put($viewKey, true, now()->addHours(24)); // Lock IP for 24h
+        
+        if ($project->user) {
+            app(\App\Services\VendorLevelService::class)->evaluate($project->user);
+        }
+    }
+
     $user = auth()->user();
     $hasPurchased = false;
     if ($user) {

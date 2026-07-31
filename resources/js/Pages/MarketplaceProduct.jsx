@@ -152,15 +152,13 @@ export default function MarketplaceProduct({ project, canEdit }) {
                             <div className="flex items-center gap-4 pb-6 border-b border-[var(--border)]">
                                 <div className="w-12 h-12 bg-[var(--bg-main)] rounded-xl flex items-center justify-center border border-[var(--border)] relative shadow-inner shrink-0">
                                     <User size={20} className="text-emerald-500" />
-                                    {project.user?.identity_status === 'verified' && (
-                                        <div className="absolute -bottom-1.5 -right-1.5 bg-emerald-500 rounded-full p-0.5 border-2 border-[var(--bg-surface)]" title="Verified Identity">
-                                            <ShieldCheck size={10} className="text-black" />
-                                        </div>
-                                    )}
                                 </div>
                                 <div>
                                     <p className="text-sm font-black text-[var(--text-main)] uppercase tracking-tight flex items-center gap-2">
                                         @{project.user?.name}
+                                        {project.user?.identity_status === 'verified' && (
+                                            <ShieldCheck size={14} className="text-emerald-500" title="Verified Identity" />
+                                        )}
                                     </p>
                                     <div className="flex items-center gap-1 mt-1">
                                         <Star size={10} className="text-amber-400 fill-amber-400" />
