@@ -45,18 +45,18 @@ class VendorLevelService
                                ->where('status', 'cleared')
                                ->sum('amount');
             
-            // Level 5: Rising Star ($1,000 in sales)
-            if ($totalSales >= 1000) {
+            // Level 5: Rising Star ($100 in sales)
+            if ($totalSales >= 100) {
                 $newLevel = 5;
             }
 
-            // Level 6: Elite Vendor ($10,000 in sales)
-            if ($totalSales >= 10000) {
+            // Level 6: Elite Vendor ($1,000 in sales)
+            if ($totalSales >= 1000) {
                 $newLevel = 6;
             }
 
-            // Level 7: Legendary Vendor ($50,000 in sales)
-            if ($totalSales >= 50000) {
+            // Level 7: Legendary Vendor ($5,000 in sales)
+            if ($totalSales >= 5000) {
                 $newLevel = 7;
             }
         }
