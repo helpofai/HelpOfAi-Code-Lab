@@ -34,6 +34,14 @@ class InfoController extends Controller
         ];
         $foundNames[] = 'system_env';
 
+        // Add System Requirements Node
+        $data[] = [
+            'name' => 'SYSTEM_REQUIREMENTS',
+            'display' => 'System Requirements',
+            'content' => $this->getSystemRequirementsMarkdown(),
+        ];
+        $foundNames[] = 'system_requirements';
+
         foreach ($files as $fileName) {
             $path = base_path($fileName);
             if (File::exists($path)) {
@@ -56,6 +64,41 @@ class InfoController extends Controller
         return Inertia::render('Admin/Info', [
             'infoFiles' => $data
         ]);
+    }
+
+    private function getSystemRequirementsMarkdown()
+    {
+        $requiredExtensions = [
+            'ctype', 'curl', 'dom', 'fileinfo', 'filter', 'hash',
+            'mbstring', 'openssl', 'pcre', 'PDO', 'session', 'tokenizer', 'xml', 'gd'
+        ];
+
+        $markdown = "# System Requirements Checklist\n";
+        $markdown .= "The following PHP extensions are required for this system to operate. If any show as missing, you must enable them in your `php.ini` file or hosting panel.\n\n";
+        
+        $markdown .= "| PHP Extension | Status |\n";
+        $markdown .= "| :--- | :--- |\n";
+
+        foreach ($requiredExtensions as $ext) {
+            $isLoaded = extension_loaded($ext);
+            $status = $isLoaded ? "<span style='color: #10b981; font-weight: bold;'>✔ ENABLED</span>" : "<span style='color: #f43f5e; font-weight: bold;'>✖ MISSING</span>";
+            $markdown .= "| **{$ext}** | {$status} |\n";
+        }
+
+        $markdown .= "\n## Server PHP Limits\n";
+        $markdown .= "These settings control how large of a file (like product zips or images) you can upload.\n\n";
+        
+        $uploadMax = ini_get('upload_max_filesize');
+        $postMax = ini_get('post_max_size');
+        $memoryLimit = ini_get('memory_limit');
+
+        $markdown .= "| Setting | Current Value |\n";
+        $markdown .= "| :--- | :--- |\n";
+        $markdown .= "| **Upload Max Filesize** | {$uploadMax} |\n";
+        $markdown .= "| **Post Max Size** | {$postMax} |\n";
+        $markdown .= "| **Memory Limit** | {$memoryLimit} |\n";
+
+        return $markdown;
     }
 
     private function getSystemEnvMarkdown()
