@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payouts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->decimal('amount', 10, 2);
-            $table->string('status')->default('pending'); // pending, processing, completed, rejected
-            $table->string('payment_method')->nullable(); // stripe, razorpay, phonepe, bank_transfer, etc.
-            $table->string('reference_id')->nullable(); // External gateway transaction ID
-            $table->text('admin_notes')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('payouts')) {
+            Schema::create('payouts', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->decimal('amount', 10, 2);
+                $table->string('status')->default('pending'); // pending, processing, completed, rejected
+                $table->string('payment_method')->nullable(); // stripe, razorpay, phonepe, bank_transfer, etc.
+                $table->string('reference_id')->nullable(); // External gateway transaction ID
+                $table->text('admin_notes')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

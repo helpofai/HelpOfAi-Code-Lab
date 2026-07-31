@@ -8,14 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('license_domains', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('license_id')->constrained()->cascadeOnDelete();
-            $table->string('domain_url');
-            $table->timestamps();
-            
-            $table->unique(['license_id', 'domain_url']);
-        });
+        if (!Schema::hasTable('license_domains')) {
+            Schema::create('license_domains', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('license_id')->constrained()->cascadeOnDelete();
+                $table->string('domain_url');
+                $table->timestamps();
+                
+                $table->unique(['license_id', 'domain_url']);
+            });
+        }
     }
 
     public function down(): void
