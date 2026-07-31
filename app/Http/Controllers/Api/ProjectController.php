@@ -62,10 +62,10 @@ class ProjectController extends Controller
             return response()->json(['message' => 'Private projects are restricted to Pro clearance.'], 403);
         }
 
-        // Level 4+ Marketplace Gate
+        // Level 4+ Marketplace Gate (Full Git Projects)
         if (!$user->isAdmin() && $user->level < 4) {
-            if (isset($validated['is_for_sale']) && $validated['is_for_sale']) {
-                return response()->json(['message' => 'You must reach Level 4 and verify your identity to list products for sale.'], 403);
+            if (isset($validated['github_repo_url']) && !empty($validated['github_repo_url'])) {
+                return response()->json(['message' => 'You must reach Level 4 and verify your identity to link full GitHub repositories.'], 403);
             }
         }
 
@@ -166,11 +166,8 @@ class ProjectController extends Controller
 
         // Level 4+ (Verified) Marketplace Gate
         if (!Auth::user()->isAdmin() && Auth::user()->level < 4) {
-            if (isset($validated['is_for_sale']) && $validated['is_for_sale']) {
-                return response()->json(['message' => 'You must reach Level 4 and verify your identity to list products for sale.'], 403);
-            }
             if (isset($validated['github_repo_url']) && !empty($validated['github_repo_url'])) {
-                return response()->json(['message' => 'Linking private repositories requires Level 4.'], 403);
+                return response()->json(['message' => 'Linking full private repositories requires Level 4 and Identity Verification.'], 403);
             }
         }
 

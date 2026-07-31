@@ -30,7 +30,8 @@ import {
     DollarSign,
     Store,
     Wallet,
-    Briefcase
+    Briefcase,
+    FileCode
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -59,6 +60,7 @@ export default function AuthenticatedLayout({ header, children }) {
         const vendorItems = [
             { name: 'Vendors Hub', icon: Shield, href: route('vendors.dashboard'), active: route().current('vendors.dashboard') },
             { name: 'Manage Projects', icon: Briefcase, href: route('vendors.projects'), active: route().current('vendors.projects') },
+            { name: 'SDK & APIs', icon: FileCode, href: route('vendors.sdk-integration'), active: route().current('vendors.sdk-integration') },
             { name: 'Payments', icon: DollarSign, href: route('vendors.payments'), active: route().current('vendors.payments') },
             { name: 'Sell Product', icon: Store, href: route('vendors.sell'), active: route().current('vendors.sell') },
             { name: 'Marketplace', icon: ShoppingBag, href: route('marketplace'), active: route().current('marketplace') },

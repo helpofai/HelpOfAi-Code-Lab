@@ -258,6 +258,29 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Vendors/Projects');
     })->name('vendors.projects');
 
+    Route::get('/vendors/payments', function () {
+        $user = auth()->user();
+        
+        $sales = \App\Models\Purchase::whereHas('project', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->with(['project', 'user' => function($q) { $q->select('id', 'name'); }])
+            ->where('status', 'completed')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $totalEarnings = $sales->sum('amount') * 0.70;
+
+        return Inertia::render('Vendors/Payments', [
+            'sales' => $sales,
+            'totalEarnings' => $totalEarnings
+        ]);
+    })->name('vendors.payments');
+
+    Route::get('/vendors/sdk-integration', function () {
+        return Inertia::render('Vendors/SdkIntegration');
+    })->name('vendors.sdk-integration');
+
     Route::get('/vendors/dashboard', function () {
         $user = auth()->user();
         

@@ -27,11 +27,9 @@ class VendorController extends Controller
 
         $user = Auth::user();
 
-        // Ensure only high-level vendors or admins can update these fields
-        if (!$user->isAdmin()) {
-            if ($user->level < 4 && !$user->is_vendor) {
-                return response()->json(['message' => 'Unauthorized. You must reach Level 4 (Marketplace) to configure payout accounts.'], 403);
-            }
+        // Ensure only vendors or admins can update these fields
+        if (!$user->isAdmin() && !$user->is_vendor && $user->level < 1) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
         if ($request->has('stripe_account_id')) {
