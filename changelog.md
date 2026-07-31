@@ -2,6 +2,25 @@
 
 Systematic documentation of all protocol upgrades, module injections, and core optimisations for the HOACodeLab environment.
 
+## [1.15.0] - MULTI_VENDOR_MARKETPLACE - 2026-07-31
+
+### 🛍️ Vendor & Marketplace Architecture
+- **Multi-Gateway Checkout Engine**: Rebuilt the purchase controller to support advanced S2S (Server-to-Server) callbacks (e.g., PhonePe) neutralizing browser-redirect payment spoofing attacks.
+- **Financial Ledger & ACID Transactions**: Implemented a double-entry `wallet_transactions` immutable ledger utilizing pessimistic row-locking (`lockForUpdate()`) to prevent race conditions during high-frequency payouts.
+- **Auto & Manual Payout Routing**: Added a global `SiteSetting` to toggle payout models. In "Auto" mode, gateways route funds directly. In "Manual" mode, admins hold funds and approve vendor withdrawals.
+- **Dynamic Currency Bridge**: Developed a dynamic USD to INR conversion layer (`usd_to_inr_rate`) specifically built for local-currency checkout constraints against global USD product pricing.
+- **Automated License Generation**: Project purchases now auto-generate secure RSA-style license keys tied to the buyer's ID and the project ID, unlocking ZIP payload delivery.
+
+### 🛡️ Marketplace Fraud & Bleed Protection
+- **7-Day Escrow Shield**: Implemented a mandatory 7-day holding period (`escrow_balance`) for vendor earnings to buffer against hit-and-run fraud and chargebacks.
+- **Escrow Sweeper Daemon**: Added `php artisan escrow:clear` command to automatically flush mature escrow funds into vendors' `available_balance`.
+- **Minimum Payout Threshold**: Enforced a minimum withdrawal threshold (default $50) to block micro-transaction wire transfer bleed.
+- **Database Safety Measures**: Hardened marketplace schema migrations with `Schema::hasColumn` conditional checks to enforce idempotency across environments.
+
+### 📧 Notifications & Professional Invoicing
+- **Enterprise PDF Invoices**: Integrated `dompdf`. The system now dynamically compiles and attaches a highly professional, tax-ready `.pdf` invoice to the buyer's receipt email instantly upon checkout.
+- **Global Notification Engine**: Upgraded the `NotificationController` with API endpoints to support a universal React Bell-Icon dropdown for Vendors, Admins, and Buyers across the platform.
+
 ---
 
 ## [1.14.0] - ADS_AND_ACCESS_REQUESTS - 2026-06-29

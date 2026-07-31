@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Purchase;
 use App\Models\SiteSetting;
+use App\Models\License;
+use App\Services\LicenseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Razorpay\Api\Api as RazorpayApi;
@@ -25,7 +28,7 @@ class PurchaseController extends Controller
             'gateway' => 'required|string|in:test,stripe,razorpay,paytm,phonepe',
         ]);
 
-        $project = Project::findOrFail($request->project_id);
+        $project = Project::with('user')->findOrFail($request->project_id);
         $user = Auth::user();
 
         if ($project->user_id === $user->id) {
@@ -67,7 +70,7 @@ class PurchaseController extends Controller
 
             config(['cashier.secret' => $stripeSecret]);
 
-            $checkout = $user->checkoutCharge($price * 100, $project->title, 1, [
+            $checkoutOptions = [
                 'success_url' => route('purchase.status') . '?status=success&project_id=' . $project->id . '&session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('purchase.status') . '?status=failed&project_id=' . $project->id,
                 'metadata' => [
@@ -75,9 +78,23 @@ class PurchaseController extends Controller
                     'user_id' => $user->id,
                     'type' => 'project_purchase'
                 ]
-            ]);
+            ];
 
-            // Create a pending purchase record so we don't lose the intent
+            // Split Payment Logic for Stripe Connect
+            $routingMode = SiteSetting::where('key', 'payout_routing_mode')->first()?->value ?: 'auto';
+            $vendor = $project->user;
+            if ($routingMode === 'auto' && $vendor && $vendor->is_vendor && $vendor->stripe_account_id) {
+                $platformFee = (int) ($price * 0.30 * 100); // 30% platform fee in cents
+                $checkoutOptions['payment_intent_data'] = [
+                    'application_fee_amount' => $platformFee,
+                    'transfer_data' => [
+                        'destination' => $vendor->stripe_account_id,
+                    ],
+                ];
+            }
+
+            $checkout = $user->checkoutCharge($price * 100, $project->title, 1, $checkoutOptions);
+
             Purchase::create([
                 'user_id' => $user->id,
                 'project_id' => $project->id,
@@ -99,15 +116,39 @@ class PurchaseController extends Controller
             if (!$key || !$secret) return response()->json(['message' => 'Razorpay offline.'], 500);
 
             $api = new RazorpayApi($key, $secret);
-            $order = $api->order->create([
+            
+            // CURRENCY CONVERSION: USD to INR
+            $exchangeRate = (float) (SiteSetting::where('key', 'usd_to_inr_rate')->first()?->value ?: 84.00);
+            $amountInINR = $price * $exchangeRate;
+            
+            $orderData = [
                 'receipt' => 'project_' . $project->id . '_' . $user->id,
-                'amount' => $price * 100,
+                'amount' => (int) ($amountInINR * 100), // in paise
                 'currency' => 'INR',
                 'notes' => [
                     'project_id' => $project->id,
                     'type' => 'project_purchase'
                 ]
-            ]);
+            ];
+
+            // Split Payment Logic for Razorpay Route
+            $routingMode = SiteSetting::where('key', 'payout_routing_mode')->first()?->value ?: 'auto';
+            $vendor = $project->user;
+            if ($routingMode === 'auto' && $vendor && $vendor->is_vendor && $vendor->razorpay_account_id) {
+                $vendorShare = (int) ($amountInINR * 0.70 * 100); // 70% to vendor in paise
+                $orderData['transfers'] = [
+                    [
+                        'account' => $vendor->razorpay_account_id,
+                        'amount' => $vendorShare,
+                        'currency' => 'INR',
+                        'notes' => ['project_id' => $project->id],
+                        'linked_account_notes' => ['project_id'],
+                        'on_hold' => 0
+                    ]
+                ];
+            }
+
+            $order = $api->order->create($orderData);
 
             return response()->json([
                 'gateway' => 'razorpay',
@@ -131,13 +172,17 @@ class PurchaseController extends Controller
 
             if (!$mId || !$salt) return response()->json(['message' => 'PhonePe node offline.'], 500);
 
+            // CURRENCY CONVERSION: USD to INR
+            $exchangeRate = (float) (SiteSetting::where('key', 'usd_to_inr_rate')->first()?->value ?: 84.00);
+            $amountInINR = $price * $exchangeRate;
+
             $txnId = 'PROJ_' . $project->id . '_' . $user->id . '_' . time();
             $payload = [
                 'merchantId' => $mId,
                 'merchantTransactionId' => $txnId,
                 'merchantUserId' => 'U' . $user->id,
-                'amount' => $price * 100,
-                'redirectUrl' => route('purchase.status') . '?status=success&project_id=' . $project->id . '&gateway=phonepe',
+                'amount' => (int) ($amountInINR * 100), // in paise
+                'redirectUrl' => route('purchase.status') . '?status=success&project_id=' . $project->id . '&gateway=phonepe&txnId=' . $txnId,
                 'redirectMode' => 'POST',
                 'callbackUrl' => route('api.phonepe.callback'),
                 'paymentInstrument' => ['type' => 'PAY_PAGE'],
@@ -179,7 +224,7 @@ class PurchaseController extends Controller
     /**
      * Verify payment and record purchase.
      */
-    public function verify(Request $request)
+    public function verify(Request $request, LicenseService $licenseService)
     {
         $request->validate([
             'gateway' => 'required|string',
@@ -189,23 +234,31 @@ class PurchaseController extends Controller
         $user = Auth::user();
         $project = Project::findOrFail($request->project_id);
         $gateway = $request->gateway;
+        $purchase = null;
+
+        $isNewPayment = false;
 
         if ($gateway === 'test') {
-            Purchase::firstOrCreate([
-                'user_id' => $user->id,
-                'project_id' => $project->id,
-                'payment_method' => 'test_gateway',
-            ], [
-                'amount' => $project->price,
-                'currency' => 'USD',
-                'payment_id' => 'TEST-' . strtoupper(Str::random(10)),
-                'status' => 'completed'
-            ]);
-
-            return response()->json(['message' => 'Test Handshake Verified. Node Unlocked.']);
-        }
-
-        if ($gateway === 'razorpay') {
+            $purchase = Purchase::where('user_id', $user->id)->where('project_id', $project->id)->first();
+            if (!$purchase) {
+                $purchase = Purchase::create([
+                    'user_id' => $user->id,
+                    'project_id' => $project->id,
+                    'amount' => $project->price,
+                    'currency' => 'USD',
+                    'payment_id' => 'TEST-' . strtoupper(Str::random(10)),
+                    'payment_method' => 'test_gateway',
+                    'status' => 'completed'
+                ]);
+                $isNewPayment = true;
+            } elseif ($purchase->status !== 'completed') {
+                $purchase->update([
+                    'payment_id' => 'TEST-' . strtoupper(Str::random(10)),
+                    'status' => 'completed'
+                ]);
+                $isNewPayment = true;
+            }
+        } elseif ($gateway === 'razorpay') {
             $key = SiteSetting::where('key', 'razorpay_key')->first()?->value;
             $secret = SiteSetting::where('key', 'razorpay_secret')->first()?->value;
             $api = new RazorpayApi($key, $secret);
@@ -217,25 +270,43 @@ class PurchaseController extends Controller
                     'razorpay_signature' => $request->razorpay_signature
                 ]);
 
-                // Create Purchase Record
-                Purchase::create([
-                    'user_id' => $user->id,
-                    'project_id' => $project->id,
-                    'amount' => $project->price,
-                    'currency' => 'INR',
-                    'payment_id' => $request->razorpay_payment_id,
-                    'payment_method' => 'razorpay',
-                    'status' => 'completed'
-                ]);
+                // CRITICAL SECURITY CHECK: Fetch the order to ensure it was actually for THIS project.
+                // Prevents a user from paying for a $1 project and sending the valid signature to unlock a $1000 project.
+                $razorpayOrder = $api->order->fetch($request->razorpay_order_id);
+                if (!isset($razorpayOrder->notes->project_id) || (int) $razorpayOrder->notes->project_id !== $project->id) {
+                    return response()->json(['message' => 'Security Error: Payment Order does not match the requested Project.'], 403);
+                }
+                
+                // Double check amount to be absolutely certain (using exchange rate)
+                $exchangeRate = (float) (SiteSetting::where('key', 'usd_to_inr_rate')->first()?->value ?: 84.00);
+                $expectedAmountInINR = (int) ($project->price * $exchangeRate * 100);
+                if ((int) $razorpayOrder->amount !== $expectedAmountInINR) {
+                    return response()->json(['message' => 'Security Error: Payment amount mismatch.'], 403);
+                }
 
-                return response()->json(['message' => 'Purchase successful. Node Unlocked.']);
+                $purchase = Purchase::where('user_id', $user->id)->where('project_id', $project->id)->first();
+                if (!$purchase) {
+                    $purchase = Purchase::create([
+                        'user_id' => $user->id,
+                        'project_id' => $project->id,
+                        'amount' => $project->price,
+                        'currency' => 'INR',
+                        'payment_id' => $request->razorpay_payment_id,
+                        'payment_method' => 'razorpay',
+                        'status' => 'completed'
+                    ]);
+                    $isNewPayment = true;
+                } elseif ($purchase->status !== 'completed') {
+                    $purchase->update([
+                        'payment_id' => $request->razorpay_payment_id,
+                        'status' => 'completed'
+                    ]);
+                    $isNewPayment = true;
+                }
             } catch (\Exception $e) {
                 return response()->json(['message' => 'Verification failed.'], 400);
             }
-        }
-
-        // Stripe: verify with Stripe API before recording purchase
-        if ($gateway === 'stripe') {
+        } elseif ($gateway === 'stripe') {
             $stripeSecret = SiteSetting::where('key', 'stripe_secret')->first()?->value;
             if (!$stripeSecret) return response()->json(['message' => 'Stripe offline.'], 500);
 
@@ -255,24 +326,99 @@ class PurchaseController extends Controller
                 return response()->json(['message' => 'Session verification failed.'], 400);
             }
 
-            Purchase::updateOrCreate(
-                [
+            $purchase = Purchase::where('user_id', $user->id)->where('project_id', $project->id)->first();
+            if (!$purchase) {
+                $purchase = Purchase::create([
                     'user_id' => $user->id,
                     'project_id' => $project->id,
-                ],
-                [
                     'amount' => $project->price,
                     'currency' => 'USD',
                     'payment_id' => $request->session_id,
                     'payment_method' => 'stripe',
                     'status' => 'completed'
+                ]);
+                $isNewPayment = true;
+            } elseif ($purchase->status !== 'completed') {
+                $purchase->update([
+                    'payment_id' => $request->session_id,
+                    'status' => 'completed'
+                ]);
+                $isNewPayment = true;
+            }
+        } elseif ($gateway === 'phonepe') {
+            // PhonePe frontend verification (the real logic happens in the callback)
+            $purchase = Purchase::where('user_id', $user->id)
+                ->where('project_id', $project->id)
+                ->where('payment_id', $request->txnId)
+                ->first();
+
+            if (!$purchase || $purchase->status !== 'completed') {
+                return response()->json(['message' => 'Payment is still processing or failed. Please check back later.'], 400);
+            }
+        } else {
+            return response()->json(['message' => 'Verification protocol unknown.'], 400);
+        }
+
+        // If purchase was successful, generate a License Key
+        if ($purchase && $purchase->status === 'completed') {
+            
+            // Handle Manual Payout Routing Logic
+            if ($isNewPayment) {
+                $routingMode = SiteSetting::where('key', 'payout_routing_mode')->first()?->value ?: 'auto';
+                if ($routingMode === 'manual') {
+                    $vendor = $project->user;
+                    if ($vendor && $vendor->is_vendor) {
+                        DB::transaction(function () use ($vendor, $project, $purchase) {
+                            $lockedVendor = \App\Models\User::where('id', $vendor->id)->lockForUpdate()->first();
+                            $vendorShare = $project->price * 0.70;
+                            $lockedVendor->escrow_balance += $vendorShare;
+                            $lockedVendor->save();
+
+                            \App\Models\WalletTransaction::create([
+                                'user_id' => $lockedVendor->id,
+                                'type' => 'credit',
+                                'amount' => $vendorShare,
+                                'status' => 'escrow',
+                                'clears_at' => now()->addDays(7),
+                                'reference_type' => get_class($purchase),
+                                'reference_id' => $purchase->id,
+                                'description' => 'Project Sale (70% cut in Escrow): ' . $project->title
+                            ]);
+                        });
+                    }
+                }
+            }
+
+            // Generate License
+            $license = License::firstOrCreate(
+                ['purchase_id' => $purchase->id],
+                [
+                    'user_id' => $user->id,
+                    'project_id' => $project->id,
+                    'license_key' => $licenseService->generateLicenseKey(),
+                    'status' => 'active',
+                    // Default to 1 year expiry, can be adjusted based on product logic
+                    'expires_at' => now()->addYear() 
                 ]
             );
 
-            return response()->json(['message' => 'Purchase confirmed.']);
+            // Notify Vendor
+            if ($isNewPayment && $project->user) {
+                $project->user->notify(new \App\Notifications\NewSaleNotification($purchase, $project));
+            }
+
+            // Notify Buyer & Email Invoice
+            if ($isNewPayment) {
+                $user->notify(new \App\Notifications\PurchaseReceiptNotification($purchase, $project, $license));
+            }
+            
+            return response()->json([
+                'message' => 'Purchase successful. Node Unlocked.',
+                'license_key' => $license->license_key
+            ]);
         }
 
-        return response()->json(['message' => 'Verification protocol unknown.'], 400);
+        return response()->json(['message' => 'Purchase not found.'], 404);
     }
 
     /**
@@ -281,8 +427,105 @@ class PurchaseController extends Controller
     public function myPurchases()
     {
         return Purchase::where('user_id', Auth::id())
-            ->with('project.user')
+            ->with(['project.user'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()->map(function ($purchase) {
+                // Attach license key info if it exists
+                $license = License::where('purchase_id', $purchase->id)->first();
+                $purchase->license_key = $license ? $license->license_key : null;
+                return $purchase;
+            });
+    }
+
+    /**
+     * PhonePe Server-to-Server Callback Handler
+     */
+    public function phonepeCallback(Request $request, LicenseService $licenseService)
+    {
+        $response = $request->all();
+        if (!isset($response['response'])) {
+            return response()->json(['status' => 'invalid_payload'], 400);
+        }
+
+        $base64 = $response['response'];
+        $decoded = json_decode(base64_decode($base64));
+
+        $salt = SiteSetting::where('key', 'phonepe_salt_key')->first()?->value;
+        $index = SiteSetting::where('key', 'phonepe_salt_index')->first()?->value ?: '1';
+
+        // Verify Checksum
+        $checksum = hash('sha256', $base64 . $salt) . '###' . $index;
+        if ($request->header('x-verify') !== $checksum) {
+            return response()->json(['status' => 'checksum_failed'], 403);
+        }
+
+        if ($decoded->code === 'PAYMENT_SUCCESS') {
+            $txnId = $decoded->data->merchantTransactionId;
+            $purchase = Purchase::where('payment_id', $txnId)->first();
+
+            if ($purchase && $purchase->status === 'pending') {
+                $project = Project::find($purchase->project_id);
+                if (!$project) return response()->json(['status' => 'project_not_found']);
+
+                // Verify Amount
+                $exchangeRate = (float) (SiteSetting::where('key', 'usd_to_inr_rate')->first()?->value ?: 84.00);
+                $expectedAmountInINR = (int) ($project->price * $exchangeRate * 100);
+                if ((int) $decoded->data->amount !== $expectedAmountInINR) {
+                    return response()->json(['status' => 'amount_mismatch'], 403);
+                }
+
+                $purchase->update(['status' => 'completed']);
+
+                // Process Manual Routing Payouts
+                $routingMode = SiteSetting::where('key', 'payout_routing_mode')->first()?->value ?: 'auto';
+                if ($routingMode === 'manual') {
+                    $vendor = $project->user;
+                    if ($vendor && $vendor->is_vendor) {
+                        DB::transaction(function () use ($vendor, $project, $purchase) {
+                            $lockedVendor = \App\Models\User::where('id', $vendor->id)->lockForUpdate()->first();
+                            $vendorShare = $project->price * 0.70;
+                            $lockedVendor->escrow_balance += $vendorShare;
+                            $lockedVendor->save();
+
+                            \App\Models\WalletTransaction::create([
+                                'user_id' => $lockedVendor->id,
+                                'type' => 'credit',
+                                'amount' => $vendorShare,
+                                'status' => 'escrow',
+                                'clears_at' => now()->addDays(7),
+                                'reference_type' => get_class($purchase),
+                                'reference_id' => $purchase->id,
+                                'description' => 'Project Sale (70% cut in Escrow): ' . $project->title
+                            ]);
+                        });
+                    }
+                }
+
+                // Generate License
+                $license = License::firstOrCreate(
+                    ['purchase_id' => $purchase->id],
+                    [
+                        'user_id' => $purchase->user_id,
+                        'project_id' => $project->id,
+                        'license_key' => $licenseService->generateLicenseKey(),
+                        'status' => 'active',
+                        'expires_at' => now()->addYear() 
+                    ]
+                );
+
+                // Notify Vendor
+                if ($project->user) {
+                    $project->user->notify(new \App\Notifications\NewSaleNotification($purchase, $project));
+                }
+
+                // Notify Buyer & Email Invoice
+                $buyer = \App\Models\User::find($purchase->user_id);
+                if ($buyer) {
+                    $buyer->notify(new \App\Notifications\PurchaseReceiptNotification($purchase, $project, $license));
+                }
+            }
+        }
+
+        return response()->json(['status' => 'success']);
     }
 }

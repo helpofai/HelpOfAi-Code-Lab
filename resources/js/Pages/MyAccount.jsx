@@ -30,6 +30,24 @@ export default function MyAccount({ mustVerifyEmail, status }) {
     const [projectSearch, setProjectSearch] = useState('');
     const [purchaseSearch, setPurchaseSearch] = useState('');
 
+    // Vendor State
+    const [stripeId, setStripeId] = useState(auth.user.stripe_account_id || '');
+    const [razorpayId, setRazorpayId] = useState(auth.user.razorpay_account_id || '');
+    const [isUpdatingPayout, setIsUpdatingPayout] = useState(false);
+
+    const handleUpdatePayout = async (type) => {
+        setIsUpdatingPayout(true);
+        try {
+            const payload = type === 'stripe' ? { stripe_account_id: stripeId } : { razorpay_account_id: razorpayId };
+            await axios.post('/api/vendor/payout-accounts', payload);
+            toast.success(`${type.toUpperCase()} account linked successfully!`);
+        } catch (error) {
+            toast.error(error.response?.data?.message || `Failed to link ${type} account.`);
+        } finally {
+            setIsUpdatingPayout(false);
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -77,6 +95,7 @@ export default function MyAccount({ mustVerifyEmail, status }) {
         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
         { id: 'projects', label: 'My Projects', icon: Database },
         { id: 'purchases', label: 'My Purchases', icon: ShoppingBag },
+        ...(auth.user.is_vendor ? [{ id: 'vendor', label: 'Vendor Settings', icon: Briefcase }] : []),
         { id: 'profile', label: 'Profile Details', icon: Fingerprint },
         { id: 'security', label: 'Security', icon: Shield },
     ];
@@ -345,6 +364,11 @@ export default function MyAccount({ mustVerifyEmail, status }) {
                                                                 <td className="px-8 py-6">
                                                                     <div className="font-bold text-sm text-[var(--text-main)] italic uppercase">{p.project?.title || 'Unknown Project'}</div>
                                                                     <div className="text-[10px] text-[var(--text-muted)] font-mono mt-1">ID: {p.id}</div>
+                                                                    {p.license_key && (
+                                                                        <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded text-cyan-500 text-[10px] font-mono cursor-pointer hover:bg-cyan-500 hover:text-black transition-colors" onClick={() => copyToClipboard(p.license_key)}>
+                                                                            <Key size={10} /> {p.license_key}
+                                                                        </div>
+                                                                    )}
                                                                 </td>
                                                                 <td className="px-8 py-6 font-mono text-emerald-500 font-bold text-lg">${p.amount}</td>
                                                                 <td className="px-8 py-6">
@@ -355,9 +379,14 @@ export default function MyAccount({ mustVerifyEmail, status }) {
                                                                 <td className="px-8 py-6 text-xs text-[var(--text-muted)] font-mono">{new Date(p.created_at).toLocaleString()}</td>
                                                                 <td className="px-8 py-6 text-right">
                                                                     {p.project ? (
-                                                                        <Link href={route('editor', p.project.slug)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all shadow-lg shadow-emerald-500/10">
-                                                                            <Download size={14} /> Open
-                                                                        </Link>
+                                                                        <div className="flex justify-end gap-2">
+                                                                            <Link href={route('editor', p.project.slug)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-black transition-all shadow-lg shadow-cyan-500/10">
+                                                                                <ExternalLink size={14} /> Open
+                                                                            </Link>
+                                                                            <a href={`/api/purchases/${p.id}/download`} download className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all shadow-lg shadow-emerald-500/10">
+                                                                                <Download size={14} /> Download Zip
+                                                                            </a>
+                                                                        </div>
                                                                     ) : (
                                                                         <span className="inline-flex items-center gap-2 px-4 py-2 text-[10px] text-rose-500 uppercase font-bold tracking-widest bg-rose-500/10 rounded-xl">
                                                                             <Lock size={12}/> Offline
@@ -378,6 +407,66 @@ export default function MyAccount({ mustVerifyEmail, status }) {
                                                         )}
                                                     </tbody>
                                                 </table>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* VENDOR TAB */}
+                                {activeTab === 'vendor' && (
+                                    <motion.div 
+                                        key="vendor"
+                                        initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -10, filter: 'blur(10px)' }}
+                                        transition={{ duration: 0.3 }}
+                                        className="space-y-8"
+                                    >
+                                        <div className="bg-[var(--bg-surface)]/80 backdrop-blur-xl border border-[var(--border)] rounded-3xl p-8 lg:p-12 shadow-2xl">
+                                            <div className="max-w-xl">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <Briefcase size={24} className="text-cyan-500" />
+                                                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--text-main)]">Vendor Settings</h3>
+                                                </div>
+                                                <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-10">Manage your connected payout accounts.</p>
+                                                
+                                                <div className="space-y-6">
+                                                    <div className="bg-[var(--bg-main)] border border-[var(--border)] rounded-xl p-6 flex flex-col gap-3">
+                                                        <h4 className="text-sm font-black uppercase text-[var(--text-main)]">Stripe Connect</h4>
+                                                        <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Connect your Stripe account to receive 70% automatic splits.</p>
+                                                        <input 
+                                                            type="text" 
+                                                            placeholder="e.g. acct_1N..." 
+                                                            value={stripeId} 
+                                                            onChange={(e) => setStripeId(e.target.value)} 
+                                                            className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg p-3 text-xs font-mono text-[var(--text-main)] focus:border-cyan-500/50 focus:outline-none focus:ring-0"
+                                                        />
+                                                        <button 
+                                                            onClick={() => handleUpdatePayout('stripe')} 
+                                                            disabled={isUpdatingPayout || !stripeId.startsWith('acct_')}
+                                                            className="btn-primary py-2 px-4 text-[10px] font-bold uppercase tracking-widest self-start disabled:opacity-50"
+                                                        >
+                                                            Save Stripe ID
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <div className="bg-[var(--bg-main)] border border-[var(--border)] rounded-xl p-6 flex flex-col gap-3">
+                                                        <h4 className="text-sm font-black uppercase text-[var(--text-main)]">Razorpay Route</h4>
+                                                        <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Connect your Razorpay account to receive 70% automatic splits.</p>
+                                                        <input 
+                                                            type="text" 
+                                                            placeholder="e.g. acc_1M..." 
+                                                            value={razorpayId} 
+                                                            onChange={(e) => setRazorpayId(e.target.value)} 
+                                                            className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg p-3 text-xs font-mono text-[var(--text-main)] focus:border-cyan-500/50 focus:outline-none focus:ring-0"
+                                                        />
+                                                        <button 
+                                                            onClick={() => handleUpdatePayout('razorpay')}
+                                                            disabled={isUpdatingPayout || !razorpayId.startsWith('acc_')}
+                                                            className="btn-primary py-2 px-4 text-[10px] font-bold uppercase tracking-widest self-start disabled:opacity-50"
+                                                        >
+                                                            Save Razorpay ID
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </motion.div>

@@ -61,6 +61,9 @@ function ProjectSettingsModal({ project, teams, onClose, onUpdate }) {
         meta_description: project.meta_description || '',
         meta_keywords: project.meta_keywords || '',
         team_id: project.team_id || '',
+        is_for_sale: project.is_for_sale ? 1 : 0,
+        price: project.price || 0,
+        github_repo_url: project.github_repo_url || '',
     });
     const [isSaving, setIsSaving] = useState(false);
 
@@ -72,7 +75,8 @@ function ProjectSettingsModal({ project, teams, onClose, onUpdate }) {
             const res = await axios.put(`/api/projects/${project.id}`, {
                 ...formData,
                 tags: tagsArray,
-                is_public: !!Number(formData.is_public)
+                is_public: !!Number(formData.is_public),
+                is_for_sale: !!Number(formData.is_for_sale)
             });
             onUpdate(res.data);
             onClose();
@@ -124,6 +128,41 @@ function ProjectSettingsModal({ project, teams, onClose, onUpdate }) {
                                 <input type="text" value={formData.tags} onChange={(e) => setFormData({...formData, tags: e.target.value})} className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded p-3 text-[var(--text-main)] focus:border-cyan-500/50 focus:ring-0 text-[10px] font-bold" />
                             </div>
                         </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] border-b border-[var(--border)] pb-2 flex items-center gap-2">
+                            <ShoppingBag size={14} /> Marketplace Settings
+                        </h4>
+                        
+                        <div className="bg-[var(--bg-elevated)] p-4 rounded border border-[var(--border)] flex justify-between items-center mb-4">
+                            <div>
+                                <span className="block text-[10px] font-black text-[var(--text-main)] uppercase tracking-widest mb-1">Sell Product</span>
+                                <span className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest font-bold">List this on the Premium Marketplace</span>
+                            </div>
+                            <div className="flex bg-[var(--bg-main)] rounded p-1 border border-[var(--border)]">
+                                <button type="button" onClick={() => setFormData({...formData, is_for_sale: 1})} className={`px-4 py-1.5 rounded text-[9px] font-black uppercase tracking-widest transition-all ${formData.is_for_sale ? 'bg-emerald-500 text-black shadow-lg' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>Yes</button>
+                                <button type="button" onClick={() => setFormData({...formData, is_for_sale: 0})} className={`px-4 py-1.5 rounded text-[9px] font-black uppercase tracking-widest transition-all ${!formData.is_for_sale ? 'bg-rose-500 text-white shadow-lg' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>No</button>
+                            </div>
+                        </div>
+
+                        {formData.is_for_sale ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Price (USD)</label>
+                                    <input type="number" min="0" step="0.01" value={formData.price} onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value) || 0})} className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded p-3 text-[var(--text-main)] focus:border-emerald-500/50 focus:ring-0 text-[10px] font-bold uppercase tracking-widest" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">GitHub Private Repo URL</label>
+                                    <input type="url" placeholder="https://github.com/vendor/repo" value={formData.github_repo_url} onChange={(e) => setFormData({...formData, github_repo_url: e.target.value})} className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded p-3 text-[var(--text-main)] focus:border-emerald-500/50 focus:ring-0 text-[10px] font-bold" />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <p className="text-[9px] text-emerald-500/80 font-bold uppercase tracking-widest italic">
+                                        Note: Buyers will automatically receive an RSA signed license key and a direct download of your GitHub repo zipball upon successful payment via Stripe/Razorpay.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                     <div className="pt-4 flex justify-end sticky bottom-0 bg-[var(--bg-surface)] py-4 border-t border-[var(--border)]">
                         <button type="submit" disabled={isSaving} className="btn-primary w-full md:w-auto">

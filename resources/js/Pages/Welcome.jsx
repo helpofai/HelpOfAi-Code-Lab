@@ -411,6 +411,47 @@ export default function Welcome({ auth, siteSettings }) {
                 </section>
             )}
 
+            {/* Supported Tech Section */}
+            <section className="py-24 px-6 border-y border-[var(--border)] bg-[#050505] overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 backdrop-blur-3xl" />
+                <div className="max-w-7xl mx-auto relative z-10">
+                    <div className="flex flex-wrap justify-center gap-12 md:gap-24 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
+                        <div className="flex flex-col items-center gap-4 hover:text-cyan-500 transition-colors cursor-default"><Layout size={40} /> <span className="text-[10px] font-black uppercase tracking-widest">HTML5</span></div>
+                        <div className="flex flex-col items-center gap-4 hover:text-blue-500 transition-colors cursor-default"><AppWindow size={40} /> <span className="text-[10px] font-black uppercase tracking-widest">CSS3</span></div>
+                        <div className="flex flex-col items-center gap-4 hover:text-yellow-500 transition-colors cursor-default"><Braces size={40} /> <span className="text-[10px] font-black uppercase tracking-widest">JavaScript</span></div>
+                        <div className="flex flex-col items-center gap-4 hover:text-pink-500 transition-colors cursor-default"><Terminal size={40} /> <span className="text-[10px] font-black uppercase tracking-widest">Sass/SCSS</span></div>
+                    </div>
+                </div>
+            </section>
+
+            {/* How It Works Section */}
+            <section className="py-32 px-6 bg-[var(--bg-surface)]">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-20 space-y-4">
+                        <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">How It Works</h2>
+                        <p className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-[0.2em]">Build. Publish. Monetize.</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        {[
+                            { step: '01', title: 'Code', desc: 'Use our lightning-fast browser editor to build UI components with HTML, CSS, and JS.', icon: Code2 },
+                            { step: '02', title: 'Preview', desc: 'Watch your code compile in real-time with our neural sandbox instance.', icon: Monitor },
+                            { step: '03', title: 'Publish', desc: 'Share your work publicly or restrict access for premium users only.', icon: Share2 },
+                            { step: '04', title: 'Monetize', desc: 'Set a price or lock your code behind ads to earn from your creations.', icon: ShoppingBag }
+                        ].map((s, i) => (
+                            <div key={i} className="relative group p-8 bg-[var(--bg-main)] border border-[var(--border)] rounded-3xl hover:border-cyan-500/30 transition-all hover:-translate-y-2 shadow-2xl overflow-hidden">
+                                <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity">
+                                    <s.icon size={100} className="text-cyan-500" />
+                                </div>
+                                <div className="text-6xl font-black text-white/5 mb-6 italic tracking-tighter group-hover:text-cyan-500/10 transition-colors">{s.step}</div>
+                                <h3 className="text-2xl font-black text-[var(--text-main)] uppercase tracking-tighter mb-4 relative z-10">{s.title}</h3>
+                                <p className="text-[var(--text-muted)] text-xs font-bold leading-relaxed relative z-10">{s.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             <section id="features" className="py-48 px-6 bg-[var(--bg-main)] text-left">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">
                     {[

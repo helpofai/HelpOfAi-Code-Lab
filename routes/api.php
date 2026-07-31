@@ -52,8 +52,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/subscription/portal', [\App\Http\Controllers\Api\SubscriptionController::class, 'portal']);
     Route::get('/subscription/status', [\App\Http\Controllers\Api\SubscriptionController::class, 'status']);
     
-    // Webhook placeholders for regional gateways
-    Route::post('/payment/phonepe/callback', function() { return response()->json(['status' => 'received']); })->name('api.phonepe.callback');
+    // Neural Checkout Bridge
+    Route::post('/payment/phonepe/callback', [\App\Http\Controllers\Api\PurchaseController::class, 'phonepeCallback'])->name('api.phonepe.callback');
     
     Route::get('projects/{project}/revisions', [\App\Http\Controllers\Api\RevisionController::class, 'index']);
     Route::post('projects/{project}/revisions', [\App\Http\Controllers\Api\RevisionController::class, 'store']);
@@ -90,3 +90,22 @@ Route::get('/google-drive/callback', [\App\Http\Controllers\Api\GoogleDriveContr
 
 // Public route for viewing projects
 Route::get('projects/{slug}', [ProjectController::class, 'show']);
+
+// Digital Product Licensing Endpoints
+Route::post('/license/verify', [\App\Http\Controllers\Api\LicenseValidationController::class, 'verify']);
+
+// Vendor Endpoints
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/vendor/payout-accounts', [\App\Http\Controllers\Api\VendorController::class, 'updatePayoutAccounts']);
+    Route::post('/vendor/request-payout', [\App\Http\Controllers\Api\VendorController::class, 'requestPayout']);
+    Route::get('/vendor/connections', [\App\Http\Controllers\Api\VendorController::class, 'getConnections']);
+    Route::post('/vendor/connections', [\App\Http\Controllers\Api\VendorController::class, 'storeConnection']);
+    Route::post('/vendor/connections/{id}/verify', [\App\Http\Controllers\Api\VendorController::class, 'verifyConnection']);
+    Route::delete('/vendor/connections/{id}', [\App\Http\Controllers\Api\VendorController::class, 'deleteConnection']);
+    Route::post('/vendor/github/fetch-md', [\App\Http\Controllers\Api\VendorController::class, 'fetchMarkdownFiles']);
+});
+
+// Secure Download Endpoint
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/purchases/{purchaseId}/download', [\App\Http\Controllers\Api\DownloadController::class, 'downloadProject']);
+});

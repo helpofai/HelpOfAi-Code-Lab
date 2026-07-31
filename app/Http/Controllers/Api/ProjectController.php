@@ -147,6 +147,7 @@ class ProjectController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:255',
+            'github_repo_url' => 'nullable|url|max:255',
         ]);
 
         // SaaS Logic: Gating private projects
@@ -186,6 +187,9 @@ class ProjectController extends Controller
         }
         if (array_key_exists('price', $validated)) {
             $updateData['price'] = $validated['price'];
+        }
+        if (array_key_exists('github_repo_url', $validated)) {
+            $updateData['github_repo_url'] = $validated['github_repo_url'];
         }
         if (array_key_exists('meta_title', $validated)) {
             $updateData['meta_title'] = $validated['meta_title'];

@@ -26,7 +26,10 @@ import {
     BadgeCheck,
     Megaphone,
     User,
-    Compass
+    Compass,
+    DollarSign,
+    Store,
+    Wallet
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -44,19 +47,19 @@ export default function AuthenticatedLayout({ header, children }) {
             { name: 'Dashboard', icon: LayoutDashboard, href: route('dashboard'), active: route().current('dashboard') },
             { name: 'Explore', icon: Compass, href: route('explore'), active: route().current('explore') },
             { name: 'My Account', icon: User, href: route('my-account'), active: route().current('my-account') },
-
             { name: 'Cloud Sync', icon: Cloud, href: route('cloud-sync'), active: route().current('cloud-sync') },
-
             { name: 'Teams', icon: Users, href: route('teams.index'), active: route().current('teams.*') },
-
             { name: 'Blog', icon: FileText, href: route('blog.index'), active: route().current('blog.index') },
-
             { name: 'Editor', icon: Code2, href: route('editor'), active: route().current('editor') },
-
             { name: 'My Projects', icon: Database, href: route('my-projects'), active: route().current('my-projects') },
-
             { name: 'Support', icon: LifeBuoy, href: route('support.index'), active: route().current('support.index') },
+        ];
 
+        const vendorItems = [
+            { name: 'Vendor Hub', icon: Shield, href: route('vendor.dashboard'), active: route().current('vendor.dashboard') },
+            { name: 'Payments', icon: DollarSign, href: route('vendor.payments'), active: route().current('vendor.payments') },
+            { name: 'Sell Product', icon: Store, href: route('vendor.sell'), active: route().current('vendor.sell') },
+            { name: 'Marketplace', icon: ShoppingBag, href: route('marketplace'), active: route().current('marketplace') },
         ];
 
     const adminItems = [
@@ -66,6 +69,7 @@ export default function AuthenticatedLayout({ header, children }) {
         { name: 'Blog system', icon: FileText, href: route('admin.blog.index'), active: route().current('admin.blog.index') },
         { name: 'Sales Matrix', icon: ShoppingBag, href: route('admin.sales.index'), active: route().current('admin.sales.index') },
         { name: 'Paid Projects', icon: Tag, href: route('admin.sales.paid-projects'), active: route().current('admin.sales.paid-projects') },
+        { name: 'Vendor Payouts', icon: Wallet, href: route('admin.payouts.index'), active: route().current('admin.payouts.*') },
         { name: 'Mail System', icon: Mail, href: route('admin.email.index'), active: route().current('admin.email.index') },
         { name: 'SMTP Config', icon: Settings, href: route('admin.email.settings'), active: route().current('admin.email.settings') },
         { name: 'Support Queue', icon: LifeBuoy, href: route('admin.support'), active: route().current('admin.support') },
@@ -112,6 +116,25 @@ export default function AuthenticatedLayout({ header, children }) {
                             ))}
                         </nav>
                     </div>
+
+                    {user?.is_vendor || user?.role === 'admin' ? (
+                        <div className="px-4 mb-8">
+                            <div className="h-px bg-[var(--border)] mx-4 mb-6" />
+                            {isSidebarOpen && <div className="px-4 mb-4 text-[9px] font-bold text-purple-500/80 uppercase tracking-[0.3em]">Vendor Portal</div>}
+                            <nav className="space-y-1">
+                                {vendorItems.map((item) => (
+                                    <Link 
+                                        key={item.name}
+                                        href={item.href}
+                                        className={`flex items-center gap-4 p-3 rounded transition-all ${item.active ? 'bg-purple-500 text-white font-bold' : 'text-[var(--text-muted)] hover:text-purple-500 hover:bg-purple-500/5'}`}
+                                    >
+                                        <item.icon size={18} />
+                                        {isSidebarOpen && <span className="text-[10px] uppercase tracking-widest">{item.name}</span>}
+                                    </Link>
+                                ))}
+                            </nav>
+                        </div>
+                    ) : null}
 
                     {user?.role === 'admin' && (
                         <div className="px-4 mb-8">

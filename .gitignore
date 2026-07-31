@@ -5,6 +5,9 @@
 /.phpunit.result.cache
 /public/hot
 .codewhale
+.helpofai
+
+
 .env
 .env.backup
 .env.production

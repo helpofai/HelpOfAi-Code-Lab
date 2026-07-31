@@ -27,6 +27,10 @@ Route::get('/explore', function () {
     return Inertia::render('Explore');
 })->name('explore');
 
+Route::get('/marketplace', function () {
+    return Inertia::render('Marketplace');
+})->name('marketplace');
+
 Route::get('/editor/{slug?}', function ($slug = null) {
     $project = null;
     if ($slug) {
@@ -116,6 +120,13 @@ Route::get('/project/{slug}', function ($slug) {
 
     $project->makeVisible(['code', 'settings']);
 
+    if (!empty($project->github_repo_url)) {
+        return Inertia::render('MarketplaceProduct', [
+            'project' => $project,
+            'canEdit' => $isOwner || $isTeamMember || $hasPurchased
+        ]);
+    }
+
     return Inertia::render('ProjectView', [
         'project' => $project,
         'canEdit' => $isOwner || $isTeamMember || $hasPurchased
@@ -186,6 +197,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     // Sales Management
     Route::get('/admin/sales', [\App\Http\Controllers\Admin\SalesController::class, 'index'])->name('admin.sales.index');
     Route::get('/admin/sales/paid-projects', [\App\Http\Controllers\Admin\SalesController::class, 'paidProjects'])->name('admin.sales.paid-projects');
+    Route::get('/admin/payouts', [\App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('admin.payouts.index');
+    Route::post('/admin/payouts/{payout}/mark-paid', [\App\Http\Controllers\Admin\PayoutController::class, 'markAsPaid'])->name('admin.payouts.mark-paid');
 
     Route::get('/admin/support', [\App\Http\Controllers\Admin\SupportController::class, 'index'])->name('admin.support');
     Route::get('/admin/support/{ticket}', [\App\Http\Controllers\Admin\SupportController::class, 'show'])->name('admin.support.show');
@@ -223,6 +236,33 @@ Route::middleware('auth')->group(function () {
             'status' => session('status'),
         ]);
     })->name('my-account');
+
+    Route::get('/sell', function () {
+        return Inertia::render('Vendor/Sell');
+    })->name('vendor.sell');
+
+    Route::get('/vendor/dashboard', function () {
+        return Inertia::render('Vendor/Dashboard');
+    })->name('vendor.dashboard');
+
+    Route::get('/vendor/payments', function () {
+        $user = auth()->user();
+        
+        $sales = \App\Models\Purchase::whereHas('project', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->with(['project', 'user' => function($q) { $q->select('id', 'name'); }])
+            ->where('status', 'completed')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $totalEarnings = $sales->sum('amount') * 0.70;
+
+        return Inertia::render('Vendor/Payments', [
+            'sales' => $sales,
+            'totalEarnings' => $totalEarnings
+        ]);
+    })->name('vendor.payments');
 
     // Personal Google Drive Config
     Route::post('/api/google-drive/config', function (\Illuminate\Http\Request $request) {

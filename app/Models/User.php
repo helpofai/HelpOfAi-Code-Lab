@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'identity_rejected_reason',
             'level',
             'manual_level',
+            'github_token',
         ];
     
         /**
@@ -135,6 +136,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Purchase::class);
     }
 
+    public function payouts()
+    {
+        return $this->hasMany(Payout::class);
+    }
+
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
     /**
      * Get the teams the user belongs to.
      */
@@ -143,6 +154,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Team::class, 'team_user')
                     ->withPivot('role')
                     ->withTimestamps();
+    }
+
+    public function vendorConnections(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(VendorConnection::class);
     }
 
     /**
