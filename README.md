@@ -183,6 +183,12 @@ For developers with SSH access:
     php artisan view:cache
     ```
 
+4.  **Configure Server Cron Job (Critical for Escrow System)**:
+    To ensure the 7-day automated Escrow release system functions properly, configure a Cron Job on your server (cPanel) to run every minute:
+    ```bash
+    * * * * * cd /home/helpofai/code.helpofai.com && php artisan schedule:run >> /dev/null 2>&1
+    ```
+
 ---
 
 ## 🔧 Configuration

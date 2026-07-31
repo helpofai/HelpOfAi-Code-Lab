@@ -192,6 +192,12 @@ Since you are committing `vendor` and `node_modules` to Git, your deployment on 
     php artisan queue:restart
     ```
 
+6.  **Configure Server Cron Job (Critical for Escrow & Market)**:
+    To ensure the 7-day automated Escrow release system functions properly, you must configure a Cron Job on your server (cPanel/Server Panel) to run every minute:
+    ```bash
+    * * * * * cd /home/helpofai/code.helpofai.com && php artisan schedule:run >> /dev/null 2>&1
+    ```
+
 ## 6. Subdomain Routing (Optional)
 
 If you want specific logic for subdomains (e.g., `admin.hoacodelab.com`), you can use domain grouping in `routes/web.php`:

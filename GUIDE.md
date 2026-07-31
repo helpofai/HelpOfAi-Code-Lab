@@ -135,6 +135,12 @@ To sync local changes to a production environment:
     php artisan config:cache
     ```
 
+4. **Initialize Cron Scheduler (Escrow Protocol):**
+    The marketplace Escrow system requires a continuous 1-minute cron heartbeat:
+    ```bash
+    * * * * * cd /home/helpofai/code.helpofai.com && php artisan schedule:run >> /dev/null 2>&1
+    ```
+
 ---
 
 The hosting has old locally-installed node_modules files that conflict with the
