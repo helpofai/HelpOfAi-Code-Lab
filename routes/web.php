@@ -242,11 +242,11 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Vendor/Sell');
     })->name('vendor.sell');
 
-    Route::get('/vendor/dashboard', function () {
+    Route::get('/vendors/dashboard', function () {
         return Inertia::render('Vendor/Dashboard');
     })->name('vendor.dashboard');
 
-    Route::get('/vendor/payments', function () {
+    Route::get('/vendors/payments', function () {
         $user = auth()->user();
         
         $sales = \App\Models\Purchase::whereHas('project', function($query) use ($user) {
