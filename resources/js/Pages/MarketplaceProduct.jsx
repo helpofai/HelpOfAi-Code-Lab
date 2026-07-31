@@ -48,34 +48,8 @@ export default function MarketplaceProduct({ project, canEdit }) {
                             </div>
                         </div>
 
-                        {/* Product Documentation Tabs */}
-                        {project.settings?.markdown_files?.length > 0 && (
-                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-2xl mt-8">
-                                <div className="flex overflow-x-auto border-b border-[var(--border)] bg-[var(--bg-elevated)]">
-                                    {project.settings.markdown_files.map((file, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setActiveTab(idx)}
-                                            className={`px-6 py-4 text-xs font-black uppercase tracking-widest whitespace-nowrap transition-colors border-b-2 ${
-                                                activeTab === idx 
-                                                    ? 'border-emerald-500 text-emerald-500 bg-[var(--bg-surface)]' 
-                                                    : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)]/50'
-                                            }`}
-                                        >
-                                            {file.name}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="p-8 prose prose-sm max-w-none dark:prose-invert prose-headings:font-black prose-a:text-cyan-500 hover:prose-a:text-cyan-400">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                        {project.settings.markdown_files[activeTab]?.content || 'No content.'}
-                                    </ReactMarkdown>
-                                </div>
-                            </div>
-                        )}
-
                         {/* Product Demo / Visual Area */}
-                        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden">
+                        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden mt-8">
                             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-cyan-500"></div>
                             
                             {project.settings?.thumbnail_url ? (
@@ -106,9 +80,9 @@ export default function MarketplaceProduct({ project, canEdit }) {
                                 </a>
                             )}
                         </div>
-                        
+
                         {/* Features / Details */}
-                        <div className="space-y-6">
+                        <div className="space-y-6 mt-8">
                             <h3 className="text-lg font-black text-[var(--text-main)] uppercase tracking-widest italic border-b border-[var(--border)] pb-4">
                                 Product Details
                             </h3>
@@ -129,6 +103,32 @@ export default function MarketplaceProduct({ project, canEdit }) {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Product Documentation Tabs */}
+                        {project.settings?.markdown_files?.length > 0 && (
+                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-2xl mt-8">
+                                <div className="flex overflow-x-auto border-b border-[var(--border)] bg-[var(--bg-elevated)]">
+                                    {project.settings.markdown_files.map((file, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setActiveTab(idx)}
+                                            className={`px-6 py-4 text-xs font-black uppercase tracking-widest whitespace-nowrap transition-colors border-b-2 ${
+                                                activeTab === idx 
+                                                    ? 'border-emerald-500 text-emerald-500 bg-[var(--bg-surface)]' 
+                                                    : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)]/50'
+                                            }`}
+                                        >
+                                            {file.name}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="p-8 prose prose-sm max-w-none dark:prose-invert prose-headings:font-black prose-a:text-cyan-500 hover:prose-a:text-cyan-400">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {project.settings.markdown_files[activeTab]?.content || 'No content.'}
+                                    </ReactMarkdown>
+                                </div>
+                            </div>
+                        )}
 
                     </div>
 
