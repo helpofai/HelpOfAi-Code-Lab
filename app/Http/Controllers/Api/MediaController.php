@@ -13,20 +13,38 @@ class MediaController extends Controller
      */
     public function upload(Request $request)
     {
-        $request->validate([
-            'image' => 'required|image|max:5120', // 5MB Limit
-        ]);
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('content-media', 'public');
-            $url = asset('storage/' . $path);
-
-            return response()->json([
-                'url' => $url,
-                'path' => $path
+        try {
+            $request->validate([
+                'image' => 'required|image|max:10240', // 10MB Limit
             ]);
-        }
 
-        return response()->json(['error' => 'Upload failed'], 400);
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                if (!$file->isValid()) {
+                    return response()->json(['error' => 'Upload failed: ' . $file->getErrorMessage()], 400);
+                }
+
+                $path = $file->store('content-media', 'public');
+                
+                if (!$path) {
+                    return response()->json(['error' => 'Could not save file to disk. Check storage folder permissions (chmod 775 storage/app/public).'], 500);
+                }
+
+                $url = asset('storage/' . $path);
+
+                return response()->json([
+                    'url' => $url,
+                    'path' => $path
+                ]);
+            }
+
+            return response()->json(['error' => 'No image provided.'], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Server Error: ' . $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
+        }
     }
 }
