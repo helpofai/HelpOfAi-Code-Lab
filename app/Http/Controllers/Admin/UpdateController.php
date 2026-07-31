@@ -632,25 +632,27 @@ if ($composer->successful()) {
     private function prepareStream()
     {
         // 1. Session Unlocking (Crucial for Laravel)
-        // Writes and releases the session lock so background requests don't freeze the user's browser.
         if (session()->isStarted()) {
             session()->save();
         }
 
-        // 2. Disable PHP Core Buffering
-        while (ob_get_level() > 0) ob_end_flush();
-        ini_set('output_buffering', 'off');
-        ini_set('zlib.output_compression', false);
+        // 2. Configure PHP and send Headers BEFORE flushing buffers
+        if (!headers_sent()) {
+            @ini_set('output_buffering', 'off');
+            @ini_set('zlib.output_compression', false);
+            header('X-Accel-Buffering: no'); // Nginx / FastCGI
+            header('X-LiteSpeed-Cache-Control: no-cache'); // LiteSpeed / cPanel
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Content-Type: text/event-stream');
+        }
 
-        // 3. Proxy & Server Bypass Headers
-        header('X-Accel-Buffering: no'); // Nginx / FastCGI
-        header('X-LiteSpeed-Cache-Control: no-cache'); // LiteSpeed / cPanel
-        header('Cache-Control: no-cache, no-store, must-revalidate');
-        header('Content-Type: text/event-stream');
+        // 3. Disable PHP Core Buffering
+        while (ob_get_level() > 0) {
+            @ob_end_flush();
+        }
         flush();
 
         // 4. Cloudflare / WAF Bypass
-        // Cloudflare often requires >4KB of immediate data to begin streaming the payload.
         echo ":" . str_repeat(" ", 4096) . "\n\n";
         flush();
     }
