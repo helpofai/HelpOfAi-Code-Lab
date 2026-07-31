@@ -95,7 +95,7 @@ export default function MyAccount({ mustVerifyEmail, status }) {
         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
         { id: 'projects', label: 'My Projects', icon: Database },
         { id: 'purchases', label: 'My Purchases', icon: ShoppingBag },
-        ...(auth.user.is_vendor ? [{ id: 'vendor', label: 'Vendor Settings', icon: Briefcase }] : []),
+        ...(auth.user.is_vendor ? [{ id: 'vendor', label: 'Vendors Settings', icon: Briefcase }] : []),
         { id: 'profile', label: 'Profile Details', icon: Fingerprint },
         { id: 'security', label: 'Security', icon: Shield },
     ];
@@ -424,7 +424,7 @@ export default function MyAccount({ mustVerifyEmail, status }) {
                                             <div className="max-w-xl">
                                                 <div className="flex items-center gap-3 mb-2">
                                                     <Briefcase size={24} className="text-cyan-500" />
-                                                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--text-main)]">Vendor Settings</h3>
+                                                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--text-main)]">Vendors Settings</h3>
                                                 </div>
                                                 <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-10">Manage your connected payout accounts.</p>
                                                 

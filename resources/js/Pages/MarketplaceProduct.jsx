@@ -96,7 +96,7 @@ export default function MarketplaceProduct({ project, canEdit }) {
                             
                             <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--text-main)] italic">Source Code Repository</h3>
                             <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto mt-2">
-                                This product is linked directly to the vendor's private GitHub repository. 
+                                This product is linked directly to the vendors' private GitHub repository. 
                                 Upon purchase, you will receive an automated download of the latest code.
                             </p>
                             
@@ -141,7 +141,7 @@ export default function MarketplaceProduct({ project, canEdit }) {
                                     <User size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">Vendor</p>
+                                    <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">Vendors</p>
                                     <p className="text-sm font-bold text-[var(--text-main)]">@{project.user?.name}</p>
                                 </div>
                             </div>
@@ -179,7 +179,7 @@ export default function MarketplaceProduct({ project, canEdit }) {
                                 {[
                                     'Full Source Code Download',
                                     'RSA Digital License Key',
-                                    'Direct from Vendor Repo',
+                                    'Direct from Vendors Repo',
                                     'Secure Stripe / Razorpay'
                                 ].map((perk, i) => (
                                     <div key={i} className="flex items-center gap-3 text-[10px] uppercase font-bold text-[var(--text-muted)]">

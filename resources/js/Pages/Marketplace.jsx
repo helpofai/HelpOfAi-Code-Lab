@@ -203,7 +203,7 @@ export default function Marketplace({ auth, siteSettings }) {
                                             <div className="flex items-center gap-4 text-[10px] text-[var(--text-muted)] font-mono">
                                                 <span className="flex items-center gap-1 uppercase font-bold">
                                                     <User size={10} className="text-cyan-500/40" /> 
-                                                    {project.user?.name || 'Unknown Vendor'}
+                                                    {project.user?.name || 'Unknown Vendors'}
                                                 </span>
                                             </div>
                                             <div className="pt-4 mt-auto">

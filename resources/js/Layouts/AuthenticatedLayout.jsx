@@ -56,9 +56,9 @@ export default function AuthenticatedLayout({ header, children }) {
         ];
 
         const vendorItems = [
-            { name: 'Vendor Hub', icon: Shield, href: route('vendor.dashboard'), active: route().current('vendor.dashboard') },
-            { name: 'Payments', icon: DollarSign, href: route('vendor.payments'), active: route().current('vendor.payments') },
-            { name: 'Sell Product', icon: Store, href: route('vendor.sell'), active: route().current('vendor.sell') },
+            { name: 'Vendors Hub', icon: Shield, href: route('vendors.dashboard'), active: route().current('vendors.dashboard') },
+            { name: 'Payments', icon: DollarSign, href: route('vendors.payments'), active: route().current('vendors.payments') },
+            { name: 'Sell Product', icon: Store, href: route('vendors.sell'), active: route().current('vendors.sell') },
             { name: 'Marketplace', icon: ShoppingBag, href: route('marketplace'), active: route().current('marketplace') },
         ];
 
@@ -91,7 +91,7 @@ export default function AuthenticatedLayout({ header, children }) {
             >
                 <div className="h-20 flex items-center px-6 border-b border-[var(--border)] shrink-0">
                     <Link href="/" className="flex items-center gap-3">
-                        <div className="p-2 bg-cyan-500 text-white dark:bg-white dark:text-black rounded">
+                        <div className="p-2 bg-cyan-500 text-white dark:bg-white dark:black rounded">
                             <Code2 size={20} />
                         </div>
                         {isSidebarOpen && (
@@ -120,7 +120,8 @@ export default function AuthenticatedLayout({ header, children }) {
                     {user?.is_vendor || user?.role === 'admin' ? (
                         <div className="px-4 mb-8">
                             <div className="h-px bg-[var(--border)] mx-4 mb-6" />
-                            {isSidebarOpen && <div className="px-4 mb-4 text-[9px] font-bold text-purple-500/80 uppercase tracking-[0.3em]">Vendor Portal</div>}
+                            {/* Section Header */}
+                            {isSidebarOpen && <div className="px-4 mb-4 text-[9px] font-bold text-purple-500/80 uppercase tracking-[0.3em]">Vendors Portal</div>}
                             <nav className="space-y-1">
                                 {vendorItems.map((item) => (
                                     <Link 

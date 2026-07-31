@@ -25,7 +25,7 @@ export default function Index({ auth, payouts, routingMode: initialRoutingMode }
     };
 
     const handleMarkAsPaid = (payoutId) => {
-        if (!confirm("Are you sure you want to mark this payout as PAID? Make sure you have actually transferred the money to the vendor's account.")) return;
+        if (!confirm("Are you sure you want to mark this payout as PAID? Make sure you have actually transferred the money to the vendors account.")) return;
         
         setProcessingId(payoutId);
         router.post(route('admin.payouts.mark-paid', payoutId), {
@@ -47,9 +47,9 @@ export default function Index({ auth, payouts, routingMode: initialRoutingMode }
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-black text-xl text-[var(--text-main)] uppercase tracking-[0.2em] italic">Vendor_Payouts</h2>}
+            header={<h2 className="font-black text-xl text-[var(--text-main)] uppercase tracking-[0.2em] italic">Vendors_Payouts</h2>}
         >
-            <Head title="Vendor Payouts" />
+            <Head title="Vendors Payouts" />
 
             <div className="py-12 px-10 space-y-10">
                 
@@ -81,7 +81,7 @@ export default function Index({ auth, payouts, routingMode: initialRoutingMode }
                             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><Wallet size={20} /></div>
                             <div>
                                 <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)] italic">Withdrawal Requests</h3>
-                                <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-widest">Manage manual vendor payouts</p>
+                                <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-widest">Manage manual vendors payouts</p>
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,7 @@ export default function Index({ auth, payouts, routingMode: initialRoutingMode }
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-[var(--bg-main)] border-b border-[var(--border)]">
-                                    <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Vendor</th>
+                                    <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Vendors</th>
                                     <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Amount</th>
                                     <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Status</th>
                                     <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Gateway Preference</th>

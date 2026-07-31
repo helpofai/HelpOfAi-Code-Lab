@@ -238,13 +238,13 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('my-account');
 
-    Route::get('/sell', function () {
-        return Inertia::render('Vendor/Sell');
-    })->name('vendor.sell');
+    Route::get('/vendors/sell', function () {
+        return Inertia::render('Vendors/Sell');
+    })->name('vendors.sell');
 
     Route::get('/vendors/dashboard', function () {
-        return Inertia::render('Vendor/Dashboard');
-    })->name('vendor.dashboard');
+        return Inertia::render('Vendors/Dashboard');
+    })->name('vendors.dashboard');
 
     Route::get('/vendors/payments', function () {
         $user = auth()->user();
@@ -259,11 +259,11 @@ Route::middleware('auth')->group(function () {
             
         $totalEarnings = $sales->sum('amount') * 0.70;
 
-        return Inertia::render('Vendor/Payments', [
+        return Inertia::render('Vendors/Payments', [
             'sales' => $sales,
             'totalEarnings' => $totalEarnings
         ]);
-    })->name('vendor.payments');
+    })->name('vendors.payments');
 
     // Personal Google Drive Config
     Route::post('/api/google-drive/config', function (\Illuminate\Http\Request $request) {
