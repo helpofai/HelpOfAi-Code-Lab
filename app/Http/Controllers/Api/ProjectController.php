@@ -120,14 +120,15 @@ class ProjectController extends Controller
     public function update(Request $request, Project $project)
     {
         $user = Auth::user();
+        $isAdmin = $user->role === 'admin';
         $isTeamMember = $project->team_id && $user->teams()->where('teams.id', $project->team_id)->exists();
         
-        if ($project->user_id !== $user->id && !$isTeamMember) {
+        if (!$isAdmin && $project->user_id !== $user->id && !$isTeamMember) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         // Team role check: editors can save, members can't
-        if ($isTeamMember && $project->user_id !== $user->id) {
+        if (!$isAdmin && $isTeamMember && $project->user_id !== $user->id) {
             $team = $user->teams()->where('teams.id', $project->team_id)->first();
             if ($team->pivot->role === 'member') {
                 return response()->json(['message' => 'Members have read-only access to team projects.'], 403);
@@ -213,6 +214,8 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         $user = Auth::user();
+        $isAdmin = $user->role === 'admin';
+        
         $isTeamAdmin = $project->team_id && $user->teams()
             ->where('teams.id', $project->team_id)
             ->wherePivot('role', 'admin')
@@ -220,7 +223,7 @@ class ProjectController extends Controller
 
         $isTeamOwner = $project->team && $project->team->user_id === $user->id;
 
-        if ($project->user_id !== $user->id && !$isTeamAdmin && !$isTeamOwner) {
+        if (!$isAdmin && $project->user_id !== $user->id && !$isTeamAdmin && !$isTeamOwner) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
