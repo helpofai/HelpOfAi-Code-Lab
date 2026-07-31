@@ -61,20 +61,6 @@ class ProjectController extends Controller
         if ($isPrivate && !$user->isPro()) {
             return response()->json(['message' => 'Private projects are restricted to Pro clearance.'], 403);
         }
-        
-        // Project Quota Limits by Level
-        if (!$user->isAdmin() && $user->level < 4) {
-            $projectCount = $user->projects()->count();
-            if ($user->level === 1 && $projectCount >= 5) {
-                return response()->json(['message' => 'Level 1 limit reached (Max 5 projects). Get more views to reach Level 2!'], 403);
-            }
-            if ($user->level === 2 && $projectCount >= 15) {
-                return response()->json(['message' => 'Level 2 limit reached (Max 15 projects). Get more views to reach Level 3!'], 403);
-            }
-            if ($user->level === 3 && $projectCount >= 30) {
-                return response()->json(['message' => 'Level 3 limit reached. Please verify your identity to unlock Level 4 (Marketplace) and unlimited projects!'], 403);
-            }
-        }
 
         // Level 4+ Marketplace Gate
         if (!$user->isAdmin() && $user->level < 4) {
