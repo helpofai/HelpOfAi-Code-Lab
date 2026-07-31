@@ -228,6 +228,17 @@ class ProjectController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        // Extract all media files associated with this project to delete them
+        $jsonString = json_encode($project->getAttributes());
+        preg_match_all('/\/storage\/(content-media\/[a-zA-Z0-9_\-\.\/]+\.[a-zA-Z0-9]+)/', $jsonString, $matches);
+        
+        if (!empty($matches[1])) {
+            $uniquePaths = array_unique($matches[1]);
+            foreach ($uniquePaths as $path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
+            }
+        }
+
         // Delete from Database
         $project->delete();
 
