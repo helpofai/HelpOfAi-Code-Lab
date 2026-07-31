@@ -27,8 +27,8 @@ class VendorController extends Controller
 
         $user = Auth::user();
 
-        // Ensure only vendors can update these fields
-        if (!$user->is_vendor) {
+        // Ensure only vendors or admins can update these fields
+        if (!$user->is_vendor && !$user->isAdmin()) {
             return response()->json(['message' => 'Unauthorized. Must be a vendor.'], 403);
         }
 
@@ -114,7 +114,7 @@ class VendorController extends Controller
     public function getConnections()
     {
         $user = Auth::user();
-        if (!$user->is_vendor) {
+        if (!$user->is_vendor && !$user->isAdmin()) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
         return response()->json($user->vendorConnections);
@@ -129,7 +129,7 @@ class VendorController extends Controller
         ]);
 
         $user = Auth::user();
-        if (!$user->is_vendor) {
+        if (!$user->is_vendor && !$user->isAdmin()) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
