@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vendor_connections', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('provider'); // github, gitlab, bitbucket
-            $table->string('name')->nullable(); // e.g. "Personal Account"
-            $table->text('token'); // Encrypted PAT
-            $table->boolean('is_valid')->default(false);
-            $table->timestamp('last_verified_at')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('vendor_connections')) {
+            Schema::create('vendor_connections', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->string('provider'); // github, gitlab, bitbucket
+                $table->string('name')->nullable(); // e.g. "Personal Account"
+                $table->text('token'); // Encrypted PAT
+                $table->boolean('is_valid')->default(false);
+                $table->timestamp('last_verified_at')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
