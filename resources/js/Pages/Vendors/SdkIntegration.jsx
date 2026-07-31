@@ -266,11 +266,11 @@ if (!is_license_valid($license_key, $cache_file)) {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={\`px-6 py-4 text-xs font-black uppercase tracking-widest whitespace-nowrap transition-colors border-b-2 \${
+                                className={`px-6 py-4 text-xs font-black uppercase tracking-widest whitespace-nowrap transition-colors border-b-2 ${
                                     activeTab === tab.id 
                                         ? 'border-cyan-500 text-cyan-500 bg-[var(--bg-main)]' 
                                         : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-main)]/50'
-                                }\`}
+                                }`}
                             >
                                 {tab.name}
                             </button>
