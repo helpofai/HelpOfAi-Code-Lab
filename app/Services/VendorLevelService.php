@@ -32,12 +32,36 @@ class VendorLevelService
             $newLevel = 3;
         }
 
-        // 4. The Verification Gate for Level 4+
+        // 4. The Verification Gate for Level 4
         if ($newLevel >= 3 && $user->identity_status === 'verified') {
             $newLevel = 4;
         }
 
-        // 5. Apply Upgrade (Only upgrade, never auto-downgrade)
+        // 5. The Financial Gate for Levels 5-7 (Only applies if they are already Level 4)
+        if ($newLevel >= 4) {
+            // Calculate total gross sales (Assuming 'sale' or 'credit' type in wallet transactions)
+            $totalSales = $user->walletTransactions()
+                               ->whereIn('type', ['sale', 'credit'])
+                               ->where('status', 'cleared')
+                               ->sum('amount');
+            
+            // Level 5: Rising Star ($1,000 in sales)
+            if ($totalSales >= 1000) {
+                $newLevel = 5;
+            }
+
+            // Level 6: Elite Vendor ($10,000 in sales)
+            if ($totalSales >= 10000) {
+                $newLevel = 6;
+            }
+
+            // Level 7: Legendary Vendor ($50,000 in sales)
+            if ($totalSales >= 50000) {
+                $newLevel = 7;
+            }
+        }
+
+        // 6. Apply Upgrade (Only upgrade, never auto-downgrade)
         if ($newLevel > $user->level) {
             $user->update(['level' => $newLevel]);
         }
