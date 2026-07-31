@@ -12,6 +12,39 @@ class HelpOFAILicenseManager {
         add_action('admin_menu', [$this, 'add_license_menu']);
         add_action('wp_ajax_verify_helpofai_license', [$this, 'verify_license_ajax']);
         add_action('template_redirect', [$this, 'enforce_license_lock']);
+        
+        // Native WordPress Auto-Updater Hooks
+        add_filter('site_transient_update_themes', [$this, 'check_for_updates']);
+        add_filter('site_transient_update_plugins', [$this, 'check_for_updates']);
+    }
+
+    // NATIVE OTA UPDATER: Hooks into WordPress Core Updater
+    public function check_for_updates($transient) {
+        if (empty($transient->checked)) return $transient;
+
+        $data = get_option('helpofai_license_data', []);
+        
+        // If there's a newer version and we have a secure download URL
+        if (isset($data['latest_version'], $data['version'], $data['download_url']) 
+            && version_compare($data['version'], $data['latest_version'], '<')) {
+            
+            $plugin_slug = basename(__DIR__); // Assuming plugin/theme slug matches directory
+            
+            $response = new stdClass();
+            $response->slug = $plugin_slug;
+            $response->new_version = $data['latest_version'];
+            $response->package = $data['download_url']; // This is the OTA endpoint!
+            $response->url = 'https://your-marketplace.com';
+            
+            // Inject into WP update system
+            if (current_filter() === 'site_transient_update_themes') {
+                $transient->response[get_stylesheet()] = (array) $response;
+            } else {
+                $transient->response[$plugin_slug . '/' . $plugin_slug . '.php'] = $response;
+            }
+        }
+        
+        return $transient;
     }
 
     // 1. Add WordPress Admin Menu

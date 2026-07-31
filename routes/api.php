@@ -93,6 +93,7 @@ Route::get('projects/{slug}', [ProjectController::class, 'show']);
 
 // Digital Product Licensing Endpoints
 Route::post('/license/verify', [\App\Http\Controllers\Api\LicenseValidationController::class, 'verify']);
+Route::get('/license/download-update', [\App\Http\Controllers\Api\LicenseValidationController::class, 'downloadUpdate']);
 
 // Vendor Endpoints
 Route::middleware(['auth:sanctum'])->group(function () {
