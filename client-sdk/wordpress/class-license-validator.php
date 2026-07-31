@@ -8,14 +8,23 @@ class HelpOFAILicenseManager {
     
     private $api_url = 'YOUR_MARKETPLACE_URL_HERE/api/licenses/validate';
     
+    // For Themes: use the folder name (e.g., 'my-theme')
+    // For Plugins: use the plugin basename (e.g., 'my-plugin/my-plugin.php')
+    private $product_id = 'your-product-slug';
+    private $is_plugin = true; // Set to false if this is a theme
+    
     public function __construct() {
         add_action('admin_menu', [$this, 'add_license_menu']);
         add_action('wp_ajax_verify_helpofai_license', [$this, 'verify_license_ajax']);
         add_action('template_redirect', [$this, 'enforce_license_lock']);
         
         // Native WordPress Auto-Updater Hooks
-        add_filter('site_transient_update_themes', [$this, 'check_for_updates']);
-        add_filter('site_transient_update_plugins', [$this, 'check_for_updates']);
+        if ($this->is_plugin) {
+            add_filter('pre_set_site_transient_update_plugins', [$this, 'check_for_updates']);
+            add_filter('plugins_api', [$this, 'plugin_details_popup'], 10, 3);
+        } else {
+            add_filter('pre_set_site_transient_update_themes', [$this, 'check_for_updates']);
+        }
     }
 
     // NATIVE OTA UPDATER: Hooks into WordPress Core Updater
@@ -24,27 +33,47 @@ class HelpOFAILicenseManager {
 
         $data = get_option('helpofai_license_data', []);
         
-        // If there's a newer version and we have a secure download URL
         if (isset($data['latest_version'], $data['version'], $data['download_url']) 
             && version_compare($data['version'], $data['latest_version'], '<')) {
             
-            $plugin_slug = basename(__DIR__); // Assuming plugin/theme slug matches directory
-            
             $response = new stdClass();
-            $response->slug = $plugin_slug;
+            $response->slug = dirname($this->product_id); // e.g. 'my-plugin'
+            $response->plugin = $this->product_id; // e.g. 'my-plugin/my-plugin.php'
             $response->new_version = $data['latest_version'];
-            $response->package = $data['download_url']; // This is the OTA endpoint!
+            $response->package = $data['download_url']; 
             $response->url = 'https://your-marketplace.com';
             
-            // Inject into WP update system
-            if (current_filter() === 'site_transient_update_themes') {
-                $transient->response[get_stylesheet()] = (array) $response;
+            if ($this->is_plugin) {
+                $transient->response[$this->product_id] = $response;
             } else {
-                $transient->response[$plugin_slug . '/' . $plugin_slug . '.php'] = $response;
+                $transient->response[$this->product_id] = (array) $response;
             }
         }
         
         return $transient;
+    }
+
+    // Handles the "View version x.x details" popup for plugins
+    public function plugin_details_popup($false, $action, $args) {
+        if ($action !== 'plugin_information' || $args->slug !== dirname($this->product_id)) {
+            return $false;
+        }
+
+        $data = get_option('helpofai_license_data', []);
+        
+        $response = new stdClass();
+        $response->name = $data['product_name'] ?? 'Premium Plugin';
+        $response->slug = $args->slug;
+        $response->version = $data['latest_version'] ?? '1.0.0';
+        $response->author = $data['author_name'] ?? 'HelpOfAI Vendor';
+        $response->homepage = 'https://your-marketplace.com';
+        $response->download_link = $data['download_url'] ?? '';
+        $response->sections = [
+            'description' => 'This is a premium plugin verified by HelpOfAI Licensing.',
+            'changelog' => 'Automatic OTA update from HelpOfAI Marketplace.'
+        ];
+
+        return $response;
     }
 
     // 1. Add WordPress Admin Menu
