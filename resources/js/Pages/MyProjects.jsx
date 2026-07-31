@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Plus, Code2, ExternalLink, Trash2, Clock, 
     Database, Search, LayoutGrid, List,
-    Share2, Check, Settings, Save, X, Activity, Briefcase, Bell
+    Share2, Check, Settings, Save, X, Activity, Briefcase, Bell, ShoppingBag
 } from 'lucide-react';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import { useToast } from '@/Components/Toast/ToastProvider';

@@ -95,13 +95,14 @@ class ProjectController extends Controller
             $hasPurchased = $project->purchases()->where('user_id', $user->id)->exists();
         }
 
+        $isAdmin = $user && $user->role === 'admin';
         $isOwner = $user && $project->user_id === $user->id;
         $isTeamMember = $project->team_id && $user && 
                         $user->teams()->where('teams.id', $project->team_id)->exists();
 
-        // Check if project is private and user is not owner/team member
+        // Check if project is private and user is not owner/team member/admin
         if (!$project->is_public) {
-            if (!$isOwner && !$isTeamMember) {
+            if (!$isAdmin && !$isOwner && !$isTeamMember) {
                 return response()->json(['message' => 'Unauthorized. Restricted Neural Core.'], 403);
             }
         }
