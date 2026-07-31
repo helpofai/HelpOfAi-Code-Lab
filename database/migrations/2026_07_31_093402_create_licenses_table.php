@@ -11,9 +11,9 @@ return new class extends Migration
         if (!Schema::hasTable('licenses')) {
             Schema::create('licenses', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-                $table->foreignId('project_id')->constrained()->cascadeOnDelete();
-                $table->foreignId('purchase_id')->nullable()->constrained()->nullOnDelete();
+                $table->unsignedBigInteger('user_id');
+                $table->unsignedBigInteger('project_id');
+                $table->unsignedBigInteger('purchase_id')->nullable();
                 
                 $table->string('license_key')->unique();
                 $table->enum('status', ['active', 'suspended', 'expired'])->default('active');

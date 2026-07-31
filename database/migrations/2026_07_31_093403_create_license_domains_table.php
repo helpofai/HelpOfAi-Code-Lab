@@ -11,7 +11,7 @@ return new class extends Migration
         if (!Schema::hasTable('license_domains')) {
             Schema::create('license_domains', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('license_id')->constrained()->cascadeOnDelete();
+                $table->unsignedBigInteger('license_id');
                 $table->string('domain_url');
                 $table->timestamps();
                 
