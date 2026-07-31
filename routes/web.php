@@ -243,6 +243,10 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Vendors/Sell');
     })->name('vendors.sell');
 
+    Route::get('/vendors/projects', function () {
+        return Inertia::render('Vendors/Projects');
+    })->name('vendors.projects');
+
     Route::get('/vendors/dashboard', function () {
         $user = auth()->user();
         

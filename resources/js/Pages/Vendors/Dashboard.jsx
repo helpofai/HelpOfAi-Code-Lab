@@ -115,6 +115,12 @@ export default function VendorsDashboard({ totalEarnings = 0, totalSales = 0, pr
                                 >
                                     <DollarSign size={16} /> View Payouts
                                 </Link>
+                                <Link 
+                                    href={route('vendors.projects')} 
+                                    className="px-6 py-3 bg-purple-500/30 border border-purple-400/30 text-white font-black uppercase tracking-widest text-xs rounded-full hover:bg-purple-500/50 hover:scale-105 transition-all flex items-center gap-2 backdrop-blur-sm"
+                                >
+                                    <Briefcase size={16} /> Manage Projects
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -152,17 +158,18 @@ export default function VendorsDashboard({ totalEarnings = 0, totalSales = 0, pr
                         </div>
 
                         {/* Products Card */}
-                        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 shadow-xl hover:shadow-2xl hover:border-purple-500/30 transition-all group">
+                        <Link href={route('vendors.projects')} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 shadow-xl hover:shadow-2xl hover:border-purple-500/30 transition-all group block">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="p-3 bg-purple-500/10 rounded-2xl">
                                     <Briefcase className="text-purple-500" size={24} />
                                 </div>
+                                <span className="text-[10px] font-bold text-[var(--text-muted)] group-hover:text-purple-500 transition-colors uppercase tracking-widest">View All</span>
                             </div>
                             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] mb-1">Active Products</h3>
                             <div className="text-4xl font-black text-[var(--text-main)] tracking-tighter group-hover:text-purple-500 transition-colors">
                                 {projectCount}
                             </div>
-                        </div>
+                        </Link>
 
                         {/* Health Status Card */}
                         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all group relative overflow-hidden">
