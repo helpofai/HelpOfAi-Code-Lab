@@ -120,7 +120,8 @@ Route::get('/project/{slug}', function ($slug) {
 
     $project->makeVisible(['code', 'settings']);
 
-    if (!empty($project->github_repo_url)) {
+    // If it's a marketplace product OR has a github repo, show the product sales page
+    if ($project->is_for_sale || !empty($project->github_repo_url)) {
         return Inertia::render('MarketplaceProduct', [
             'project' => $project,
             'canEdit' => $isOwner || $isTeamMember || $hasPurchased
