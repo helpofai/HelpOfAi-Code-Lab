@@ -29,7 +29,8 @@ import {
     Compass,
     DollarSign,
     Store,
-    Wallet
+    Wallet,
+    Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -57,6 +58,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
         const vendorItems = [
             { name: 'Vendors Hub', icon: Shield, href: route('vendors.dashboard'), active: route().current('vendors.dashboard') },
+            { name: 'Manage Projects', icon: Briefcase, href: route('vendors.projects'), active: route().current('vendors.projects') },
             { name: 'Payments', icon: DollarSign, href: route('vendors.payments'), active: route().current('vendors.payments') },
             { name: 'Sell Product', icon: Store, href: route('vendors.sell'), active: route().current('vendors.sell') },
             { name: 'Marketplace', icon: ShoppingBag, href: route('marketplace'), active: route().current('marketplace') },
@@ -237,13 +239,39 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </div>
                                 <button onClick={() => setIsMobileMenuOpen(false)} className="text-[var(--text-muted)] hover:text-[var(--text-main)]"><X size={20} /></button>
                             </div>
-                            <nav className="flex-1 space-y-2">
+                            <nav className="flex-1 space-y-2 overflow-y-auto pb-6">
                                 {userItems.map((item) => (
                                     <Link key={item.name} href={item.href} className={`flex items-center gap-4 p-4 rounded ${item.active ? 'bg-cyan-500 text-white dark:text-black font-bold' : 'text-[var(--text-muted)]'}`}>
                                         <item.icon size={18} />
                                         <span className="uppercase tracking-widest text-[10px]">{item.name}</span>
                                     </Link>
                                 ))}
+
+                                {user?.is_vendor || user?.role === 'admin' ? (
+                                    <div className="mt-6 mb-2">
+                                        <div className="h-px bg-[var(--border)] mx-4 mb-4" />
+                                        <div className="px-4 mb-2 text-[9px] font-bold text-purple-500/80 uppercase tracking-[0.3em]">Vendors Portal</div>
+                                        {vendorItems.map((item) => (
+                                            <Link key={item.name} href={item.href} className={`flex items-center gap-4 p-4 rounded ${item.active ? 'bg-purple-500 text-white font-bold' : 'text-[var(--text-muted)]'}`}>
+                                                <item.icon size={18} />
+                                                <span className="uppercase tracking-widest text-[10px]">{item.name}</span>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                ) : null}
+
+                                {user?.role === 'admin' && (
+                                    <div className="mt-6 mb-2">
+                                        <div className="h-px bg-[var(--border)] mx-4 mb-4" />
+                                        <div className="px-4 mb-2 text-[9px] font-bold text-rose-500/60 uppercase tracking-[0.3em]">Command</div>
+                                        {adminItems.map((item) => (
+                                            <Link key={item.name} href={item.href} className={`flex items-center gap-4 p-4 rounded ${item.active ? 'bg-rose-500 text-white font-bold' : 'text-[var(--text-muted)]'}`}>
+                                                <item.icon size={18} />
+                                                <span className="uppercase tracking-widest text-[10px]">{item.name}</span>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
                             </nav>
                             
                             <div className="mb-6 flex items-center justify-between gap-4">
