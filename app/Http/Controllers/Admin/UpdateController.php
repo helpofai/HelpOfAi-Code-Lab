@@ -452,6 +452,17 @@ class UpdateController extends Controller
             $optimize = Process::path(base_path())->run("$php artisan optimize:clear");
             $this->sendUpdateLog($optimize->output());
 
+            // 3.5 Storage Link & Permissions
+            $this->sendUpdateLog("Verifying storage symlinks and permissions...", 85);
+            try {
+                \Illuminate\Support\Facades\Artisan::call('storage:link', ['--force' => true]);
+                Process::path(base_path())->run("chmod -R 775 storage bootstrap/cache");
+                Process::path(base_path())->run("chown -R www-data:www-data storage bootstrap/cache");
+                $this->sendUpdateLog("Storage configuration verified.", 88, 'success');
+            } catch (\Exception $e) {
+                $this->sendUpdateLog("Non-fatal: Could not automatically set all storage permissions. " . $e->getMessage(), 88, 'error');
+            }
+
             // 4. Reload Config Cache (Production)
             if (app()->environment('production')) {
                 $this->sendUpdateLog("Caching configuration...", 90);
