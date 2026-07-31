@@ -26,7 +26,10 @@ class Project extends Model
         'meta_description',
         'meta_keywords',
         'og_image',
-        'canonical_url'
+        'canonical_url',
+        'github_repo_url',
+        'project_type',
+        'version'
     ];
 
     protected $casts = [
