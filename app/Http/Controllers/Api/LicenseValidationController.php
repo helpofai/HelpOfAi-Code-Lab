@@ -17,13 +17,14 @@ class LicenseValidationController extends Controller
             'domain' => 'required|string'
         ]);
 
-        $license = License::with('project', 'domains')
+        $license = License::with(['project.user', 'domains'])
             ->where('license_key', $request->license_key)
             ->first();
 
         if (!$license || !$license->is_valid) {
             return response()->json([
                 'success' => false,
+                'valid' => false,
                 'message' => 'Invalid or expired license.'
             ], 403);
         }
@@ -38,6 +39,7 @@ class LicenseValidationController extends Controller
             } else {
                 return response()->json([
                     'success' => false,
+                    'valid' => false,
                     'message' => 'License is registered to another domain.'
                 ], 403);
             }
@@ -48,7 +50,15 @@ class LicenseValidationController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $signedData
+            'valid' => true,
+            'data' => $signedData,
+            'product_name' => $license->project->title ?? 'Premium Product',
+            'author_name' => $license->project->user->name ?? 'HelpOfAI Vendor',
+            'version' => $license->project->version ?? '1.0.0',
+            'latest_version' => $license->project->version ?? '1.0.0', // Could be checked against a versions table
+            'support_expires_at' => $license->created_at->addMonths(6)->format('M d, Y'),
+            'last_sync' => now()->format('M d, Y H:i:s'),
+            'build_hash' => substr(md5($license->id . now()), 0, 8)
         ]);
     }
 }

@@ -9,6 +9,9 @@ export default function SdkIntegration() {
     const [activeTab, setActiveTab] = useState('wordpress');
     const [copied, setCopied] = useState('');
 
+    // Dynamically get the current marketplace domain (e.g., localhost:8000 or code.helpofai.com)
+    const apiUrl = typeof window !== 'undefined' ? \`\${window.location.origin}/api/licenses/validate\` : 'https://code.helpofai.com/api/licenses/validate';
+
     const handleCopy = (code, id) => {
         navigator.clipboard.writeText(code);
         setCopied(id);
@@ -37,7 +40,7 @@ function check_theme_license_validity() {
     if ($status === 'valid') return true;
 
     // 2. Ping validation server
-    $response = wp_remote_post('https://your-marketplace.com/api/licenses/validate', [
+    $response = wp_remote_post('${apiUrl}', [
         'body' => [
             'license_key' => $license_key,
             'domain' => $_SERVER['HTTP_HOST']
@@ -94,7 +97,7 @@ class VerifyProductLicense
         // Cache for 24 hours to prevent API throttling
         $isValid = Cache::remember('product_license_valid', 86400, function () use ($licenseKey) {
             try {
-                $response = Http::timeout(5)->post('https://your-marketplace.com/api/licenses/validate', [
+                $response = Http::timeout(5)->post('${apiUrl}', [
                     'license_key' => $licenseKey,
                     'domain' => request()->getHost()
                 ]);
@@ -128,7 +131,7 @@ const verifyLicense = async (req, res, next) => {
     }
 
     try {
-        const response = await axios.post('https://your-marketplace.com/api/licenses/validate', {
+        const response = await axios.post('${apiUrl}', {
             license_key: licenseKey,
             domain: domain
         }, { timeout: 5000 });
@@ -169,7 +172,7 @@ function is_license_valid($key, $cache_file) {
     }
 
     // 2. Call API
-    $ch = curl_init('https://your-marketplace.com/api/licenses/validate');
+    $ch = curl_init('${apiUrl}');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
         'license_key' => $key,
