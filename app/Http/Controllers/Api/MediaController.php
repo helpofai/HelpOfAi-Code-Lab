@@ -24,7 +24,7 @@ class MediaController extends Controller
                     return response()->json(['error' => 'Upload failed: ' . $file->getErrorMessage()], 400);
                 }
 
-                $path = $file->store('content-media', 'public');
+                $path = $file->storePublicly('content-media', 'public');
                 
                 if (!$path) {
                     return response()->json(['error' => 'Could not save file to disk. Check storage folder permissions (chmod 775 storage/app/public).'], 500);
