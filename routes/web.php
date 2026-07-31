@@ -243,7 +243,27 @@ Route::middleware('auth')->group(function () {
     })->name('vendors.sell');
 
     Route::get('/vendors/dashboard', function () {
-        return Inertia::render('Vendors/Dashboard');
+        $user = auth()->user();
+        
+        $sales = \App\Models\Purchase::whereHas('project', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->with(['project', 'user' => function($q) { $q->select('id', 'name'); }])
+            ->where('status', 'completed')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $totalEarnings = $sales->sum('amount') * 0.70;
+        $totalSales = $sales->count();
+        $projectCount = \App\Models\Project::where('user_id', $user->id)->count();
+        $recentSales = $sales->take(5);
+
+        return Inertia::render('Vendors/Dashboard', [
+            'totalEarnings' => $totalEarnings,
+            'totalSales' => $totalSales,
+            'projectCount' => $projectCount,
+            'recentSales' => $recentSales,
+        ]);
     })->name('vendors.dashboard');
 
     Route::get('/vendors/payments', function () {
