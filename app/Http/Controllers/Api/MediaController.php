@@ -39,7 +39,7 @@ class MediaController extends Controller
             }
 
             return response()->json(['error' => 'No image provided.'], 400);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json([
                 'error' => 'Server Error: ' . $e->getMessage(),
                 'line' => $e->getLine(),
