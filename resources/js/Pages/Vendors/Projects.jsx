@@ -223,9 +223,9 @@ export default function VendorsProjects() {
                     axios.get('/api/projects'),
                     axios.get('/api/teams-list')
                 ]);
-                // In Vendors portal, we focus on all their projects. 
-                // We'll let them filter by "For Sale" via the UI if they want, or default to all.
-                setProjects(projRes.data);
+                // In Vendors portal, we focus only on "git projects" (products linked to a repo)
+                const gitProjects = projRes.data.filter(p => !!p.github_repo_url);
+                setProjects(gitProjects);
                 setTeams(teamsRes.data);
             } catch (e) {
                 console.error("Failed to fetch products.");
