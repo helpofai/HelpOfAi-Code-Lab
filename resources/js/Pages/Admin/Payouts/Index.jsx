@@ -1,12 +1,28 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
-import { Wallet, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Wallet, CheckCircle, Clock, AlertCircle, Settings } from 'lucide-react';
 import { useToast } from '@/Components/Toast/ToastProvider';
 
-export default function Index({ auth, payouts }) {
+export default function Index({ auth, payouts, routingMode: initialRoutingMode }) {
     const toast = useToast();
     const [processingId, setProcessingId] = useState(null);
+    const [routingMode, setRoutingMode] = useState(initialRoutingMode || 'auto');
+
+    const handleToggleMode = (mode) => {
+        const previousMode = routingMode;
+        setRoutingMode(mode);
+        router.post(route('admin.payouts.settings'), {
+            payout_routing_mode: mode
+        }, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Payout routing engine updated.'),
+            onError: () => {
+                setRoutingMode(previousMode);
+                toast.error('Failed to update routing engine.');
+            }
+        });
+    };
 
     const handleMarkAsPaid = (payoutId) => {
         if (!confirm("Are you sure you want to mark this payout as PAID? Make sure you have actually transferred the money to the vendor's account.")) return;
@@ -36,6 +52,29 @@ export default function Index({ auth, payouts }) {
             <Head title="Vendor Payouts" />
 
             <div className="py-12 px-10 space-y-10">
+                
+                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+                    <div className="px-8 py-6 flex justify-between items-center bg-[var(--bg-main)]">
+                        <div className="flex items-center gap-4">
+                            <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-500"><Settings size={20} /></div>
+                            <div>
+                                <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)] italic">Payout Routing Engine</h3>
+                                <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-widest">Switch between Auto Gateway splits and Manual wire transfers</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${routingMode === 'auto' ? 'text-cyan-500' : 'text-[var(--text-muted)]'}`}>Auto</span>
+                            <button 
+                                onClick={() => handleToggleMode(routingMode === 'auto' ? 'manual' : 'auto')}
+                                className={`relative w-12 h-6 rounded-full transition-colors ${routingMode === 'auto' ? 'bg-cyan-500' : 'bg-rose-500'}`}
+                            >
+                                <span className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${routingMode === 'auto' ? 'translate-x-0' : 'translate-x-6'}`} />
+                            </button>
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${routingMode === 'manual' ? 'text-rose-500' : 'text-[var(--text-muted)]'}`}>Manual</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
                     <div className="px-8 py-6 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg-main)]">
                         <div className="flex items-center gap-4">

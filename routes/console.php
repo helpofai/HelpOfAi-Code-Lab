@@ -8,3 +8,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 \Illuminate\Support\Facades\Schedule::command('user:recalculate-levels')->daily();
+\Illuminate\Support\Facades\Schedule::command('escrow:clear')->daily();

@@ -198,6 +198,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/admin/sales', [\App\Http\Controllers\Admin\SalesController::class, 'index'])->name('admin.sales.index');
     Route::get('/admin/sales/paid-projects', [\App\Http\Controllers\Admin\SalesController::class, 'paidProjects'])->name('admin.sales.paid-projects');
     Route::get('/admin/payouts', [\App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('admin.payouts.index');
+    Route::post('/admin/payouts/settings', [\App\Http\Controllers\Admin\PayoutController::class, 'updateSettings'])->name('admin.payouts.settings');
     Route::post('/admin/payouts/{payout}/mark-paid', [\App\Http\Controllers\Admin\PayoutController::class, 'markAsPaid'])->name('admin.payouts.mark-paid');
 
     Route::get('/admin/support', [\App\Http\Controllers\Admin\SupportController::class, 'index'])->name('admin.support');
