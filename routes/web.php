@@ -286,6 +286,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('teams/{team}/invitations/{invitation}', [\App\Http\Controllers\TeamController::class, 'cancelInvitation'])->name('teams.invitations.destroy');
     Route::post('invitations/{invitation}/accept', [\App\Http\Controllers\TeamController::class, 'acceptInvitation'])->name('invitations.accept');
     Route::delete('invitations/{invitation}', [\App\Http\Controllers\TeamController::class, 'rejectInvitation'])->name('invitations.destroy');
+    
+    // Notifications
+    Route::get('/api/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::put('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::put('/api/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 });
 
 Route::get('/p/{slug}', function ($slug) {
