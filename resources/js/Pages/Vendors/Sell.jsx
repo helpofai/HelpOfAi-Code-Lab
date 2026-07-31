@@ -26,10 +26,17 @@ export default function Sell() {
     const uploadImage = async (file) => {
         const formData = new FormData();
         formData.append('image', file);
-        const res = await axios.post('/api/media/upload', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        return res.data.url;
+        try {
+            const res = await axios.post('/api/media/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            return res.data.url;
+        } catch (err) {
+            const serverMsg = err.response?.data?.error || err.response?.data?.message || err.message;
+            toast.error("Upload failed: " + serverMsg);
+            console.error("FULL ERROR:", err.response?.data);
+            throw err;
+        }
     };
 
     const handleSubmit = async (e) => {
