@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
-import { ShoppingCart, ShoppingBag, ExternalLink, Github, Zap, Shield, Key, Download, CheckCircle2, User, Clock, Code2 } from 'lucide-react';
+import { ShoppingCart, ShoppingBag, ExternalLink, Github, Zap, Shield, Key, Download, CheckCircle2, User, Clock, Code2, Package } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -21,26 +21,38 @@ export default function MarketplaceProduct({ project, canEdit }) {
                     {/* Main Content Area */}
                     <div className="lg:col-span-2 space-y-12">
                         
-                        {/* Header Area */}
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3 text-emerald-500 font-bold tracking-widest uppercase text-xs">
-                                <ShoppingBag size={14} className="fill-current" />
-                                <span>Premium Marketplace Product</span>
-                            </div>
-                            <h1 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">
-                                {project.title}
-                            </h1>
-                            <p className="text-lg text-[var(--text-muted)] font-medium leading-relaxed max-w-2xl">
-                                {project.meta_description || project.description || 'A premium script available for purchase on the Marketplace.'}
-                            </p>
+                        {/* Header Info */}
+                        <div className="relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-8 md:p-12 shadow-2xl overflow-hidden">
+                            {/* Decorative Background Glow */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none"></div>
                             
-                            <div className="space-y-4">
-                                <h4 className="text-sm font-black text-[var(--text-main)] uppercase tracking-[0.2em] border-b border-[var(--border)] pb-2 flex items-center gap-2">
-                                    <Code2 size={16} className="text-cyan-500" /> Technology Stack
-                                </h4>
-                                <div className="flex flex-wrap gap-2">
+                            <div className="relative z-10 flex flex-col items-start gap-6">
+                                <div className="flex items-center gap-3 w-full">
+                                    <div className="w-12 h-12 bg-[var(--bg-main)] border border-[var(--border)] rounded-xl flex items-center justify-center shrink-0 shadow-inner">
+                                        <Package size={24} className="text-cyan-500" />
+                                    </div>
+                                    <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-sm">
+                                        {project.category}
+                                    </span>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-[var(--text-main)] leading-[1.1]">
+                                        {project.title}
+                                    </h1>
+                                    
+                                    <p className="text-lg md:text-xl text-[var(--text-muted)] font-medium max-w-3xl leading-relaxed">
+                                        {project.meta_description || 'A premium source code product.'}
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2 pt-4 border-t border-[var(--border)] w-full">
+                                    <div className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest mr-2 flex items-center">
+                                        Tags:
+                                    </div>
                                     {project.tags?.map((tag, i) => (
-                                        <span key={i} className="px-3 py-1 bg-[var(--bg-main)] text-[var(--text-muted)] border border-[var(--border)] rounded text-[10px] font-black uppercase tracking-widest">
+                                        <span key={i} className="px-3 py-1 bg-[var(--bg-main)] text-[var(--text-main)] border border-[var(--border)] rounded-md text-[10px] font-bold uppercase tracking-wider hover:border-cyan-500/50 transition-colors cursor-default shadow-sm">
                                             {tag}
                                         </span>
                                     ))}
