@@ -7,7 +7,7 @@ import {
     Database, ShoppingBag, User, Activity, 
     ExternalLink, Trash2, Globe, Lock, DollarSign, 
     CreditCard, Code2, Edit, CheckCircle2, LayoutDashboard,
-    Search, Download, Share2, Shield, Fingerprint, Zap, Key, BadgeCheck, Plus
+    Search, Download, Share2, Shield, Fingerprint, Zap, Key, BadgeCheck, Plus, Briefcase, Settings, Bell
 } from 'lucide-react';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import UserLevelBadge from '@/Components/Visuals/UserLevelBadge';
@@ -97,6 +97,8 @@ export default function MyAccount({ mustVerifyEmail, status }) {
         { id: 'purchases', label: 'My Purchases', icon: ShoppingBag },
         ...(auth.user.is_vendor ? [{ id: 'vendor', label: 'Vendors Settings', icon: Briefcase }] : []),
         { id: 'profile', label: 'Profile Details', icon: Fingerprint },
+        { id: 'settings', label: 'App Settings', icon: Settings },
+        { id: 'api', label: 'API & Tokens', icon: Code2 },
         { id: 'security', label: 'Security', icon: Shield },
     ];
 
@@ -496,6 +498,93 @@ export default function MyAccount({ mustVerifyEmail, status }) {
                                         <div className="bg-[var(--bg-surface)]/80 backdrop-blur-xl border border-[var(--border)] rounded-3xl p-8 lg:p-12 shadow-2xl">
                                             <div className="max-w-xl">
                                                 <IdentityVerificationForm className="w-full" />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* SETTINGS TAB */}
+                                {activeTab === 'settings' && (
+                                    <motion.div 
+                                        key="settings"
+                                        initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -10, filter: 'blur(10px)' }}
+                                        transition={{ duration: 0.3 }}
+                                        className="space-y-8"
+                                    >
+                                        <div className="bg-[var(--bg-surface)]/80 backdrop-blur-xl border border-[var(--border)] rounded-3xl p-8 lg:p-12 shadow-2xl">
+                                            <div className="max-w-xl">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <Settings size={24} className="text-purple-500" />
+                                                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--text-main)]">App Preferences</h3>
+                                                </div>
+                                                <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-10">Customize your application experience.</p>
+                                                
+                                                <div className="space-y-6">
+                                                    <div className="bg-[var(--bg-main)] border border-[var(--border)] rounded-xl p-6 flex justify-between items-center">
+                                                        <div>
+                                                            <h4 className="text-sm font-black uppercase text-[var(--text-main)]">Dark Mode</h4>
+                                                            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Toggle the application theme.</p>
+                                                        </div>
+                                                        <button className="px-4 py-2 bg-purple-500/10 text-purple-500 rounded font-black uppercase tracking-widest text-[10px] border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all">Toggle Theme</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-[var(--bg-surface)]/80 backdrop-blur-xl border border-[var(--border)] rounded-3xl p-8 lg:p-12 shadow-2xl">
+                                            <div className="max-w-xl">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <Bell size={24} className="text-blue-500" />
+                                                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--text-main)]">Notifications</h3>
+                                                </div>
+                                                <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-10">Manage your email and push notifications.</p>
+                                                
+                                                <div className="space-y-4">
+                                                    {[
+                                                        { id: 'notif_sales', label: 'New Sales Alerts', desc: 'Get notified when someone purchases your product.' },
+                                                        { id: 'notif_updates', label: 'Product Updates', desc: 'Receive emails when a product you purchased is updated.' },
+                                                        { id: 'notif_marketing', label: 'Marketing Emails', desc: 'Receive newsletters and promotional offers.' }
+                                                    ].map((notif, idx) => (
+                                                        <div key={idx} className="bg-[var(--bg-main)] border border-[var(--border)] rounded-xl p-6 flex justify-between items-center">
+                                                            <div>
+                                                                <h4 className="text-sm font-black uppercase text-[var(--text-main)]">{notif.label}</h4>
+                                                                <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">{notif.desc}</p>
+                                                            </div>
+                                                            <div className="w-10 h-6 bg-blue-500/20 rounded-full relative cursor-pointer border border-blue-500/50">
+                                                                <div className="w-4 h-4 bg-blue-500 rounded-full absolute top-1 left-1 shadow-sm"></div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* API & TOKENS TAB */}
+                                {activeTab === 'api' && (
+                                    <motion.div 
+                                        key="api"
+                                        initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -10, filter: 'blur(10px)' }}
+                                        transition={{ duration: 0.3 }}
+                                        className="space-y-8"
+                                    >
+                                        <div className="bg-[var(--bg-surface)]/80 backdrop-blur-xl border border-[var(--border)] rounded-3xl p-8 lg:p-12 shadow-2xl">
+                                            <div className="max-w-2xl">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <Code2 size={24} className="text-pink-500" />
+                                                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-[var(--text-main)]">API & Personal Tokens</h3>
+                                                </div>
+                                                <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-10">Generate tokens to interact with the HOACodeLab API natively.</p>
+                                                
+                                                <div className="bg-[var(--bg-main)] border border-[var(--border)] rounded-xl p-8 text-center border-dashed">
+                                                    <Code2 size={32} className="mx-auto mb-4 text-[var(--text-muted)] opacity-50" />
+                                                    <h4 className="text-sm font-black uppercase text-[var(--text-main)] mb-2">No Active Tokens</h4>
+                                                    <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-6">You have not generated any API tokens yet.</p>
+                                                    <button className="px-6 py-3 bg-pink-500/10 text-pink-500 rounded-xl font-black uppercase tracking-widest text-xs border border-pink-500/20 hover:bg-pink-500 hover:text-white transition-all shadow-lg shadow-pink-500/10">
+                                                        Generate New Token
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </motion.div>
