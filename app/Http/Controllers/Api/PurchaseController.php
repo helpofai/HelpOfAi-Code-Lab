@@ -397,8 +397,9 @@ class PurchaseController extends Controller
                     'project_id' => $project->id,
                     'license_key' => $licenseService->generateLicenseKey(),
                     'status' => 'active',
+                    'support_duration' => $project->support_duration ?? '6_months',
                     // Default to 1 year expiry, can be adjusted based on product logic
-                    'expires_at' => now()->addYear() 
+                    'expires_at' => ($project->support_duration === 'lifetime') ? null : now()->addYear() 
                 ]
             );
 

@@ -88,6 +88,7 @@ class ProjectController extends Controller
             'is_private' => $isPrivate,
             'is_for_sale' => $validated['is_for_sale'] ?? false,
             'price' => $validated['price'] ?? 0.00,
+            'support_duration' => $validated['settings']['support_duration'] ?? '6_months',
         ]);
 
         return response()->json($project->makeVisible('code'), 201);
