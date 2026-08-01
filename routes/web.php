@@ -247,8 +247,19 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('MyAccount', [
             'mustVerifyEmail' => $request->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail,
             'status' => session('status'),
+            'tokens' => $request->user()->tokens,
         ]);
     })->name('my-account');
+
+    Route::post('/my-account/token', function (\Illuminate\Http\Request $request) {
+        $token = $request->user()->createToken('Personal Access Token');
+        return response()->json(['token' => $token->plainTextToken]);
+    })->name('my-account.token.store');
+
+    Route::delete('/my-account/token/{id}', function (\Illuminate\Http\Request $request, $id) {
+        $request->user()->tokens()->where('id', $id)->delete();
+        return response()->json(['message' => 'Token deleted successfully']);
+    })->name('my-account.token.destroy');
 
     Route::get('/vendors/sell', function () {
         return Inertia::render('Vendors/Sell');

@@ -17,7 +17,7 @@ import UpdateProfileInformationForm from './Profile/Partials/UpdateProfileInform
 import DeleteUserForm from './Profile/Partials/DeleteUserForm';
 import IdentityVerificationForm from './Profile/Partials/IdentityVerificationForm';
 
-export default function MyAccount({ mustVerifyEmail, status }) {
+export default function MyAccount({ mustVerifyEmail, status, tokens: initialTokens = [] }) {
     const { auth } = usePage().props;
     const toast = useToast();
     
@@ -45,6 +45,35 @@ export default function MyAccount({ mustVerifyEmail, status }) {
             toast.error(error.response?.data?.message || `Failed to link ${type} account.`);
         } finally {
             setIsUpdatingPayout(false);
+        }
+    };
+
+    // Tokens State
+    const [tokens, setTokens] = useState(initialTokens);
+    const [newToken, setNewToken] = useState(null);
+    const [isGeneratingToken, setIsGeneratingToken] = useState(false);
+
+    const handleGenerateToken = async () => {
+        setIsGeneratingToken(true);
+        try {
+            const res = await axios.post(route('my-account.token.store'));
+            setNewToken(res.data.token);
+            // Refresh tokens list manually or by page reload. For simplicity, reload.
+            window.location.reload();
+        } catch (error) {
+            toast.error('Failed to generate token.');
+            setIsGeneratingToken(false);
+        }
+    };
+
+    const handleDeleteToken = async (id) => {
+        if (!confirm('Are you sure you want to delete this token?')) return;
+        try {
+            await axios.delete(route('my-account.token.destroy', id));
+            setTokens(tokens.filter(t => t.id !== id));
+            toast.success('Token deleted.');
+        } catch (error) {
+            toast.error('Failed to delete token.');
         }
     };
 
@@ -577,14 +606,42 @@ export default function MyAccount({ mustVerifyEmail, status }) {
                                                 </div>
                                                 <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-10">Generate tokens to interact with the HOACodeLab API natively.</p>
                                                 
-                                                <div className="bg-[var(--bg-main)] border border-[var(--border)] rounded-xl p-8 text-center border-dashed">
+                                                <div className="bg-[var(--bg-main)] border border-[var(--border)] rounded-xl p-8 text-center border-dashed mb-6">
                                                     <Code2 size={32} className="mx-auto mb-4 text-[var(--text-muted)] opacity-50" />
-                                                    <h4 className="text-sm font-black uppercase text-[var(--text-main)] mb-2">No Active Tokens</h4>
-                                                    <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-6">You have not generated any API tokens yet.</p>
-                                                    <button className="px-6 py-3 bg-pink-500/10 text-pink-500 rounded-xl font-black uppercase tracking-widest text-xs border border-pink-500/20 hover:bg-pink-500 hover:text-white transition-all shadow-lg shadow-pink-500/10">
-                                                        Generate New Token
+                                                    <h4 className="text-sm font-black uppercase text-[var(--text-main)] mb-2">Manage Tokens</h4>
+                                                    <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-6">Generate a new API token below.</p>
+                                                    <button onClick={handleGenerateToken} disabled={isGeneratingToken} className="px-6 py-3 bg-pink-500/10 text-pink-500 rounded-xl font-black uppercase tracking-widest text-xs border border-pink-500/20 hover:bg-pink-500 hover:text-white transition-all shadow-lg shadow-pink-500/10 disabled:opacity-50">
+                                                        {isGeneratingToken ? 'Generating...' : 'Generate New Token'}
                                                     </button>
                                                 </div>
+
+                                                {newToken && (
+                                                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-xl mb-6 flex flex-col gap-2">
+                                                        <span className="text-xs font-black uppercase text-emerald-500">Token Generated Successfully</span>
+                                                        <span className="text-[10px] text-emerald-500/70 font-bold uppercase tracking-widest">Please copy this token now. You will not be able to see it again.</span>
+                                                        <div className="flex gap-2 mt-2">
+                                                            <input type="text" readOnly value={newToken} className="flex-1 bg-[var(--bg-surface)] border border-emerald-500/30 rounded-lg p-3 text-xs font-mono text-[var(--text-main)]" />
+                                                            <button onClick={() => copyToClipboard(newToken)} className="px-4 bg-emerald-500 text-black font-black rounded-lg uppercase text-[10px] tracking-widest hover:bg-emerald-400">Copy</button>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {tokens.length > 0 && (
+                                                    <div className="space-y-4">
+                                                        <h4 className="text-sm font-black uppercase text-[var(--text-main)] border-b border-[var(--border)] pb-2">Active Tokens</h4>
+                                                        {tokens.map(t => (
+                                                            <div key={t.id} className="flex justify-between items-center p-4 bg-[var(--bg-main)] rounded-2xl border border-[var(--border)]">
+                                                                <div>
+                                                                    <div className="text-sm font-black text-[var(--text-main)] italic">{t.name}</div>
+                                                                    <div className="text-[10px] text-[var(--text-muted)] font-mono mt-1">Last Used: {t.last_used_at ? new Date(t.last_used_at).toLocaleDateString() : 'Never'}</div>
+                                                                </div>
+                                                                <button onClick={() => handleDeleteToken(t.id)} className="w-10 h-10 flex items-center justify-center bg-rose-500/10 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-colors">
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </motion.div>
