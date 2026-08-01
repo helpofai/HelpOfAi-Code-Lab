@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('project_assets', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('project_id')->constrained()->cascadeOnDelete();
-            $table->string('file_path');
-            $table->string('version')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('project_assets')) {
+            Schema::create('project_assets', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('project_id')->constrained()->cascadeOnDelete();
+                $table->string('file_path');
+                $table->string('version')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
