@@ -77,6 +77,7 @@ function ProjectSettingsModal({ project, teams, onClose, onUpdate }) {
         is_for_sale: project.is_for_sale ? 1 : 0,
         price: project.price || 0,
         github_repo_url: project.github_repo_url || '',
+        support_duration: project.support_duration || '6_months',
     });
     const [isSaving, setIsSaving] = useState(false);
     const toast = useToast();
@@ -185,6 +186,17 @@ function ProjectSettingsModal({ project, teams, onClose, onUpdate }) {
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">GitHub Private Repo URL</label>
                                     <input type="url" placeholder="https://github.com/vendor/repo" value={formData.github_repo_url} onChange={(e) => setFormData({...formData, github_repo_url: e.target.value})} className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded p-3 text-[var(--text-main)] focus:border-emerald-500/50 focus:ring-0 text-[10px] font-bold" />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Support & Updates Duration</label>
+                                    <select 
+                                        value={formData.support_duration} 
+                                        onChange={(e) => setFormData({...formData, support_duration: e.target.value})}
+                                        className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded p-3 text-[var(--text-main)] focus:border-emerald-500/50 focus:ring-0 text-[10px] font-bold uppercase tracking-widest appearance-none"
+                                    >
+                                        <option value="6_months">6 Months (Industry Standard)</option>
+                                        <option value="lifetime">Lifetime Updates</option>
+                                    </select>
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
                                     <p className="text-[9px] text-emerald-500/80 font-bold uppercase tracking-widest italic">

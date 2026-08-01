@@ -159,6 +159,7 @@ class ProjectController extends Controller
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:255',
             'github_repo_url' => 'nullable|url|max:255',
+            'support_duration' => 'nullable|in:6_months,lifetime',
         ]);
 
         // SaaS Logic: Gating private projects
@@ -217,6 +218,9 @@ class ProjectController extends Controller
         }
         if (array_key_exists('meta_keywords', $validated)) {
             $updateData['meta_keywords'] = $validated['meta_keywords'];
+        }
+        if (array_key_exists('support_duration', $validated)) {
+            $updateData['support_duration'] = $validated['support_duration'];
         }
 
         // Update database metadata
