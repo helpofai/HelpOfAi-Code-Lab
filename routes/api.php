@@ -66,6 +66,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Project Purchases
     Route::post('/purchase/checkout', [\App\Http\Controllers\Api\PurchaseController::class, 'checkout'])->middleware('throttle:10,1');
+    Route::post('/webhooks/stripe', [\App\Http\Controllers\Api\PurchaseController::class, 'stripeWebhook']);
+    
+    // GitHub Webhook for Real-time CI/CD Sync
+    Route::post('/webhooks/github', [\App\Http\Controllers\Api\GithubWebhookController::class, 'handle'])->middleware('throttle:30,1');
     Route::post('/purchase/verify', [\App\Http\Controllers\Api\PurchaseController::class, 'verify'])->middleware('throttle:30,1');
     Route::get('/purchases/my-purchases', [\App\Http\Controllers\Api\PurchaseController::class, 'myPurchases']);
 
