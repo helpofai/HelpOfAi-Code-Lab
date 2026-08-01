@@ -292,21 +292,31 @@ class ProjectController extends Controller
         $zipUrlMain = "https://github.com/{$repoPath}/archive/refs/heads/main.zip";
         $zipUrlMaster = "https://github.com/{$repoPath}/archive/refs/heads/master.zip";
 
+        // Check if vendor has a connected GitHub account
+        $githubConnection = \App\Models\VendorConnection::where('user_id', $project->user_id)
+            ->where('provider', 'github')
+            ->first();
+
         try {
-            $zipContent = \Illuminate\Support\Facades\Http::withoutVerifying()
-                ->timeout(60)
-                ->get($zipUrlMain);
-
-            if (!$zipContent->successful()) {
-                $zipContent = \Illuminate\Support\Facades\Http::withoutVerifying()
-                    ->timeout(60)
-                    ->get($zipUrlMaster);
+            $request = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(60);
+            
+            if ($githubConnection && $githubConnection->token) {
+                $request->withToken($githubConnection->token);
             }
 
-            if (!$zipContent->successful()) {
-                return response()->json(['message' => 'Failed to download repository. Ensure it is public and has a main or master branch.'], 400);
-            }
+            $zipContent = $request->get($zipUrlMain);
 
+            if (!$zipContent->successful()) {
+                // Try master branch
+                $zipContent = $request->get($zipUrlMaster);
+                
+                if (!$zipContent->successful()) {
+                    return response()->json([
+                        'message' => 'Failed to download repository. Ensure it is public or you have connected a GitHub Token, and it has a main or master branch.'
+                    ], 400);
+                }
+            } 
+            
             // Version Auto-Increment (e.g., from 1.0.0 to 1.0.1)
             $currentVersion = $project->version ?? '1.0.0';
             $parts = explode('.', $currentVersion);
