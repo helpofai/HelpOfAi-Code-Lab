@@ -37,12 +37,15 @@ class DownloadController extends Controller
             ->where('is_valid', true)
             ->first();
 
-        if (!$githubConnection) {
-            return response()->json(['message' => 'Vendor does not have a verified GitHub integration.'], 404);
+        $vendorToken = null;
+        if ($githubConnection) {
+            $vendorToken = $githubConnection->token;
+        } elseif ($project->user->github_token) {
+            $vendorToken = $project->user->github_token;
         }
 
-        $vendorToken = $githubConnection->token;
-
+        // We will pass the token to the service. If it's null, the service will fall back to the .env GITHUB_TOKEN.
+        
         // Streams the zip directly from the vendor's private repo to the buyer.
         // We default to 'main' branch, but you could add a column in projects table if they use 'master'.
         return $githubService->streamRepoZipToBrowser($project->github_repo_url, 'main', $filename, $vendorToken);

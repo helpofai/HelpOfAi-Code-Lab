@@ -31,37 +31,35 @@ class GitHubService
 
         $token = $vendorToken ?? $this->token;
 
-        return response()->streamDownload(function () use ($zipUrl, $token) {
-            $headers = [
-                'User-Agent' => 'HOA-Asset-Server',
-                'Accept' => 'application/vnd.github.v3+json',
-            ];
-            
-            if (!empty($token)) {
-                $headers['Authorization'] = 'Bearer ' . $token;
+        $headers = [
+            'User-Agent' => 'HOA-Asset-Server',
+            'Accept' => 'application/vnd.github.v3+json',
+        ];
+        
+        if (!empty($token)) {
+            $headers['Authorization'] = 'Bearer ' . $token;
+        }
+
+        try {
+            $response = Http::withHeaders($headers)
+                ->withOptions(['stream' => true, 'allow_redirects' => true])
+                ->get($zipUrl);
+
+            if ($response->failed()) {
+                Log::error("GitHub Zip Download failed", ['status' => $response->status(), 'url' => $zipUrl]);
+                return response()->json(['message' => 'Failed to fetch repository from GitHub. Ensure the repository exists and the token is valid.'], $response->status());
             }
 
-            // We use Guzzle streaming to avoid memory limits and catch errors BEFORE sending invalid zips
-            try {
-                $response = Http::withHeaders($headers)
-                    ->withOptions(['stream' => true, 'allow_redirects' => true])
-                    ->get($zipUrl);
-
-                if ($response->failed()) {
-                    echo "Error: Failed to fetch repository from GitHub.\n";
-                    echo "HTTP Status: " . $response->status() . "\n";
-                    echo "Please check if your GitHub Token is set in .env (GITHUB_TOKEN) and has access to the repo.\n";
-                    echo "Response: " . $response->body();
-                    return;
-                }
-
+            return response()->streamDownload(function () use ($response) {
                 $stream = $response->toPsrResponse()->getBody();
                 while (!$stream->eof()) {
                     echo $stream->read(8192);
                 }
-            } catch (\Exception $e) {
-                echo "Exception occurred during download: " . $e->getMessage();
-            }
-        }, $filename);
+            }, $filename);
+
+        } catch (\Exception $e) {
+            Log::error("GitHub Zip Download exception", ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Exception occurred during download.'], 500);
+        }
     }
 }

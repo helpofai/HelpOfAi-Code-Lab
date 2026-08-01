@@ -77,6 +77,25 @@ export default function MyAccount({ mustVerifyEmail, status, tokens: initialToke
         }
     };
 
+    const handleDownload = async (purchaseId, projectTitle) => {
+        const toastId = toast.loading('Initiating download...');
+        try {
+            const res = await axios.get(`/api/purchases/${purchaseId}/download`, { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const slug = projectTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            link.setAttribute('download', `${slug}-source.zip`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            toast.success('Download started!', { id: toastId });
+        } catch (error) {
+            console.error(error);
+            toast.error('Download failed. The vendor may not have a valid GitHub connection.', { id: toastId });
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -414,9 +433,9 @@ export default function MyAccount({ mustVerifyEmail, status, tokens: initialToke
                                                                             <Link href={route('editor', p.project.slug)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-black transition-all shadow-lg shadow-cyan-500/10">
                                                                                 <ExternalLink size={14} /> Open
                                                                             </Link>
-                                                                            <a href={`/api/purchases/${p.id}/download`} download className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all shadow-lg shadow-emerald-500/10">
+                                                                            <button onClick={() => handleDownload(p.id, p.project.title)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all shadow-lg shadow-emerald-500/10">
                                                                                 <Download size={14} /> Download Zip
-                                                                            </a>
+                                                                            </button>
                                                                         </div>
                                                                     ) : (
                                                                         <span className="inline-flex items-center gap-2 px-4 py-2 text-[10px] text-rose-500 uppercase font-bold tracking-widest bg-rose-500/10 rounded-xl">
