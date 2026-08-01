@@ -34,6 +34,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+    Route::post('/projects/{project:slug}/sync-github', [ProjectController::class, 'syncFromGithub']);
     Route::apiResource('projects', ProjectController::class)->except(['show']);
     Route::get('/teams-list', function() {
         return auth()->user()->teams()->get()->merge(auth()->user()->ownedTeams()->get());
@@ -92,7 +93,7 @@ Route::get('/google-drive/callback', [\App\Http\Controllers\Api\GoogleDriveContr
 Route::get('projects/{slug}', [ProjectController::class, 'show']);
 
 // Digital Product Licensing Endpoints
-Route::post('/license/verify', [\App\Http\Controllers\Api\LicenseValidationController::class, 'verify']);
+Route::post('/licenses/validate', [\App\Http\Controllers\Api\LicenseValidationController::class, 'verify']);
 Route::get('/license/download-update', [\App\Http\Controllers\Api\LicenseValidationController::class, 'downloadUpdate']);
 
 // Vendor Endpoints

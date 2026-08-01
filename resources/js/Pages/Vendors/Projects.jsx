@@ -247,6 +247,18 @@ export default function VendorsProjects() {
         }
     };
 
+    const handleSync = async (slug) => {
+        try {
+            toast.success("Initiating GitHub Sync...");
+            const res = await axios.post(`/api/projects/${slug}/sync-github`);
+            toast.success(res.data.message || "Sync successful!");
+            // Update local version if needed
+            setProjects(projects.map(p => p.slug === slug ? {...p, version: res.data.version} : p));
+        } catch (e) {
+            toast.error(e.response?.data?.message || "Failed to sync from GitHub.");
+        }
+    };
+
     const categories = useMemo(() => ['ALL', ...new Set(projects.map(p => p.category).filter(Boolean))], [projects]);
     const filteredProjects = projects.filter(p => 
         (p.title.toLowerCase().includes(search.toLowerCase())) && 
@@ -339,6 +351,7 @@ export default function VendorsProjects() {
                                                     <a href={route('project.show', { slug: project.slug })} target="_blank" className="flex-1 px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-purple-500/50 hover:bg-purple-500/10 text-center rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-[var(--text-main)] flex items-center justify-center">
                                                         View <ArrowUpRight className="ml-1" size={12} />
                                                     </a>
+                                                    <button onClick={() => handleSync(project.slug)} title="Pull latest from GitHub" className="p-2.5 bg-[var(--bg-elevated)] text-[var(--text-main)] hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg border border-[var(--border)] transition-all"><Database size={16}/></button>
                                                     <button onClick={() => setEditingProject(project)} className="p-2.5 bg-[var(--bg-elevated)] text-[var(--text-main)] hover:text-purple-500 hover:bg-purple-500/10 rounded-lg border border-[var(--border)] transition-all"><Settings size={16}/></button>
                                                     <button onClick={() => handleDelete(project.id)} className="p-2.5 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg border border-rose-500/10 transition-all"><Trash2 size={16}/></button>
                                                 </div>
@@ -374,6 +387,7 @@ export default function VendorsProjects() {
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <a href={route('project.show', { slug: project.slug })} target="_blank" className="p-2 text-[var(--text-muted)] hover:text-purple-500 hover:bg-purple-500/10 rounded transition-all"><ArrowUpRight size={16} /></a>
+                                                            <button onClick={() => handleSync(project.slug)} title="Pull latest from GitHub" className="p-2 text-[var(--text-muted)] hover:text-emerald-500 hover:bg-emerald-500/10 rounded transition-all"><Database size={16} /></button>
                                                             <button onClick={() => setEditingProject(project)} className="p-2 text-[var(--text-muted)] hover:text-purple-500 hover:bg-purple-500/10 rounded transition-all"><Settings size={16} /></button>
                                                             <button onClick={() => handleDelete(project.id)} className="p-2 text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 rounded transition-all"><Trash2 size={16} /></button>
                                                         </div>

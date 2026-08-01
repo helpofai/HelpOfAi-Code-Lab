@@ -63,8 +63,9 @@ class ProjectController extends Controller
         }
 
         // Level 4+ Marketplace Gate (Full Git Projects)
-        if (!$user->isAdmin() && $user->level < 4) {
-            if (isset($validated['github_repo_url']) && !empty($validated['github_repo_url'])) {
+        if (!$user->isAdmin()) {
+            $isLevel4Verified = $user->level >= 4 && $user->identity_status === 'verified';
+            if (!$isLevel4Verified && isset($validated['github_repo_url']) && !empty($validated['github_repo_url'])) {
                 return response()->json(['message' => 'You must reach Level 4 and verify your identity to link full GitHub repositories.'], 403);
             }
         }
@@ -257,5 +258,81 @@ class ProjectController extends Controller
         $project->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function syncFromGithub(Project $project)
+    {
+        $user = Auth::user();
+        $isAdmin = $user->role === 'admin';
+        
+        $isTeamAdmin = $project->team_id && $user->teams()
+            ->where('teams.id', $project->team_id)
+            ->wherePivot('role', 'admin')
+            ->exists();
+
+        $isTeamOwner = $project->team && $project->team->user_id === $user->id;
+
+        if (!$isAdmin && $project->user_id !== $user->id && !$isTeamAdmin && !$isTeamOwner) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if (empty($project->github_repo_url)) {
+            return response()->json(['message' => 'No GitHub repository linked to this project.'], 400);
+        }
+
+        // Parse github URL (e.g. https://github.com/helpofai/HOA-Movie-Mart)
+        $url = rtrim($project->github_repo_url, '/');
+        $pathParts = explode('github.com/', $url);
+        if (count($pathParts) < 2) {
+            return response()->json(['message' => 'Invalid GitHub URL format.'], 400);
+        }
+        $repoPath = trim($pathParts[1], '/');
+
+        // We will try main first, then master
+        $zipUrlMain = "https://github.com/{$repoPath}/archive/refs/heads/main.zip";
+        $zipUrlMaster = "https://github.com/{$repoPath}/archive/refs/heads/master.zip";
+
+        try {
+            $zipContent = \Illuminate\Support\Facades\Http::withoutVerifying()
+                ->timeout(60)
+                ->get($zipUrlMain);
+
+            if (!$zipContent->successful()) {
+                $zipContent = \Illuminate\Support\Facades\Http::withoutVerifying()
+                    ->timeout(60)
+                    ->get($zipUrlMaster);
+            }
+
+            if (!$zipContent->successful()) {
+                return response()->json(['message' => 'Failed to download repository. Ensure it is public and has a main or master branch.'], 400);
+            }
+
+            // Version Auto-Increment (e.g., from 1.0.0 to 1.0.1)
+            $currentVersion = $project->version ?? '1.0.0';
+            $parts = explode('.', $currentVersion);
+            $lastIndex = count($parts) - 1;
+            $parts[$lastIndex] = (int)$parts[$lastIndex] + 1;
+            $newVersion = implode('.', $parts);
+
+            // Save ZIP securely to private disk
+            $filename = 'assets/' . $project->slug . '-v' . $newVersion . '-' . time() . '.zip';
+            \Illuminate\Support\Facades\Storage::disk('local')->put($filename, $zipContent->body());
+
+            // Create Asset record
+            $project->assets()->create([
+                'file_path' => $filename,
+                'version' => $newVersion,
+            ]);
+
+            // Update Project Version
+            $project->update(['version' => $newVersion]);
+
+            return response()->json([
+                'message' => 'Successfully synced from GitHub!',
+                'version' => $newVersion
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Sync failed: ' . $e->getMessage()], 500);
+        }
     }
 }

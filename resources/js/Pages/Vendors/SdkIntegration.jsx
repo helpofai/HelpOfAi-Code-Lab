@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { ShieldAlert, Key, FileCode, CheckCircle2, Copy } from 'lucide-react';
+import { ShieldAlert, Key, FileCode, CheckCircle2, Copy, Download } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+import wordpressSnippetRaw from '../../../../client-sdk/wordpress/class-license-validator.php?raw';
+import laravelSnippetRaw from '../../../../client-sdk/laravel/VerifyProductLicense.php?raw';
+import nodejsSnippetRaw from '../../../../client-sdk/nodejs/verifyLicense.js?raw';
+import phpSnippetRaw from '../../../../client-sdk/php/validate.php?raw';
 
 export default function SdkIntegration() {
     const [activeTab, setActiveTab] = useState('wordpress');
     const [copied, setCopied] = useState('');
 
     // Dynamically get the current marketplace domain (e.g., localhost:8000 or code.helpofai.com)
-    const apiUrl = typeof window !== 'undefined' ? \`\${window.location.origin}/api/licenses/validate\` : 'https://code.helpofai.com/api/licenses/validate';
+    const domainUrl = typeof window !== 'undefined' ? window.location.origin : 'https://code.helpofai.com';
 
     const handleCopy = (code, id) => {
         navigator.clipboard.writeText(code);
@@ -23,182 +28,162 @@ export default function SdkIntegration() {
         { id: 'laravel', name: 'Laravel' },
         { id: 'nodejs', name: 'Node.js' },
         { id: 'php', name: 'Custom PHP' },
+        { id: 'rest_api', name: 'Raw REST API' },
     ];
 
     const snippets = {
-        wordpress: `<?php
-/**
- * Advanced License Protection for WordPress
- * Paste this in functions.php or your core plugin file.
- */
+        wordpress: wordpressSnippetRaw.replace(/YOUR_MARKETPLACE_URL_HERE/g, domainUrl),
+        laravel: laravelSnippetRaw.replace(/YOUR_MARKETPLACE_URL_HERE/g, domainUrl),
+        nodejs: nodejsSnippetRaw.replace(/YOUR_MARKETPLACE_URL_HERE/g, domainUrl),
+        php: phpSnippetRaw.replace(/YOUR_MARKETPLACE_URL_HERE/g, domainUrl),
+        rest_api: `/* 
+======================================================
+1. VALIDATE LICENSE API
+======================================================
+Build your own custom UI, validation, and dashboard 
+by interacting with this endpoint directly.
 
-function check_theme_license_validity() {
-    $license_key = get_option('theme_license_key');
-    
-    // 1. Check transient cache to avoid slowing down site (24 hr cache)
-    $status = get_transient('theme_license_status');
-    if ($status === 'valid') return true;
+Endpoint: POST ${domainUrl}/api/licenses/validate
+Content-Type: application/json
 
-    // 2. Ping validation server
-    $response = wp_remote_post('${apiUrl}', [
-        'body' => [
-            'license_key' => $license_key,
-            'domain' => $_SERVER['HTTP_HOST']
-        ]
-    ]);
-
-    if (is_wp_error($response)) return false;
-
-    $body = json_decode(wp_remote_retrieve_body($response), true);
-
-    if (isset($body['valid']) && $body['valid']) {
-        set_transient('theme_license_status', 'valid', 24 * HOUR_IN_SECONDS);
-        // Delete lock if exists
-        delete_option('theme_locked_status');
-        return true;
-    } else {
-        // 3. Mark theme as locked if bypassed or invalid
-        update_option('theme_locked_status', true);
-        return false;
-    }
-}
-
-// 4. Auto-Lock execution hook
-add_action('template_redirect', function() {
-    if (get_option('theme_locked_status')) {
-        wp_die(
-            '<div style="text-align:center; padding:50px; font-family:sans-serif;">' .
-            '<h2>🛑 Security Lock</h2>' .
-            '<p>This product has been locked due to an invalid license or bypass attempt.</p>' .
-            '<p>Please contact <a href="mailto:support@vendor.com">support@vendor.com</a></p>' .
-            '</div>', 
-            'License Locked', 
-            ['response' => 403]
-        );
-    }
-});`,
-        laravel: `<?php
-
-namespace App\\Http\\Middleware;
-
-use Closure;
-use Illuminate\\Support\\Facades\\Cache;
-use Illuminate\\Support\\Facades\\Http;
-
-class VerifyProductLicense
+Request Body:
 {
-    /**
-     * Handle an incoming request.
-     */
-    public function handle($request, Closure $next)
-    {
-        $licenseKey = config('app.license_key');
-        
-        // Cache for 24 hours to prevent API throttling
-        $isValid = Cache::remember('product_license_valid', 86400, function () use ($licenseKey) {
-            try {
-                $response = Http::timeout(5)->post('${apiUrl}', [
-                    'license_key' => $licenseKey,
-                    'domain' => request()->getHost()
-                ]);
-                
-                return $response->json('valid') === true;
-            } catch (\\Exception $e) {
-                // Fail open temporarily if validation server is down
-                return true; 
-            }
-        });
-
-        if (!$isValid) {
-            abort(403, 'CRITICAL LOCK: Invalid license key detected. Please contact support.');
-        }
-
-        return $next($request);
-    }
-}`,
-        nodejs: `// Advanced License Middleware for Express.js
-const axios = require('axios');
-const NodeCache = require('node-cache');
-const licenseCache = new NodeCache({ stdTTL: 86400 }); // 24 hour cache
-
-const verifyLicense = async (req, res, next) => {
-    const licenseKey = process.env.LICENSE_KEY;
-    const domain = req.hostname;
-
-    // Check Cache
-    if (licenseCache.get('is_valid')) {
-        return next();
-    }
-
-    try {
-        const response = await axios.post('${apiUrl}', {
-            license_key: licenseKey,
-            domain: domain
-        }, { timeout: 5000 });
-
-        if (response.data.valid) {
-            licenseCache.set('is_valid', true);
-            return next();
-        } else {
-            // Lock the application
-            return res.status(403).send(\`
-                <div style="text-align:center; padding:50px; font-family:sans-serif;">
-                    <h2>🛑 Application Locked</h2>
-                    <p>Invalid license key. Please contact support.</p>
-                </div>
-            \`);
-        }
-    } catch (error) {
-        // If validation server is unreachable, allow temporarily
-        return next();
-    }
-};
-
-module.exports = verifyLicense;`,
-        php: `<?php
-/**
- * Vanilla PHP Integration
- * Place this at the very top of your index.php
- */
-
-$license_key = 'YOUR_LICENSE_KEY_HERE';
-$cache_file = __DIR__ . '/.license_cache';
-
-function is_license_valid($key, $cache_file) {
-    // 1. Check local file cache (24 hours)
-    if (file_exists($cache_file) && (time() - filemtime($cache_file)) < 86400) {
-        $data = json_decode(file_get_contents($cache_file), true);
-        if ($data['valid'] === true) return true;
-    }
-
-    // 2. Call API
-    $ch = curl_init('${apiUrl}');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        'license_key' => $key,
-        'domain' => $_SERVER['HTTP_HOST']
-    ]));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($http_code == 200) {
-        $result = json_decode($response, true);
-        if ($result['valid']) {
-            file_put_contents($cache_file, json_encode(['valid' => true]));
-            return true;
-        }
-    }
-    
-    return false;
+    "license_key": "YOUR-LICENSE-KEY",
+    "domain": "client-domain.com"
 }
 
-if (!is_license_valid($license_key, $cache_file)) {
-    http_response_code(403);
-    die('<h1 style="color:red;text-align:center;">SYSTEM LOCKED: License Violation.</h1>');
-}`
+Success Response (200 OK):
+{
+    "success": true,
+    "valid": true,
+    "product_name": "Premium Script",
+    "author_name": "Vendor Name",
+    "version": "1.0.0",
+    "latest_version": "1.0.5",
+    "download_url": "${domainUrl}/api/license/download-update?key=...",
+    "support_expires_at": "Dec 31, 2026",
+    "last_sync": "Aug 01, 2026",
+    "build_hash": "a1b2c3d4"
+}
+
+Error Response (403 Forbidden):
+{
+    "message": "Invalid or expired license."
+}
+
+
+======================================================
+2. OTA UPDATE (DOWNLOAD ZIP) API
+======================================================
+Use this endpoint to programmatically download the 
+latest .zip release of your product for auto-updating.
+
+Endpoint: GET ${domainUrl}/api/license/download-update
+Query Params:
+  ?key=YOUR-LICENSE-KEY
+  &domain=client-domain.com
+
+Success Response (200 OK):
+Content-Type: application/zip
+Content-Disposition: attachment; filename="product-latest.zip"
+(Returns the raw .zip file buffer of the latest version)
+
+Error Responses (403 / 404):
+- "Invalid or expired license."
+- "This domain is not authorized to download updates."
+- "Support and updates period has expired. Please renew."
+- "No update package available."
+*/`
+    };
+
+    const guides = {
+        wordpress: (
+            <div className="p-6 bg-[var(--bg-main)] rounded-b-2xl border-t border-[var(--border)]">
+                <h3 className="text-lg font-black text-[var(--text-main)] mb-4">Step-by-Step Integration Guide</h3>
+                <ol className="list-decimal pl-5 space-y-3 text-sm text-[var(--text-muted)]">
+                    <li><strong className="text-[var(--text-main)]">Download</strong> the SDK file by clicking the blue button above.</li>
+                    <li>Move the downloaded <code className="bg-gray-100 text-pink-600 px-1 rounded">class-license-validator.php</code> file into your theme or plugin folder (e.g., inside an <code className="bg-gray-100 text-pink-600 px-1 rounded">includes/</code> folder).</li>
+                    <li>Open your main <code className="bg-gray-100 text-pink-600 px-1 rounded">functions.php</code> (for Themes) or your main plugin file (for Plugins).</li>
+                    <li>Add the following code at the top to load the license engine:
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg mt-2 text-xs">require_once __DIR__ . '/includes/class-license-validator.php';</pre>
+                    </li>
+                    <li><strong>That's it!</strong> A beautiful License Dashboard and OTA Updater will automatically appear in your customer's WordPress Admin menu.</li>
+                </ol>
+            </div>
+        ),
+        laravel: (
+            <div className="p-6 bg-[var(--bg-main)] rounded-b-2xl border-t border-[var(--border)]">
+                <h3 className="text-lg font-black text-[var(--text-main)] mb-4">Step-by-Step Integration Guide</h3>
+                <ol className="list-decimal pl-5 space-y-3 text-sm text-[var(--text-muted)]">
+                    <li><strong className="text-[var(--text-main)]">Download</strong> the SDK file by clicking the blue button above.</li>
+                    <li>Move the downloaded <code className="bg-gray-100 text-pink-600 px-1 rounded">VerifyProductLicense.php</code> file into <code className="bg-gray-100 text-pink-600 px-1 rounded">app/Http/Middleware/</code>.</li>
+                    <li>Open <code className="bg-gray-100 text-pink-600 px-1 rounded">app/Http/Kernel.php</code> (or <code className="bg-gray-100 text-pink-600 px-1 rounded">bootstrap/app.php</code> if using Laravel 11).</li>
+                    <li>Register the middleware globally so it protects your entire application:
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg mt-2 text-xs">\App\Http\Middleware\VerifyProductLicense::class,</pre>
+                    </li>
+                    <li><strong>That's it!</strong> If a buyer visits your app without a license, the middleware will instantly intercept them with a beautiful Activation Form. It also handles 1-click OTA zip extraction automatically!</li>
+                </ol>
+            </div>
+        ),
+        nodejs: (
+            <div className="p-6 bg-[var(--bg-main)] rounded-b-2xl border-t border-[var(--border)]">
+                <h3 className="text-lg font-black text-[var(--text-main)] mb-4">Step-by-Step Integration Guide</h3>
+                <ol className="list-decimal pl-5 space-y-3 text-sm text-[var(--text-muted)]">
+                    <li><strong className="text-[var(--text-main)]">Download</strong> the SDK file by clicking the blue button above.</li>
+                    <li>Move the downloaded <code className="bg-gray-100 text-pink-600 px-1 rounded">verifyLicense.js</code> file into your project's root folder.</li>
+                    <li>Install the required dependencies using your terminal:
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg mt-2 text-xs">npm install axios dotenv adm-zip</pre>
+                    </li>
+                    <li>Open your main server file (e.g., <code className="bg-gray-100 text-pink-600 px-1 rounded">app.js</code>, <code className="bg-gray-100 text-pink-600 px-1 rounded">server.js</code>, or <code className="bg-gray-100 text-pink-600 px-1 rounded">index.js</code>).</li>
+                    <li>Require and mount the middleware <strong>before</strong> your application routes:
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg mt-2 text-xs">
+const verifyProductLicense = require('./verifyLicense');{'\n'}
+app.use(verifyProductLicense);
+                        </pre>
+                    </li>
+                </ol>
+            </div>
+        ),
+        php: (
+            <div className="p-6 bg-[var(--bg-main)] rounded-b-2xl border-t border-[var(--border)]">
+                <h3 className="text-lg font-black text-[var(--text-main)] mb-4">Step-by-Step Integration Guide</h3>
+                <ol className="list-decimal pl-5 space-y-3 text-sm text-[var(--text-muted)]">
+                    <li><strong className="text-[var(--text-main)]">Download</strong> the SDK file by clicking the blue button above.</li>
+                    <li>Move the downloaded <code className="bg-gray-100 text-pink-600 px-1 rounded">validate.php</code> file into your project's root folder.</li>
+                    <li>Open your main entry point file (usually <code className="bg-gray-100 text-pink-600 px-1 rounded">index.php</code>).</li>
+                    <li>Require the validation script at the <strong>very top</strong> of the file (on line 2, directly below <code className="bg-gray-100 text-pink-600 px-1 rounded">&lt;?php</code>):
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg mt-2 text-xs">require_once __DIR__ . '/validate.php';</pre>
+                    </li>
+                    <li><strong>Important:</strong> We highly recommend running your final project through an obfuscator like ionCube to prevent buyers from simply commenting out the require statement.</li>
+                </ol>
+            </div>
+        ),
+        rest_api: (
+            <div className="p-6 bg-[var(--bg-main)] rounded-b-2xl border-t border-[var(--border)]">
+                <h3 className="text-lg font-black text-[var(--text-main)] mb-4">Integration Details</h3>
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                    This tab does not provide an SDK file to download. Instead, this is the raw JSON schema and HTTP endpoints needed to build your own licensing system from scratch. You can use this to build custom implementations for Python (Django/Flask), Go, Ruby on Rails, C# (.NET), Java, or any other framework.
+                </p>
+            </div>
+        ),
+    };
+
+    const handleDownload = (code, tabId) => {
+        const filenames = {
+            wordpress: 'class-license-validator.php',
+            laravel: 'VerifyProductLicense.php',
+            nodejs: 'verifyLicense.js',
+            php: 'validate.php'
+        };
+        const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filenames[tabId] || 'sdk-file.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -286,16 +271,26 @@ if (!is_license_valid($license_key, $cache_file)) {
                                 <Key size={12} className="text-emerald-500" />
                                 Implementation Code
                             </span>
-                            <button 
-                                onClick={() => handleCopy(snippets[activeTab], activeTab)}
-                                className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-cyan-500 transition-colors"
-                            >
-                                {copied === activeTab ? (
-                                    <><CheckCircle2 size={14} className="text-emerald-500" /> <span className="text-emerald-500 font-bold">Copied</span></>
-                                ) : (
-                                    <><Copy size={14} /> <span>Copy Code</span></>
+                            <div className="flex items-center gap-4">
+                                {activeTab !== 'rest_api' && (
+                                    <button 
+                                        onClick={() => handleDownload(snippets[activeTab], activeTab)}
+                                        className="flex items-center gap-1.5 text-xs text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-colors font-bold shadow-sm"
+                                    >
+                                        <Download size={14} /> <span>Download File</span>
+                                    </button>
                                 )}
-                            </button>
+                                <button 
+                                    onClick={() => handleCopy(snippets[activeTab], activeTab)}
+                                    className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-cyan-500 transition-colors"
+                                >
+                                    {copied === activeTab ? (
+                                        <><CheckCircle2 size={14} className="text-emerald-500" /> <span className="text-emerald-500 font-bold">Copied</span></>
+                                    ) : (
+                                        <><Copy size={14} /> <span>Copy Code</span></>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                         <SyntaxHighlighter 
                             language="php" 
@@ -305,11 +300,14 @@ if (!is_license_valid($license_key, $cache_file)) {
                                 padding: '24px',
                                 background: 'transparent',
                                 fontSize: '13px',
-                                borderRadius: '0 0 1rem 1rem'
+                                borderRadius: '0'
                             }}
                         >
                             {snippets[activeTab]}
                         </SyntaxHighlighter>
+
+                        {/* Step by Step Guide Injection */}
+                        {guides[activeTab]}
                     </div>
                 </div>
 

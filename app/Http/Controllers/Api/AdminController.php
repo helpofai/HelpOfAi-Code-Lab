@@ -178,10 +178,18 @@ class AdminController extends Controller
             'reason' => 'required_if:status,rejected|nullable|string|max:255'
         ]);
 
-        $user->update([
+        $updates = [
             'identity_status' => $validated['status'],
             'identity_rejected_reason' => $validated['reason'] ?? null
-        ]);
+        ];
+
+        // If approved, instantly unlock Level 4 (Verified Vendor)
+        if ($validated['status'] === 'verified' && $user->level < 4) {
+            $updates['level'] = 4;
+            $updates['manual_level'] = true; // Lock it so automatic sales engine doesn't downgrade them
+        }
+
+        $user->update($updates);
 
         return response()->json(['message' => 'Identity status updated successfully']);
     }

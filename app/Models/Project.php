@@ -64,6 +64,11 @@ class Project extends Model
         return $this->belongsTo(Team::class);
     }
 
+    public function assets(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProjectAsset::class);
+    }
+
     public function collections(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Collection::class);
