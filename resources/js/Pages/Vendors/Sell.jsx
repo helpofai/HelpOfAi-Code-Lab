@@ -18,7 +18,8 @@ export default function Sell() {
         meta_description: '',
         tags: '',
         support_duration: '6_months',
-        markdown_files: []
+        markdown_files: [],
+        github_commits: []
     });
 
     const [showTerminal, setShowTerminal] = useState(false);
@@ -126,6 +127,7 @@ export default function Sell() {
                     thumbnail_url: thumbnailUrl,
                     gallery_images: galleryUrls,
                     support_duration: formData.support_duration,
+                    github_commits: formData.github_commits || [],
                 },
                 code: { html: '', css: '', js: '' }
             };
@@ -313,8 +315,8 @@ export default function Sell() {
                                                 if (!formData.github_repo_url) return toast.error("Please enter a GitHub URL first.");
                                                 try {
                                                     const res = await axios.post('/api/vendors/github/fetch-md', { repo_url: formData.github_repo_url });
-                                                    setFormData({...formData, markdown_files: res.data.markdown_files});
-                                                    toast.success(`Fetched ${res.data.markdown_files.length} markdown file(s)!`);
+                                                    setFormData({...formData, markdown_files: res.data.markdown_files, github_commits: res.data.commits || []});
+                                                    toast.success(`Fetched ${res.data.markdown_files.length} markdown file(s) and commit history!`);
                                                 } catch (e) {
                                                     toast.error(e.response?.data?.message || "Failed to fetch markdown files.");
                                                 }
@@ -337,6 +339,19 @@ export default function Sell() {
                                                     <li key={idx} className="font-mono">{md.name}</li>
                                                 ))}
                                             </ul>
+                                            {formData.github_commits?.length > 0 && (
+                                                <div className="mt-4 pt-4 border-t border-emerald-500/20">
+                                                    <p className="text-xs font-bold text-emerald-500 mb-2">Latest Commits:</p>
+                                                    <div className="space-y-2">
+                                                        {formData.github_commits.slice(0, 3).map((commit, idx) => (
+                                                            <div key={idx} className="text-xs text-[var(--text-muted)] font-mono flex gap-2">
+                                                                <span className="text-emerald-400 font-bold">{commit.sha}</span>
+                                                                <span>{commit.message.split('\n')[0]}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

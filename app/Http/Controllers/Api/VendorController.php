@@ -254,6 +254,24 @@ class VendorController extends Controller
             }
         }
 
-        return response()->json(['markdown_files' => array_values($markdownFiles)]);
+        $commits = [];
+        $commitsResponse = $http->withToken($githubConnection->token)
+            ->get("https://api.github.com/repos/{$owner}/{$repo}/commits?per_page=5");
+        
+        if ($commitsResponse->successful()) {
+            $commits = array_map(function ($c) {
+                return [
+                    'sha' => substr($c['sha'], 0, 7),
+                    'message' => $c['commit']['message'],
+                    'date' => $c['commit']['author']['date'],
+                    'author' => $c['commit']['author']['name'],
+                ];
+            }, $commitsResponse->json());
+        }
+
+        return response()->json([
+            'markdown_files' => array_values($markdownFiles),
+            'commits' => $commits
+        ]);
     }
 }

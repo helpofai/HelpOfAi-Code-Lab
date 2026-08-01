@@ -423,6 +423,29 @@ export default function ProjectView({ project, canEdit }) {
                                 </div>
                             )}
                         </div>
+
+                        {/* GitHub Commits Card */}
+                        {project.settings?.github_commits?.length > 0 && (
+                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-8 space-y-6 shadow-xl">
+                                <h4 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <Code2 size={14} /> Version History
+                                </h4>
+                                <div className="space-y-4">
+                                    {project.settings.github_commits.map((commit, idx) => (
+                                        <div key={idx} className="border-l-2 border-emerald-500/30 pl-4 py-1">
+                                            <div className="text-xs text-[var(--text-main)] font-bold mb-1">
+                                                {commit.message.split('\n')[0]}
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)] font-mono uppercase tracking-widest">
+                                                <span className="text-emerald-500">#{commit.sha}</span>
+                                                <span>•</span>
+                                                <span>{new Date(commit.date).toLocaleDateString()}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                 </div>
