@@ -281,6 +281,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     // Queue Monitor
     Route::get('/admin/queue', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'index'])->name('admin.queue.index');
     Route::post('/admin/queue/retry/{id}', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'retry'])->name('admin.queue.retry');
+
+    // Security & Firewall
+    Route::get('/admin/security', [\App\Http\Controllers\Admin\SecurityController::class, 'index'])->name('admin.security.index');
+    Route::post('/admin/security', [\App\Http\Controllers\Admin\SecurityController::class, 'update'])->name('admin.security.update');
+    Route::post('/admin/security/ban', [\App\Http\Controllers\Admin\SecurityController::class, 'ban'])->name('admin.security.ban');
+    Route::delete('/admin/security/unban/{bannedIp}', [\App\Http\Controllers\Admin\SecurityController::class, 'unban'])->name('admin.security.unban');
     Route::delete('/admin/queue/delete/{id}', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'deleteFailed'])->name('admin.queue.delete');
     Route::delete('/admin/queue/clear-pending', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'clearPending'])->name('admin.queue.clear-pending');
     Route::post('/admin/queue/process', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'processQueue'])->name('admin.queue.process');

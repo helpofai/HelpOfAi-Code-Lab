@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // AUTO-CONFIGURATION: Trust all proxies for production load balancers (Nginx/Cloudflare)
         $middleware->trustProxies(at: '*');
 
+        // Global Advanced Firewall (Application Layer DDoS & Bot Protection)
+        $middleware->append(\App\Http\Middleware\AdvancedFirewall::class);
+
         $middleware->validateCsrfTokens(except: [
             'admin/update/*',
             'setup/*',

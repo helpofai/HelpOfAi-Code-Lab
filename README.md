@@ -12,7 +12,7 @@
   [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
   [![Inertia](https://img.shields.io/badge/Inertia.js-2.0-9553E9?style=for-the-badge&logo=inertia&logoColor=white)](https://inertiajs.com)
-  [![Version](https://img.shields.io/badge/Version-1.17.0-purple?style=for-the-badge)](https://github.com/helpofai/HelpOfAi-Code-Lab)
+  [![Version](https://img.shields.io/badge/Version-1.18.0-purple?style=for-the-badge)](https://github.com/helpofai/HelpOfAi-Code-Lab)
   
   <br />
 
@@ -198,7 +198,7 @@ The `.env` file handles core configurations. Key custom variables:
 ```ini
 APP_NAME=HOACodeLab
 APP_URL=https://your-domain.com
-APP_VERSION=1.17.0
+APP_VERSION=1.18.0
 
 # Path Overrides (For Resilience Protocol)
 NODE_BINARY=/path/to/node

@@ -2,6 +2,14 @@
 
 Systematic documentation of all protocol upgrades, module injections, and core optimisations for the HOACodeLab environment.
 
+## [1.18.0] - SECURITY_AND_FIREWALL - 2026-08-02
+
+### 🛡️ Advanced Application Firewall
+- **Global Rate Limiting:** Injected `AdvancedFirewall` middleware into the global execution matrix to autonomously block DDoS and brute-force bot attacks.
+- **Dynamic Penalty Box:** IPs that exceed the threshold (default: 150 requests/min) are automatically placed in a 24-hour lockdown (`429` and `403` status).
+- **Security Dashboard:** Added a highly professional UI in the Admin Control Center to configure firewall thresholds, view active network bans, and manually blacklist IPs.
+- **Database Tracking:** Built a `BannedIp` ledger to permanently track malicious IPs and sync them seamlessly across the cache layer.
+
 ## [1.17.0] - SOCIAL_MEDIA_AUTOMATION - 2026-08-02
 
 ### 📱 Automated Social Media Broadcasting
