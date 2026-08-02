@@ -1,5 +1,28 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -46,6 +69,8 @@ class ProjectController extends Controller
             'price' => 'nullable|numeric|min:0',
             'team_id' => 'nullable|exists:teams,id',
             'version' => 'nullable|string',
+            'github_repo_url' => 'nullable|url',
+            'thumbnail' => 'nullable|string',
         ]);
 
         // If team_id is provided, verify user is member of that team
@@ -91,7 +116,12 @@ class ProjectController extends Controller
             'price' => $validated['price'] ?? 0.00,
             'version' => $validated['version'] ?? '1.0.0',
             'support_duration' => $validated['settings']['support_duration'] ?? '6_months',
+            'github_repo_url' => $validated['github_repo_url'] ?? null,
+            'thumbnail' => $validated['thumbnail'] ?? null, // Assuming thumbnail could be passed
         ]);
+
+        // Dispatch background job for social media auto-posting
+        \App\Jobs\SendProjectToSocialMediaJob::dispatch($project);
 
         return response()->json($project->makeVisible('code'), 201);
     }

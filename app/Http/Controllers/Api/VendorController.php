@@ -1,5 +1,28 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -246,18 +269,34 @@ class VendorController extends Controller
         $markdownFiles = [];
         $projectVersion = '1.0.0';
 
-        // Also fetch package.json or composer.json to extract the version
-        $configFiles = collect($response->json())->filter(function ($file) {
-            return $file['type'] === 'file' && in_array(strtolower($file['name']), ['package.json', 'composer.json']);
-        });
+        // 1. Try to fetch the latest release/tag from GitHub API
+        $releaseResponse = $http->withToken($githubConnection->token)
+            ->get("https://api.github.com/repos/{$owner}/{$repo}/releases/latest");
+            
+        if ($releaseResponse->successful() && isset($releaseResponse['tag_name'])) {
+            $projectVersion = ltrim($releaseResponse['tag_name'], 'vV');
+        } else {
+            // 2. Try to fetch tags if releases are not used
+            $tagsResponse = $http->withToken($githubConnection->token)
+                ->get("https://api.github.com/repos/{$owner}/{$repo}/tags?per_page=1");
+                
+            if ($tagsResponse->successful() && count($tagsResponse->json()) > 0) {
+                $projectVersion = ltrim($tagsResponse->json()[0]['name'], 'vV');
+            } else {
+                // 3. Fallback: Check package.json or composer.json
+                $configFiles = collect($response->json())->filter(function ($file) {
+                    return $file['type'] === 'file' && in_array(strtolower($file['name']), ['package.json', 'composer.json']);
+                });
 
-        foreach ($configFiles as $file) {
-            $contentResponse = $http->withToken($githubConnection->token)->get($file['download_url']);
-            if ($contentResponse->successful()) {
-                $json = json_decode($contentResponse->body(), true);
-                if (isset($json['version'])) {
-                    $projectVersion = $json['version'];
-                    break; // Use the first found version
+                foreach ($configFiles as $file) {
+                    $contentResponse = $http->withToken($githubConnection->token)->get($file['download_url']);
+                    if ($contentResponse->successful()) {
+                        $json = json_decode($contentResponse->body(), true);
+                        if (isset($json['version'])) {
+                            $projectVersion = $json['version'];
+                            break;
+                        }
+                    }
                 }
             }
         }

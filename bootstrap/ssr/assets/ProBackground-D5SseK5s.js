@@ -1,0 +1,21 @@
+import { jsxs, jsx } from "react/jsx-runtime";
+import "react";
+function ProBackground() {
+  return /* @__PURE__ */ jsxs("div", { className: "fixed inset-0 z-0 pointer-events-none overflow-hidden bg-[var(--bg-main)] transition-colors duration-300", children: [
+    /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: "absolute inset-0 opacity-[0.15]",
+        style: {
+          backgroundImage: `linear-gradient(to right, var(--accent) 1px, transparent 1px), linear-gradient(to bottom, var(--accent) 1px, transparent 1px)`,
+          backgroundSize: "60px 60px"
+        }
+      }
+    ),
+    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,var(--bg-main) 80%)]" }),
+    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 dark:shadow-[inset_0_0_150px_rgba(0,0,0,0.8)] shadow-[inset_0_0_150px_rgba(255,255,255,0.2)]" })
+  ] });
+}
+export {
+  ProBackground as P
+};

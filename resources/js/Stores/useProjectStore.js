@@ -1,3 +1,26 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import { create } from 'zustand';
 
 const DEFAULT_HTML = `<div class="neural-substrate">\n  <canvas id="neural-canvas"></canvas>\n  <div class="ui-overlay">\n    <div class="status-bar">\n      <span class="pulse"></span>\n      <span>STATUS: OPTIMIZED</span>\n    </div>\n    <div class="telemetry">\n      <h1>SYSTEM CORE</h1>\n      <p>INTERACTIVE MATRIX</p>\n    </div>\n    <div class="footer-stats">\n      <div class="stat">CORES: 128</div>\n      <div class="stat">LATENCY: 0.02ms</div>\n    </div>\n  </div>\n</div>`;

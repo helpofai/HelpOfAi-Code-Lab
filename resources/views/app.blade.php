@@ -6,6 +6,16 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        
+        <!-- Base SEO Meta Tags -->
+        <meta name="description" content="Discover, buy, and sell premium source code, templates, and digital assets.">
+        <meta name="keywords" content="source code, templates, software, marketplace, programming, react, laravel">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="{{ config('app.name', 'Laravel') }}">
+        <meta name="twitter:card" content="summary_large_image">
+        
+        <!-- Automated Canonical Tag -->
+        <link rel="canonical" href="{{ url()->current() }}" />
 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 

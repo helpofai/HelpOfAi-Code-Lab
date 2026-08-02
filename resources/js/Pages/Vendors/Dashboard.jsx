@@ -1,3 +1,26 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, Link } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -8,6 +31,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useToast } from '@/Components/Toast/ToastProvider';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function VendorsDashboard({ totalEarnings = 0, totalSales = 0, projectCount = 0, recentSales = [] }) {
     const { auth } = usePage().props;
@@ -186,6 +210,36 @@ export default function VendorsDashboard({ totalEarnings = 0, totalSales = 0, pr
                             <p className="text-xs text-[var(--text-muted)] font-medium mt-2 relative z-10">
                                 {isHealthy ? 'Source control linked.' : 'Link a repository.'}
                             </p>
+                        </div>
+                    </div>
+
+                    {/* Sales Analytics Chart */}
+                    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-2xl font-black text-[var(--text-main)] tracking-tighter flex items-center gap-3">
+                                <Activity size={28} className="text-cyan-500" /> Revenue Analytics
+                            </h3>
+                        </div>
+                        <div className="h-[400px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={recentSales} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <XAxis dataKey="date" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                                        itemStyle={{ color: 'var(--text-main)', fontWeight: 'bold' }}
+                                        formatter={(value) => [`$${value}`, 'Revenue']}
+                                    />
+                                    <Area type="monotone" dataKey="amount" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorAmount)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
 

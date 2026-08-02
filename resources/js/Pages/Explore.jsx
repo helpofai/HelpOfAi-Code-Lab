@@ -1,3 +1,26 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import React, { useState, useEffect } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
@@ -19,6 +42,8 @@ export default function Explore({ auth, siteSettings }) {
         sort: 'latest', // latest, oldest, price_low, price_high
         min_price: 0,
         max_price: 500,
+        timeframe: 'all_time', // all_time, today, this_week, this_month
+        rating: 0, // 0 means all
     });
 
     const [page, setPage] = useState(1);
@@ -154,6 +179,41 @@ export default function Explore({ auth, siteSettings }) {
                                 </select>
                             </div>
                             
+                            {/* Timeframe Filter */}
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Timeframe</label>
+                                <select 
+                                    value={filters.timeframe}
+                                    onChange={(e) => handleFilterChange('timeframe', e.target.value)}
+                                    className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-xl py-3 px-4 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-[var(--text-main)] uppercase tracking-wider font-bold"
+                                >
+                                    <option value="all_time">All Time</option>
+                                    <option value="today">Today</option>
+                                    <option value="this_week">This Week</option>
+                                    <option value="this_month">This Month</option>
+                                </select>
+                            </div>
+                            
+                            {/* Rating Filter */}
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Minimum Rating</label>
+                                <div className="grid grid-cols-4 gap-2">
+                                    {[0, 3, 4, 5].map(stars => (
+                                        <button 
+                                            key={stars}
+                                            onClick={() => handleFilterChange('rating', stars)}
+                                            className={`py-2 text-[10px] font-black tracking-widest rounded-lg border transition-all ${
+                                                filters.rating === stars 
+                                                    ? 'bg-amber-500/10 border-amber-500/50 text-amber-500' 
+                                                    : 'bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-muted)] hover:border-amber-500/30 hover:text-[var(--text-main)]'
+                                            }`}
+                                        >
+                                            {stars === 0 ? 'ANY' : `${stars}+ ⭐`}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
                             {/* Sort Filter */}
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Sort By</label>
@@ -170,7 +230,7 @@ export default function Explore({ auth, siteSettings }) {
                             </div>
                             
                             <button 
-                                onClick={() => setFilters({search: '', category: 'ALL', type: 'all', sort: 'latest', min_price: 0, max_price: 500})}
+                                onClick={() => setFilters({search: '', category: 'ALL', type: 'all', sort: 'latest', min_price: 0, max_price: 500, timeframe: 'all_time', rating: 0})}
                                 className="w-full py-3 bg-[var(--bg-main)] border border-[var(--border)] text-[var(--text-muted)] hover:text-rose-500 hover:border-rose-500/50 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
                             >
                                 Reset Filters

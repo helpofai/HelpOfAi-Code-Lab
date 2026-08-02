@@ -1,3 +1,26 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import { Head, Link, usePage } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,7 +31,7 @@ import {
     User, Clock, Box, Rocket, Monitor, Workflow,
     CheckCircle2, AppWindow, Command, Braces,
     Layout, Smartphone, Terminal, Eye, Sparkles, Lock,
-    Activity, Heart, Tag, ShoppingBag
+    Activity, Heart, Tag, ShoppingBag, Search, Quote
 } from 'lucide-react';
 import axios from 'axios';
 import PublicLayout from '@/Layouts/PublicLayout';
@@ -112,9 +135,9 @@ const HomeEditor = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 h-[500px]">
+                <div className="flex flex-col lg:grid lg:grid-cols-2 min-h-[600px] lg:min-h-0 lg:h-[500px]">
                     {/* Editor Side */}
-                    <div className="relative border-r border-[var(--border)] bg-[#050505]">
+                    <div className="relative border-b lg:border-b-0 lg:border-r border-[var(--border)] bg-[#050505] h-[300px] lg:h-full">
                         <div className="h-full pt-2">
                             <MonacoWrapper 
                                 language={activeTab} 
@@ -150,7 +173,7 @@ const HomeEditor = () => {
                     </div>
 
                     {/* Preview Side */}
-                    <div className="bg-white relative overflow-hidden">
+                    <div className="bg-white relative overflow-hidden h-[300px] lg:h-full">
                         <iframe 
                             srcDoc={previewContent} 
                             className="w-full h-full border-none" 
@@ -271,7 +294,16 @@ export default function Welcome({ auth, siteSettings }) {
                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 italic">v1.5.0 Stable Build</span>
                         </div>
                         <h1 className="text-6xl md:text-9xl font-black text-[var(--text-main)] tracking-tighter uppercase italic leading-[0.8] mb-12">Modern <br/> <span className="text-[var(--text-muted)]">Code Editor</span></h1>
-                        <p className="text-[var(--text-muted)] text-sm md:text-lg max-w-2xl mx-auto font-bold uppercase tracking-[0.3em] leading-relaxed mb-20 opacity-80 italic">High-performance development substrate for modern web creators.</p>
+                        <p className="text-[var(--text-muted)] text-sm md:text-lg max-w-2xl mx-auto font-bold uppercase tracking-[0.3em] leading-relaxed mb-12 opacity-80 italic">High-performance development substrate for modern web creators.</p>
+                        
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
+                            <Link href={route('register')} className="px-8 py-4 bg-cyan-500 text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-xl hover:bg-white transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2 group">
+                                <Rocket size={16} className="group-hover:-translate-y-1 transition-transform" /> Start Coding Free
+                            </Link>
+                            <Link href={route('public.search')} className="px-8 py-4 bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border)] font-black uppercase tracking-[0.2em] text-[10px] rounded-xl hover:border-cyan-500 hover:text-cyan-500 transition-all flex items-center gap-2 group">
+                                <Search size={16} className="group-hover:scale-110 transition-transform" /> Browse Directory
+                            </Link>
+                        </div>
                     </motion.div>
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }}>
                         <HomeEditor />
@@ -287,7 +319,7 @@ export default function Welcome({ auth, siteSettings }) {
                         { l: 'Uptime', v: '99.9%', i: Shield },
                         { l: 'Performance', v: '0.04ms', i: Zap }
                     ].map((s, i) => (
-                        <div key={i} className="flex flex-col gap-2 border-l border-[var(--border)] pl-8 first:border-0">
+                        <div key={i} className={`flex flex-col gap-2 md:border-l border-[var(--border)] md:pl-8 ${i % 2 !== 0 ? 'border-l pl-8' : ''} ${i > 1 ? 'mt-8 md:mt-0' : ''} md:first:border-0 md:first:pl-0`}>
                             <div className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em] flex items-center gap-3"><s.i size={14} className="text-cyan-500/40" /> {s.l}</div>
                             <div className="text-3xl font-black text-[var(--text-main)] tracking-tighter italic">{s.v}</div>
                         </div>
@@ -297,11 +329,14 @@ export default function Welcome({ auth, siteSettings }) {
 
             <section className="py-32 px-6 border-b border-[var(--border)]">
                 <div className="max-w-7xl mx-auto">
-                    <div className="flex justify-between items-end mb-16">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
                         <div className="space-y-2 text-left">
                             <div className="flex items-center gap-2 text-cyan-500"><Activity size={16} /><span className="text-[10px] font-black uppercase tracking-[0.3em]">Live Feed</span></div>
                             <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Featured Projects</h2>
                         </div>
+                        <Link href={route('public.categories.index')} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-cyan-500 transition-colors group">
+                            View Categories <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -328,11 +363,14 @@ export default function Welcome({ auth, siteSettings }) {
             {paidProjects.length > 0 && (
                 <section className="py-32 px-6 border-b border-[var(--border)] bg-cyan-500/[0.02]">
                     <div className="max-w-7xl mx-auto">
-                        <div className="flex justify-between items-end mb-16">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
                             <div className="space-y-2 text-left">
                                 <div className="flex items-center gap-2 text-cyan-500"><Tag size={16} /><span className="text-[10px] font-black uppercase tracking-[0.3em]">Marketplace</span></div>
                                 <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Premium Modules</h2>
                             </div>
+                            <Link href={route('public.search')} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-cyan-500 transition-colors group">
+                                Browse Marketplace <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            </Link>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -466,6 +504,35 @@ export default function Welcome({ auth, siteSettings }) {
                             <p className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest leading-loose italic">{p.d}</p>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* Testimonials Section */}
+            <section className="py-32 px-6 border-y border-[var(--border)] bg-[var(--bg-main)] overflow-hidden">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-20 space-y-4">
+                        <h2 className="text-4xl md:text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter italic">Trusted By Creators</h2>
+                        <p className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-[0.2em]">Join the ecosystem.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {[
+                            { name: 'Alex Rivera', role: 'Frontend Engineer', text: 'HOACodeLab completely changed how I rapidly prototype UI components. The live sandbox is incredibly responsive.' },
+                            { name: 'Sarah Chen', role: 'UI Designer', text: 'I use the premium marketplace to sell my HTML/CSS templates. The monetization integration is flawless and secure.' },
+                            { name: 'Marcus Johnson', role: 'Full Stack Dev', text: 'The dark mode aesthetics and raw performance make this my favorite code snippet manager online. Highly recommended.' }
+                        ].map((t, i) => (
+                            <div key={i} className="p-8 bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl relative hover:border-cyan-500/30 transition-colors">
+                                <Quote size={40} className="text-[var(--border)] absolute top-6 right-6 opacity-50" />
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-12 h-12 bg-cyan-500/10 rounded-full flex items-center justify-center text-cyan-500 font-black text-xl border border-cyan-500/20">{t.name[0]}</div>
+                                    <div>
+                                        <div className="font-black text-[var(--text-main)] uppercase tracking-tighter text-sm">{t.name}</div>
+                                        <div className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">{t.role}</div>
+                                    </div>
+                                </div>
+                                <p className="text-[var(--text-muted)] font-medium leading-relaxed italic">"{t.text}"</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 

@@ -1,5 +1,28 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -39,8 +62,17 @@ class PurchaseController extends Controller
             return response()->json(['message' => 'You have already purchased this project.'], 400);
         }
 
+        if ($request->domain || $request->license_type || $request->metadata) {
+            \Illuminate\Support\Facades\Cache::put("checkout_domain_{$user->id}_{$project->id}", $request->domain, now()->addHours(2));
+            \Illuminate\Support\Facades\Cache::put("checkout_license_type_{$user->id}_{$project->id}", $request->license_type ?: 'Standard', now()->addHours(2));
+            \Illuminate\Support\Facades\Cache::put("checkout_metadata_{$user->id}_{$project->id}", json_encode($request->metadata ?: []), now()->addHours(2));
+        }
+
         $gateway = $request->gateway;
         $price = (float) $project->price;
+        if ($request->license_type === 'Extended') {
+            $price = $price * 2.5;
+        }
 
         // 0. Test Gateway (Neural Test Bridge)
         if ($gateway === 'test') {
@@ -52,7 +84,7 @@ class PurchaseController extends Controller
                 'project_id' => $project->id,
                 'payment_method' => 'test_gateway',
             ], [
-                'amount' => $project->price,
+                'amount' => $price,
                 'currency' => 'USD',
                 'payment_id' => 'TEST-' . strtoupper(Str::random(10)),
                 'status' => 'completed'
@@ -205,8 +237,8 @@ class PurchaseController extends Controller
                 Purchase::create([
                     'user_id' => $user->id,
                     'project_id' => $project->id,
-                    'amount' => $project->price,
-                    'currency' => 'INR',
+                    'amount' => \Illuminate\Support\Facades\Cache::get("checkout_license_type_{$user->id}_{$project->id}") === 'Extended' ? clone($project)->price * 2.5 : $project->price,
+                    'currency' => 'USD',
                     'payment_id' => $txnId,
                     'payment_method' => 'phonepe',
                     'status' => 'pending'
@@ -279,7 +311,9 @@ class PurchaseController extends Controller
                 
                 // Double check amount to be absolutely certain (using exchange rate)
                 $exchangeRate = (float) (SiteSetting::where('key', 'usd_to_inr_rate')->first()?->value ?: 84.00);
-                $expectedAmountInINR = (int) ($project->price * $exchangeRate * 100);
+                $cachedLicenseType = \Illuminate\Support\Facades\Cache::get("checkout_license_type_{$user->id}_{$project->id}");
+                $expectedPrice = $cachedLicenseType === 'Extended' ? clone($project)->price * 2.5 : clone($project)->price;
+                $expectedAmountInINR = (int) ($expectedPrice * $exchangeRate * 100);
                 if ((int) $razorpayOrder->amount !== $expectedAmountInINR) {
                     return response()->json(['message' => 'Security Error: Payment amount mismatch.'], 403);
                 }
@@ -289,8 +323,8 @@ class PurchaseController extends Controller
                     $purchase = Purchase::create([
                         'user_id' => $user->id,
                         'project_id' => $project->id,
-                        'amount' => $project->price,
-                        'currency' => 'INR',
+                        'amount' => $expectedPrice,
+                        'currency' => 'USD',
                         'payment_id' => $request->razorpay_payment_id,
                         'payment_method' => 'razorpay',
                         'status' => 'completed'
@@ -395,7 +429,11 @@ class PurchaseController extends Controller
                 [
                     'user_id' => $user->id,
                     'project_id' => $project->id,
+                    'purchase_id' => $purchase->id,
                     'license_key' => $licenseService->generateLicenseKey(),
+                    'type' => \Illuminate\Support\Facades\Cache::get("checkout_license_type_{$user->id}_{$project->id}") ?: 'standard',
+                    'domain' => \Illuminate\Support\Facades\Cache::get("checkout_domain_{$user->id}_{$project->id}"),
+                    'metadata' => \Illuminate\Support\Facades\Cache::get("checkout_metadata_{$user->id}_{$project->id}") ?: null,
                     'status' => 'active',
                     'support_duration' => $project->support_duration ?? '6_months',
                     // Default to 1 year expiry, can be adjusted based on product logic
@@ -508,7 +546,11 @@ class PurchaseController extends Controller
                     [
                         'user_id' => $purchase->user_id,
                         'project_id' => $project->id,
+                        'purchase_id' => $purchase->id,
                         'license_key' => $licenseService->generateLicenseKey(),
+                        'type' => \Illuminate\Support\Facades\Cache::get("checkout_license_type_{$purchase->user_id}_{$project->id}") ?: 'standard',
+                        'domain' => \Illuminate\Support\Facades\Cache::get("checkout_domain_{$purchase->user_id}_{$project->id}"),
+                        'metadata' => \Illuminate\Support\Facades\Cache::get("checkout_metadata_{$purchase->user_id}_{$project->id}") ?: null,
                         'status' => 'active',
                         'expires_at' => now()->addYear() 
                     ]

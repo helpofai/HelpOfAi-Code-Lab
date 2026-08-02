@@ -1,3 +1,26 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, usePage } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
@@ -16,15 +39,20 @@ import UpdatePasswordForm from './Profile/Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Profile/Partials/UpdateProfileInformationForm';
 import DeleteUserForm from './Profile/Partials/DeleteUserForm';
 import IdentityVerificationForm from './Profile/Partials/IdentityVerificationForm';
+import { useDownloadManager } from '@/Components/DownloadManager';
 
 export default function MyAccount({ mustVerifyEmail, status, tokens: initialTokens = [] }) {
     const { auth } = usePage().props;
     const toast = useToast();
+    const { startDownload } = useDownloadManager();
     
     const [projects, setProjects] = useState([]);
     const [purchases, setPurchases] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
+
+    // Download Progress State
+    const [downloadState, setDownloadState] = useState({ active: false, percent: 0, loaded: 0, total: 0, title: '' });
 
     // Filters
     const [projectSearch, setProjectSearch] = useState('');
@@ -58,10 +86,13 @@ export default function MyAccount({ mustVerifyEmail, status, tokens: initialToke
         try {
             const res = await axios.post(route('my-account.token.store'));
             setNewToken(res.data.token);
-            // Refresh tokens list manually or by page reload. For simplicity, reload.
-            window.location.reload();
+            if (res.data.tokenData) {
+                setTokens([...tokens, res.data.tokenData]);
+            }
+            toast.success('Token generated successfully!');
         } catch (error) {
             toast.error('Failed to generate token.');
+        } finally {
             setIsGeneratingToken(false);
         }
     };
@@ -78,22 +109,8 @@ export default function MyAccount({ mustVerifyEmail, status, tokens: initialToke
     };
 
     const handleDownload = async (purchaseId, projectTitle) => {
-        const toastId = toast.loading('Initiating download...');
-        try {
-            const res = await axios.get(`/api/purchases/${purchaseId}/download`, { responseType: 'blob' });
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            const slug = projectTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            link.setAttribute('download', `${slug}-source.zip`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            toast.success('Download started!', { id: toastId });
-        } catch (error) {
-            console.error(error);
-            toast.error('Download failed. The vendor may not have a valid GitHub connection.', { id: toastId });
-        }
+        const slug = projectTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        startDownload(`/api/purchases/${purchaseId}/download`, `${slug}-source.zip`, projectTitle);
     };
 
     useEffect(() => {
@@ -420,7 +437,9 @@ export default function MyAccount({ mustVerifyEmail, status, tokens: initialToke
                                                                         </div>
                                                                     )}
                                                                 </td>
-                                                                <td className="px-8 py-6 font-mono text-emerald-500 font-bold text-lg">${p.amount}</td>
+                                                                <td className="px-8 py-6 font-mono text-emerald-500 font-bold text-lg">
+                                                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: p.currency || 'USD' }).format(p.amount)}
+                                                                </td>
                                                                 <td className="px-8 py-6">
                                                                     <span className="px-3 py-1.5 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] group-hover:border-emerald-500/30 transition-colors">
                                                                         {p.payment_method}
@@ -433,6 +452,9 @@ export default function MyAccount({ mustVerifyEmail, status, tokens: initialToke
                                                                             <Link href={route('editor', p.project.slug)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-black transition-all shadow-lg shadow-cyan-500/10">
                                                                                 <ExternalLink size={14} /> Open
                                                                             </Link>
+                                                                            <a href={`/api/purchases/${p.id}/invoice`} target="_blank" className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-500/10 border border-purple-500/20 text-purple-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all shadow-lg shadow-purple-500/10">
+                                                                                <ExternalLink size={14} /> Invoice
+                                                                            </a>
                                                                             <button onClick={() => handleDownload(p.id, p.project.title)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all shadow-lg shadow-emerald-500/10">
                                                                                 <Download size={14} /> Download Zip
                                                                             </button>
@@ -704,6 +726,7 @@ export default function MyAccount({ mustVerifyEmail, status, tokens: initialToke
                         </div>
                     </div>
                 </div>
+
             </AuthenticatedLayout>
         </div>
     );

@@ -1,10 +1,33 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { Code2, Settings, Wand2, Cloud, GitFork, Loader2, PanelBottom, PanelRight, PanelTop, CloudUpload, Share2, ChevronRight } from 'lucide-react';
 import useProjectStore from '@/Stores/useProjectStore';
 
 export default function EditorHeader({ handleSave, handleCloudSave, isSaving, isOwner, formatCode, isFormatting, setActiveSidebar, setActiveModal }) {
-    const { auth } = usePage().props;
+    const { auth, siteSettings } = usePage().props;
     const { title, setTitle, layout, setLayout } = useProjectStore();
     const [isTitleExpanded, setIsTitleExpanded] = useState(false);
 
@@ -12,10 +35,24 @@ export default function EditorHeader({ handleSave, handleCloudSave, isSaving, is
         <header className="h-16 bg-[var(--bg-surface)] border-b border-[var(--border)] flex items-center px-4 shrink-0 relative z-50 transition-colors duration-300">
             <div className={`flex items-center gap-2 transition-all duration-300 ${isTitleExpanded ? 'w-full' : 'w-auto'}`}>
                 <Link href="/dashboard" className={`flex items-center gap-2 group shrink-0 ${isTitleExpanded ? 'hidden sm:flex' : 'flex'}`}>
-                    <div className="p-2 bg-cyan-500/10 border border-cyan-500/20 rounded">
-                        <Code2 className="text-cyan-400" size={18} />
-                    </div>
-                    {!isTitleExpanded && <span className="font-bold tracking-tight text-white uppercase text-sm hidden lg:block italic">HOACodeLab</span>}
+                    {siteSettings?.site_logo ? (
+                        <img 
+                            src={siteSettings.site_logo} 
+                            alt={siteSettings?.site_name || 'Logo'} 
+                            className="h-8 w-auto object-contain group-hover:scale-105 transition-transform"
+                        />
+                    ) : (
+                        <>
+                            <div className="p-2 bg-cyan-500/10 border border-cyan-500/20 rounded group-hover:scale-110 transition-transform shadow-lg shadow-cyan-500/20">
+                                <Code2 className="text-cyan-500" size={18} />
+                            </div>
+                            {!isTitleExpanded && (
+                                <span className="font-bold tracking-tight text-[var(--text-main)] uppercase text-sm hidden lg:block italic">
+                                    {siteSettings?.site_name || 'HOACodeLab'}
+                                </span>
+                            )}
+                        </>
+                    )}
                 </Link>
                 
                 <div 

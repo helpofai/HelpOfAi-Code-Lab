@@ -1,5 +1,28 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -57,6 +80,28 @@ class ExploreController extends Controller
                     $q->orWhereNull('price');
                 }
             });
+        }
+
+        // Timeframe Filter
+        if ($request->filled('timeframe') && $request->timeframe !== 'all_time') {
+            $timeframe = $request->timeframe;
+            if ($timeframe === 'today') {
+                $query->where('created_at', '>=', now()->startOfDay());
+            } elseif ($timeframe === 'this_week') {
+                $query->where('created_at', '>=', now()->startOfWeek());
+            } elseif ($timeframe === 'this_month') {
+                $query->where('created_at', '>=', now()->startOfMonth());
+            }
+        }
+
+        // Rating Filter (Requires reviews relationship, implemented earlier)
+        if ($request->filled('rating') && $request->rating > 0) {
+            $rating = (int) $request->rating;
+            $query->whereHas('reviews', function ($q) {
+                // Just ensuring it has reviews, actual average rating filtering would require a subquery or join,
+                // but since this is a quick filter, let's filter projects with average_rating >= $rating if we have the column
+            })->withAvg('reviews', 'rating')
+              ->having('reviews_avg_rating', '>=', $rating);
         }
 
         // Sorting

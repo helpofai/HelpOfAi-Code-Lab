@@ -1,3 +1,26 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, usePage } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
@@ -130,7 +153,7 @@ export default function Dashboard() {
                                                 className="group bg-[var(--bg-surface)] border border-[var(--border)] p-4 flex items-center justify-between hover:border-cyan-500/30 transition-all"
                                             >
                                                 <div className="flex items-center gap-6 min-w-0">
-                                                    <div className="w-10 h-10 bg-[var(--bg-main)] border border-[var(--border)] rounded flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-white dark:group-hover:text-black transition-all">
+                                                    <div className="w-10 h-10 bg-[var(--bg-main)] border border-[var(--border)] rounded flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-black dark:group-hover:text-white transition-all">
                                                         <Code2 size={18} />
                                                     </div>
                                                     <div className="min-w-0 text-left">
@@ -142,10 +165,10 @@ export default function Dashboard() {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
-                                                    <Link href={route('editor', { slug: project.slug })} className="p-2 hover:bg-cyan-500 hover:text-white dark:hover:text-black text-[var(--text-muted)] rounded transition-all border border-transparent hover:border-cyan-500/50">
+                                                    <Link href={route('editor', { slug: project.slug })} className="p-2 hover:bg-cyan-500 hover:text-black dark:hover:text-white text-[var(--text-muted)] rounded transition-all border border-transparent hover:border-cyan-500/50">
                                                         <ExternalLink size={14} />
                                                     </Link>
-                                                    <button onClick={() => handleDelete(project.id)} className="p-2 hover:bg-rose-500 hover:text-white text-[var(--text-muted)] rounded transition-all">
+                                                    <button onClick={() => handleDelete(project.id)} className="p-2 hover:bg-rose-500 hover:text-black dark:hover:text-white text-[var(--text-muted)] rounded transition-all">
                                                         <Trash2 size={14} />
                                                     </button>
                                                 </div>

@@ -195,3 +195,15 @@ The hosting has old locally-installed node_modules files that conflict with the
 
 **End of Transmission.**  
 _Systems Operational // Sector_7G_Uplink_
+
+### Automated Queue Setup (Shared Hosting/cPanel)
+
+1. Go to your cPanel.
+2. Search for "Cron Jobs".
+3. Create a new Cron Job and set it to run Every Minute (* * * * *).
+4. In the Command field, enter your server's path to run the scheduler:
+   ```bash
+   /usr/local/bin/php /home/yourusername/public_html/artisan schedule:run >> /dev/null 2>&1
+   ```
+   *(Note: Adjust /usr/local/bin/php to your server's actual PHP 8 path, and /home/yourusername/... to the path of your project).*
+

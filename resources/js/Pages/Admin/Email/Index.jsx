@@ -1,12 +1,35 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import React, { useState } from 'react';
-import { Mail, Plus, Edit, Trash2, Send, Clock, CheckCircle2, XCircle, Activity, ChevronRight, Search } from 'lucide-react';
+import { Mail, Plus, Edit, Trash2, Send, Clock, CheckCircle2, XCircle, Activity, ChevronRight, Search, BookOpen } from 'lucide-react';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function EmailIndex({ templates, logs, stats }) {
+export default function EmailIndex({ templates, logs, stats, subscribers }) {
     const [search, setSearch] = useState('');
     const [view, setView] = useState('templates'); // 'templates' or 'history'
 
@@ -74,7 +97,7 @@ export default function EmailIndex({ templates, logs, stats }) {
                             {[
                                 { label: 'Protocols Executed', value: stats.total_sent, icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/5' },
                                 { label: 'Broadcast Volume', value: stats.broadcasts, icon: Activity, color: 'text-purple-500', bg: 'bg-purple-500/5' },
-                                { label: 'Signal Failures', value: stats.total_failed, icon: XCircle, color: 'text-rose-500', bg: 'bg-rose-500/5' },
+                                { label: 'Subscribers (Marketing)', value: stats.subscribers, icon: BookOpen, color: 'text-cyan-500', bg: 'bg-cyan-500/5' },
                             ].map((stat, i) => (
                                 <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className={`p-6 rounded-3xl border border-[var(--border)] ${stat.bg} backdrop-blur-md flex items-center justify-between`}>
                                     <div>
@@ -95,6 +118,10 @@ export default function EmailIndex({ templates, logs, stats }) {
                             <button onClick={() => setView('history')} className={`px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative ${view === 'history' ? 'text-purple-500' : 'text-[var(--text-muted)] hover:text-white'}`}>
                                 Transmission_History
                                 {view === 'history' && <motion.div layoutId="emailTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]" />}
+                            </button>
+                            <button onClick={() => setView('audience')} className={`px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative ${view === 'audience' ? 'text-cyan-500' : 'text-[var(--text-muted)] hover:text-white'}`}>
+                                Target_Audience
+                                {view === 'audience' && <motion.div layoutId="emailTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]" />}
                             </button>
                         </div>
 
@@ -125,7 +152,7 @@ export default function EmailIndex({ templates, logs, stats }) {
                                         <div className="col-span-full py-20 text-center text-[10px] font-black uppercase tracking-[0.3em] opacity-40 italic">No protocols found in database.</div>
                                     )}
                                 </motion.div>
-                            ) : (
+                            ) : view === 'history' ? (
                                 <motion.div key="history" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[2.5rem] overflow-hidden shadow-2xl">
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-left">
@@ -180,7 +207,52 @@ export default function EmailIndex({ templates, logs, stats }) {
                                         </table>
                                     </div>
                                 </motion.div>
-                            )}
+                            ) : view === 'audience' ? (
+                                <motion.div key="audience" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[2rem] overflow-hidden shadow-2xl">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="border-b border-[var(--border)] bg-[var(--bg-elevated)]">
+                                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Target Email</th>
+                                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Subscribed On</th>
+                                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] text-right">Status & Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {subscribers && subscribers.map((sub) => (
+                                                    <tr key={sub.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--bg-elevated)] transition-colors group">
+                                                        <td className="px-8 py-6">
+                                                            <div className="font-bold text-sm tracking-wide group-hover:text-cyan-500 transition-colors">{sub.email}</div>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-widest">{new Date(sub.created_at).toLocaleString()}</td>
+                                                        <td className="px-8 py-6 text-right">
+                                                            <div className="flex items-center justify-end gap-4">
+                                                                {sub.status === 'active' ? (
+                                                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 shadow-[0_0_10px_rgba(6,182,212,0.1)]">
+                                                                        <CheckCircle2 size={12} /> Active
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                                                        <XCircle size={12} /> Unsubscribed
+                                                                    </span>
+                                                                )}
+                                                                <button onClick={() => { if(confirm('Delete this subscriber?')) router.delete(route('admin.email.subscriber.destroy', sub.id)) }} className="p-2 text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all" title="Delete Subscriber">
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                {(!subscribers || subscribers.length === 0) && (
+                                                    <tr>
+                                                        <td colSpan="3" className="py-20 text-center text-[10px] font-black uppercase tracking-[0.3em] opacity-40 italic">No subscribers found in database.</td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </motion.div>
+                            ) : null}
                         </AnimatePresence>
                     </div>
                 </div>

@@ -1,3 +1,26 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -8,7 +31,16 @@ import axios from 'axios';
 export default function Checkout({ auth, project, stripeKey, enabledGateways = [] }) {
     const [processing, setProcessing] = useState(false);
     const [selectedGateway, setSelectedGateway] = useState(enabledGateways[0] || 'stripe');
+    const [domain, setDomain] = useState('');
+    const [licenseType, setLicenseType] = useState('Standard');
+    const [useCase, setUseCase] = useState('Personal');
+    const [projectName, setProjectName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [whatsapp, setWhatsapp] = useState('');
+    const [billingAddress, setBillingAddress] = useState('');
     const toast = useToast();
+
+    const calculatedPrice = licenseType === 'Extended' ? project.price * 2.5 : project.price;
 
     const gatewayMeta = {
         test: { name: 'Neural_Test_Bridge', icon: FlaskConical },
@@ -24,7 +56,16 @@ export default function Checkout({ auth, project, stripeKey, enabledGateways = [
         try {
             const res = await axios.post('/api/purchase/checkout', {
                 project_id: project.id,
-                gateway: selectedGateway
+                gateway: selectedGateway,
+                domain: domain,
+                license_type: licenseType,
+                metadata: {
+                    use_case: useCase,
+                    project_name: projectName,
+                    phone: phone,
+                    whatsapp: whatsapp,
+                    billing_address: billingAddress
+                }
             });
 
             if ((selectedGateway === 'stripe' || selectedGateway === 'test') && res.data.url) {
@@ -114,6 +155,68 @@ export default function Checkout({ auth, project, stripeKey, enabledGateways = [
                             </div>
                         </div>
 
+                        <div className="space-y-4">
+                            <h4 className="font-bold text-[var(--text-main)] uppercase tracking-widest text-sm flex items-center gap-2">
+                                <Sparkles size={16} className="text-emerald-500" /> License Details
+                            </h4>
+                            <div className="p-6 border border-[var(--border)] rounded-xl bg-[var(--bg-main)] space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">License Type</label>
+                                        <select 
+                                            value={licenseType}
+                                            onChange={(e) => setLicenseType(e.target.value)}
+                                            className="w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-main)] focus:outline-none focus:border-cyan-500 transition-colors"
+                                        >
+                                            <option value="Standard">Standard License (1x)</option>
+                                            <option value="Extended">Extended License (2.5x Price)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Intended Use Case</label>
+                                        <select 
+                                            value={useCase}
+                                            onChange={(e) => setUseCase(e.target.value)}
+                                            className="w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-main)] focus:outline-none focus:border-cyan-500 transition-colors"
+                                        >
+                                            <option value="Personal">Personal</option>
+                                            <option value="Commercial">Commercial</option>
+                                            <option value="Agency">Agency</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Target Domain (Where will you install this?)</label>
+                                    <input 
+                                        type="text" 
+                                        value={domain}
+                                        onChange={(e) => setDomain(e.target.value)}
+                                        placeholder="e.g. yoursite.com"
+                                        className="w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-main)] focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-gray-600"
+                                    />
+                                    <p className="text-[10px] text-[var(--text-muted)] mt-1">The license key generated will be registered to this domain.</p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Project/App Name</label>
+                                        <input type="text" value={projectName} onChange={(e) => setProjectName(e.target.value)} placeholder="My Awesome Startup" className="w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-main)] focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-gray-600" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Phone Number</label>
+                                        <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 234 567 890" className="w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-main)] focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-gray-600" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">WhatsApp Number</label>
+                                        <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+1 234 567 890" className="w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-main)] focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-gray-600" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Billing Address / VAT</label>
+                                        <input type="text" value={billingAddress} onChange={(e) => setBillingAddress(e.target.value)} placeholder="123 Main St..." className="w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-main)] focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-gray-600" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-8 space-y-6 shadow-sm">
                             <h4 className="text-sm font-black uppercase tracking-[0.2em] text-[var(--text-main)] italic">Payment_Gateway_Protocol</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -157,7 +260,9 @@ export default function Checkout({ auth, project, stripeKey, enabledGateways = [
                                 </div>
                                 <div className="pt-4 border-t border-[var(--border)] flex justify-between items-center">
                                     <span className="text-xs font-black uppercase tracking-widest text-[var(--text-main)]">Total Execution</span>
-                                    <span className="text-3xl font-black text-cyan-500 font-mono">${project.price}</span>
+                                    <div className="text-3xl font-black font-mono text-[var(--text-main)]">
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(calculatedPrice)}
+                                    </div>
                                 </div>
                             </div>
 

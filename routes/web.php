@@ -1,12 +1,40 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Project;
+use App\Http\Controllers\Admin\AdUnitController;
+use App\Http\Controllers\Admin\SocialMediaController;
+use App\Http\Controllers\Admin\QueueMonitorController;
+use App\Http\Controllers\Vendors\OnboardingController;
 use App\Http\Controllers\Admin\FrontManagementController;
 use App\Models\SiteSetting;
+use App\Http\Controllers\NewsletterSubscriberController;
 
 Route::get('/', function () {
     $settings = SiteSetting::whereIn('group', ['home', 'branding', 'seo', 'typography', 'subscription'])->get()->mapWithKeys(function ($item) {
@@ -19,7 +47,6 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
         'siteSettings' => $settings,
-        'siteSettings' => $settings,
     ]);
 });
 
@@ -27,9 +54,16 @@ Route::get('/explore', function () {
     return Inertia::render('Explore');
 })->name('explore');
 
-Route::get('/marketplace', function () {
-    return Inertia::render('Marketplace');
-})->name('marketplace');
+// Public Directory Routes
+Route::get('/search', [\App\Http\Controllers\PublicDirectoryController::class, 'search'])->name('public.search');
+Route::get('/categories', [\App\Http\Controllers\PublicDirectoryController::class, 'categories'])->name('public.categories.index');
+Route::get('/categories/{slug}', [\App\Http\Controllers\PublicDirectoryController::class, 'categoryShow'])->name('public.categories.show');
+Route::get('/tags', [\App\Http\Controllers\PublicDirectoryController::class, 'tags'])->name('public.tags.index');
+Route::get('/tags/{slug}', [\App\Http\Controllers\PublicDirectoryController::class, 'tagShow'])->name('public.tags.show');
+
+// Newsletter Route
+Route::post('/subscribe', [NewsletterSubscriberController::class, 'store'])->middleware('throttle:5,1')->name('newsletter.subscribe');
+Route::get('/unsubscribe/{token}', [NewsletterSubscriberController::class, 'unsubscribe'])->middleware('throttle:10,1')->name('newsletter.unsubscribe');
 
 Route::get('/editor/{slug?}', function ($slug = null) {
     $project = null;
@@ -82,7 +116,8 @@ Route::get('/editor/{slug?}', function ($slug = null) {
 Route::get('/projects/{slug}/og-image', [\App\Http\Controllers\Api\ProjectImageController::class, 'show'])->name('projects.og-image');
 
 Route::get('/project/{slug}', function ($slug) {
-    $project = Project::with(['user', 'team'])->where('slug', $slug)->firstOrFail();
+    $project = Project::with(['user', 'team', 'reviews.user'])->where('slug', $slug)->firstOrFail();
+    $project->append(['average_rating', 'reviews_count']);
     
     // Unique IP-based View Tracking
     $viewKey = 'project_viewed_' . $project->id . '_' . request()->ip();
@@ -145,13 +180,22 @@ Route::get('/project/{slug}', function ($slug) {
     ]);
 })->name('project.show');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckVendorOnboarding::class])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
 
-Route::get('/dashboard/my-projects', function () {
-    return Inertia::render('MyProjects');
-})->middleware(['auth', 'verified'])->name('my-projects');
+    Route::get('/dashboard/my-projects', function () {
+        return Inertia::render('MyProjects');
+    })->name('my-projects');
+});
+
+// Vendor Onboarding Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/onboarding', [OnboardingController::class, 'index'])->name('vendor.onboarding.index');
+    Route::post('/onboarding', [OnboardingController::class, 'store'])->name('vendor.onboarding.store');
+    Route::post('/onboarding/skip', [OnboardingController::class, 'skip'])->name('vendor.onboarding.skip');
+});
 
 
 
@@ -222,10 +266,25 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     // Admin Email System
     Route::get('/admin/email/send', [\App\Http\Controllers\Admin\EmailController::class, 'sendPage'])->name('admin.email.send');
     Route::post('/admin/email/send', [\App\Http\Controllers\Admin\EmailController::class, 'send'])->name('admin.email.send.process');
+    Route::delete('/admin/email/subscriber/{id}', [\App\Http\Controllers\Admin\EmailController::class, 'destroySubscriber'])->name('admin.email.subscriber.destroy');
     Route::post('/admin/email/resend/{log}', [\App\Http\Controllers\Admin\EmailController::class, 'resend'])->name('admin.email.resend');
     Route::get('/admin/email/settings', [\App\Http\Controllers\Admin\EmailController::class, 'settings'])->name('admin.email.settings');
     Route::post('/admin/email/settings', [\App\Http\Controllers\Admin\EmailController::class, 'updateSettings'])->name('admin.email.settings.update');
     Route::post('/admin/email/test', [\App\Http\Controllers\Admin\EmailController::class, 'testConnection'])->name('admin.email.test');
+    // Social Media Management
+    Route::get('/admin/social-media', [\App\Http\Controllers\Admin\SocialMediaController::class, 'index'])->name('admin.social-media.settings');
+    Route::post('/admin/social-media', [\App\Http\Controllers\Admin\SocialMediaController::class, 'update'])->name('admin.social-media.update');
+    Route::post('/admin/social-media/test-telegram', [\App\Http\Controllers\Admin\SocialMediaController::class, 'testTelegram'])->name('admin.social-media.test-telegram');
+    Route::post('/admin/social-media/test-whatsapp', [\App\Http\Controllers\Admin\SocialMediaController::class, 'testWhatsapp'])->name('admin.social-media.test-whatsapp');
+    Route::get('/admin/social-media/logs', [\App\Http\Controllers\Admin\SocialMediaController::class, 'logs'])->name('admin.social-media.logs');
+
+    // Queue Monitor
+    Route::get('/admin/queue', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'index'])->name('admin.queue.index');
+    Route::post('/admin/queue/retry/{id}', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'retry'])->name('admin.queue.retry');
+    Route::delete('/admin/queue/delete/{id}', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'deleteFailed'])->name('admin.queue.delete');
+    Route::delete('/admin/queue/clear-pending', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'clearPending'])->name('admin.queue.clear-pending');
+    Route::post('/admin/queue/process', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'processQueue'])->name('admin.queue.process');
+
     Route::resource('admin/email', \App\Http\Controllers\Admin\EmailController::class, ['names' => 'admin.email']);
 });
 
@@ -236,6 +295,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/support/{ticket}/reply', [\App\Http\Controllers\SupportController::class, 'reply'])->name('support.reply');
 
     // Project Purchases
+    Route::post('/projects/{project:slug}/review', [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
     Route::get('/checkout/project/{project:slug}', [\App\Http\Controllers\PurchaseController::class, 'checkoutPage'])->name('checkout.project')->middleware('throttle:10,1');
     Route::get('/purchase/status', [\App\Http\Controllers\PurchaseController::class, 'statusPage'])->name('purchase.status');
 
@@ -253,7 +313,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/my-account/token', function (\Illuminate\Http\Request $request) {
         $token = $request->user()->createToken('Personal Access Token');
-        return response()->json(['token' => $token->plainTextToken]);
+        return response()->json([
+            'token' => $token->plainTextToken,
+            'tokenData' => clone $token->accessToken
+        ]);
     })->name('my-account.token.store');
 
     Route::delete('/my-account/token/{id}', function (\Illuminate\Http\Request $request, $id) {
@@ -306,13 +369,25 @@ Route::middleware('auth')->group(function () {
         $totalEarnings = $sales->sum('amount') * 0.70;
         $totalSales = $sales->count();
         $projectCount = \App\Models\Project::where('user_id', $user->id)->count();
-        $recentSales = $sales->take(5);
+        
+        // Group for Recharts (last 7 days)
+        $chartData = collect([]);
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $daySales = $sales->filter(function($s) use ($date) {
+                return $s->created_at->format('Y-m-d') === $date;
+            });
+            $chartData->push([
+                'date' => now()->subDays($i)->format('M d'),
+                'amount' => $daySales->sum('amount') * 0.70
+            ]);
+        }
 
         return Inertia::render('Vendors/Dashboard', [
             'totalEarnings' => $totalEarnings,
             'totalSales' => $totalSales,
             'projectCount' => $projectCount,
-            'recentSales' => $recentSales,
+            'recentSales' => $chartData,
         ]);
     })->name('vendors.dashboard');
 
@@ -334,6 +409,10 @@ Route::middleware('auth')->group(function () {
             'totalEarnings' => $totalEarnings
         ]);
     })->name('vendors.payments');
+
+    Route::get('/vendors/settings', function () {
+        return Inertia::render('Vendors/Settings');
+    })->name('vendors.settings');
 
     // Personal Google Drive Config
     Route::post('/api/google-drive/config', function (\Illuminate\Http\Request $request) {
@@ -362,6 +441,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::put('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::put('/api/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    
+    // Invoices
+    Route::get('/api/purchases/{id}/invoice', [\App\Http\Controllers\Api\InvoiceController::class, 'show'])->name('purchases.invoice');
 });
 
 Route::get('/p/{slug}', function ($slug) {
@@ -379,5 +461,21 @@ Route::post('/setup/save-env', [\App\Http\Controllers\SetupController::class, 's
 Route::post('/setup/check-db', [\App\Http\Controllers\SetupController::class, 'checkDb'])->name('setup.check-db');
 Route::post('/setup/create-admin', [\App\Http\Controllers\SetupController::class, 'createAdmin'])->name('setup.create-admin');
 Route::post('/setup/finish', [\App\Http\Controllers\SetupController::class, 'finish'])->name('setup.finish');
+
+
+// Public Vendor Profile
+Route::get('/@{username}', [\App\Http\Controllers\VendorProfileController::class, 'show'])->name('vendor.profile');
+
+// SEO Sitemap
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
+
+// IndexNow Verification
+Route::get('/{key}.txt', function ($key) {
+    $expectedKey = substr(md5(config('app.key')), 0, 32);
+    if ($key === $expectedKey) {
+        return response($key, 200)->header('Content-Type', 'text/plain');
+    }
+    abort(404);
+});
 
 require __DIR__.'/auth.php';

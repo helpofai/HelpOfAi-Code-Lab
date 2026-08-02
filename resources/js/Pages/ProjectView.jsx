@@ -1,7 +1,30 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import React, { useState, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Code2, ExternalLink, Shield, Zap, Lock, ShoppingCart, User, Clock, CheckCircle2, Download, Bookmark, Loader2, Copy } from 'lucide-react';
+import { Code2, ExternalLink, Shield, Zap, Lock, ShoppingCart, User, Clock, CheckCircle2, Download, Bookmark, Loader2, Copy, Star } from 'lucide-react';
 import AdUnit from '@/Components/AdUnit';
 import axios from 'axios';
 import { useToast } from '@/Components/Toast/ToastProvider';
@@ -146,7 +169,38 @@ export default function ProjectView({ project, canEdit }) {
 
     return (
         <PublicLayout>
-            <Head title={`${project.title} - View Project`} />
+            <Head>
+                <title>{`${project.title} - View Project`}</title>
+                <meta name="description" content={project.description || `Buy ${project.title} on our marketplace.`} />
+                <meta property="og:title" content={project.title} />
+                <meta property="og:description" content={project.description || `Premium source code for ${project.title}.`} />
+                <meta property="og:image" content={project.og_image_url || ''} />
+                <script type="application/ld+json">
+                    {JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "SoftwareApplication",
+                        "name": project.title,
+                        "description": project.description,
+                        "applicationCategory": "DeveloperApplication",
+                        "offers": {
+                            "@type": "Offer",
+                            "price": project.price,
+                            "priceCurrency": "USD"
+                        },
+                        "author": {
+                            "@type": "Person",
+                            "name": project.user?.name || 'Vendor'
+                        },
+                        ...(project.reviews_count > 0 ? {
+                            "aggregateRating": {
+                                "@type": "AggregateRating",
+                                "ratingValue": project.average_rating,
+                                "reviewCount": project.reviews_count
+                            }
+                        } : {})
+                    })}
+                </script>
+            </Head>
             
             <div className="pt-24 pb-20 px-6 max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -362,6 +416,91 @@ export default function ProjectView({ project, canEdit }) {
                             </div>
                         </div>
 
+                        {/* Reviews Section */}
+                        <div className="pt-12 border-t border-[var(--border)] mt-12">
+                            <h3 className="text-xl font-black uppercase text-[var(--text-main)] tracking-widest flex items-center gap-3 mb-8">
+                                <Star size={24} className="text-amber-500 fill-amber-500" /> 
+                                Verified Reviews 
+                                <span className="text-sm font-medium text-amber-500 ml-2">
+                                    {project.average_rating > 0 ? `${project.average_rating} / 5.0` : 'No reviews yet'}
+                                </span>
+                            </h3>
+
+                            {project.has_purchased && (
+                                <div className="mb-8 p-6 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl">
+                                    <h4 className="text-sm font-black uppercase text-[var(--text-main)] tracking-widest mb-4">Write a Review</h4>
+                                    <form onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const rating = e.target.rating.value;
+                                        const comment = e.target.comment.value;
+                                        axios.post(route('reviews.store', project.slug), { rating, comment })
+                                            .then(res => {
+                                                toast.success('Review submitted successfully!');
+                                                window.location.reload();
+                                            })
+                                            .catch(err => {
+                                                toast.error(err.response?.data?.message || 'Failed to submit review');
+                                            });
+                                    }}>
+                                        <div className="mb-4">
+                                            <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Rating</label>
+                                            <select name="rating" className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-xl px-4 py-2 text-sm text-[var(--text-main)] focus:outline-none focus:border-cyan-500" required>
+                                                <option value="5">5 Stars - Excellent</option>
+                                                <option value="4">4 Stars - Good</option>
+                                                <option value="3">3 Stars - Average</option>
+                                                <option value="2">2 Stars - Poor</option>
+                                                <option value="1">1 Star - Terrible</option>
+                                            </select>
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-2">Comment (Optional)</label>
+                                            <textarea name="comment" rows="3" className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-xl px-4 py-2 text-sm text-[var(--text-main)] focus:outline-none focus:border-cyan-500 placeholder:text-[var(--text-muted)]" placeholder="What did you like about this project?"></textarea>
+                                        </div>
+                                        <button type="submit" className="px-6 py-2 bg-cyan-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-cyan-400 transition-colors">
+                                            Submit Review
+                                        </button>
+                                    </form>
+                                </div>
+                            )}
+
+                            {project.reviews?.length > 0 ? (
+                                <div className="space-y-6">
+                                    {project.reviews.map(review => (
+                                        <div key={review.id} className="p-6 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-cyan-500/10 text-cyan-500 flex items-center justify-center font-bold uppercase text-xs border border-cyan-500/20">
+                                                        {review.user?.name?.charAt(0) || 'U'}
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-bold text-[var(--text-main)]">
+                                                            {review.user?.name || 'Anonymous'}
+                                                        </div>
+                                                        <div className="text-[10px] text-[var(--text-muted)] font-mono uppercase tracking-widest">
+                                                            {new Date(review.created_at).toLocaleDateString()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex text-amber-500">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star key={i} size={14} className={i < review.rating ? "fill-amber-500" : "opacity-30"} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            {review.comment && (
+                                                <p className="text-sm text-[var(--text-muted)] leading-relaxed italic">
+                                                    "{review.comment}"
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="p-8 text-center bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl border-dashed">
+                                    <p className="text-sm text-[var(--text-muted)]">Be the first to review this project.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Sidebar / Call to Action */}

@@ -1,3 +1,26 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -156,7 +179,7 @@ export default function Sell() {
             toast.success("Product successfully listed on the Marketplace!");
             
             setTimeout(() => {
-                router.visit(route('marketplace'));
+                router.visit(route('explore'));
             }, 2000);
             
         } catch (error) {
@@ -299,6 +322,19 @@ export default function Sell() {
                                     </select>
                                 </div>
                                 
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                                        Release Version
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="1.0.0" 
+                                        value={formData.github_version} 
+                                        onChange={e => setFormData({...formData, github_version: e.target.value})} 
+                                        className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded-xl p-4 text-[var(--text-main)] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
+                                    />
+                                </div>
+
                                 <div className="space-y-2 md:col-span-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-2">
                                         <Github size={14} /> GitHub Private Repo URL

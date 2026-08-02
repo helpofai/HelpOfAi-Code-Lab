@@ -18,6 +18,10 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            boxShadow: {
+                'deep-dark': '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 10px 20px -5px rgba(0, 0, 0, 0.8)',
+                'neon-glow': '0 0 20px var(--accent-dim), 0 0 40px var(--accent-dim)',
+            }
         },
     },
 

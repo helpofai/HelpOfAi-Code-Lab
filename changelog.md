@@ -2,6 +2,15 @@
 
 Systematic documentation of all protocol upgrades, module injections, and core optimisations for the HOACodeLab environment.
 
+## [1.17.0] - SOCIAL_MEDIA_AUTOMATION - 2026-08-02
+
+### 📱 Automated Social Media Broadcasting
+- **Telegram & WhatsApp Integration:** Projects are now automatically broadcasted to configured Telegram channels and WhatsApp groups the moment they are successfully published by an admin or vendor.
+- **Dynamic Post Templates:** Introduced three customizable broadcast templates (Professional Cinematic, Startup Launch, Minimal Text) with dynamic variable injection (`{title}`, `{description}`, `{price}`, `{link}`).
+- **Advanced Proxy & Webhook Config:** Configured secure direct S2S transmission utilizing Cloudflare Worker proxies and Official Meta API Webhooks to bypass shared-hosting `pcntl` and latency limitations.
+- **Activity Log Matrix:** Added a dedicated 'Social Media Activity Logs' dashboard in the Admin Control Center, equipped with real-time success/fail status pills, platform icons, and raw API error outputs.
+- **Asynchronous Queue Observer:** Built a resilient `ProjectObserver` tied directly to an asynchronous Laravel Job Queue, ensuring that API rate limits or failures never block the core project saving process.
+
 ## [1.16.0] - THE FINAL GODMODE RELEASE - 2026-08-01
 
 ### 🚀 E2E Validated Architecture

@@ -1,5 +1,28 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -10,6 +33,8 @@ use App\Mail\DynamicEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
+use App\Jobs\SendBroadcastEmailJob;
+use App\Models\NewsletterSubscriber;
 
 use App\Models\SiteSetting;
 
@@ -27,8 +52,17 @@ class EmailController extends Controller
                 'total_sent' => EmailLog::where('status', 'sent')->count(),
                 'total_failed' => EmailLog::where('status', 'failed')->count(),
                 'broadcasts' => EmailLog::where('type', 'broadcast')->count(),
-            ]
+                'subscribers' => NewsletterSubscriber::where('status', 'active')->count(),
+            ],
+            'subscribers' => NewsletterSubscriber::latest()->get(),
         ]);
+    }
+
+    public function destroySubscriber($id)
+    {
+        $sub = NewsletterSubscriber::findOrFail($id);
+        $sub->delete();
+        return back()->with('success', 'Subscriber deleted successfully.');
     }
 
     /**
@@ -165,6 +199,7 @@ class EmailController extends Controller
                 'all' => User::count(),
                 'pro' => User::where('role', 'paid-user')->count(),
                 'admins' => User::where('role', 'admin')->count(),
+                'newsletter' => NewsletterSubscriber::count(),
             ]
         ]);
     }
@@ -176,7 +211,7 @@ class EmailController extends Controller
     {
         $validated = $request->validate([
             'template_id' => 'required|exists:email_templates,id',
-            'recipient_type' => 'required|in:all,pro,admins,specific',
+            'recipient_type' => 'required|in:all,pro,admins,newsletter,specific',
             'specific_email' => 'required_if:recipient_type,specific|nullable|email',
         ]);
 
@@ -193,6 +228,16 @@ class EmailController extends Controller
             case 'admins':
                 $users = User::where('role', 'admin')->get();
                 break;
+            case 'newsletter':
+                $subscribers = NewsletterSubscriber::where('status', 'active')->get();
+                foreach ($subscribers as $sub) {
+                    $fakeUser = new User();
+                    $fakeUser->email = $sub->email;
+                    $fakeUser->name = 'Subscriber';
+                    $fakeUser->unsubscribe_link = route('newsletter.unsubscribe', ['token' => $sub->token]);
+                    $users->push($fakeUser);
+                }
+                break;
             case 'specific':
                 $user = User::where('email', $validated['specific_email'])->first();
                 if ($user) $users->push($user);
@@ -200,44 +245,17 @@ class EmailController extends Controller
         }
 
         $count = 0;
-        $failed = 0;
+        $delaySeconds = 0;
+        $type = $validated['recipient_type'] === 'specific' ? 'individual' : 'broadcast';
+
         foreach ($users as $user) {
-            $content = str_replace(
-                ['{{name}}', '{{email}}'], 
-                [$user->name, $user->email], 
-                $template->content
-            );
-
-            try {
-                Mail::to($user->email)->send(new DynamicEmail($template->subject, $content));
-                
-                EmailLog::create([
-                    'recipient' => $user->email,
-                    'subject' => $template->subject,
-                    'content' => $content,
-                    'status' => 'sent',
-                    'type' => $validated['recipient_type'] === 'specific' ? 'individual' : 'broadcast',
-                    'user_id' => $user->id,
-                    'template_id' => $template->id,
-                ]);
-
-                $count++;
-            } catch (\Exception $e) {
-                EmailLog::create([
-                    'recipient' => $user->email,
-                    'subject' => $template->subject,
-                    'content' => $content,
-                    'status' => 'failed',
-                    'error' => $e->getMessage(),
-                    'type' => $validated['recipient_type'] === 'specific' ? 'individual' : 'broadcast',
-                    'user_id' => $user->id,
-                    'template_id' => $template->id,
-                ]);
-                $failed++;
-            }
+            // Stagger emails by 10 seconds to prevent SMTP server blocking
+            SendBroadcastEmailJob::dispatch($user, $template, $type)->delay(now()->addSeconds($delaySeconds));
+            $delaySeconds += 10;
+            $count++;
         }
 
-        return back()->with('success', "Email protocol completed. Sent: $count | Failed: $failed");
+        return back()->with('success', "Email broadcast initiated. {$count} emails queued for processing.");
     }
 
     /**

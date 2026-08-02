@@ -1,0 +1,26 @@
+import { jsx } from "react/jsx-runtime";
+import { createInertiaApp } from "@inertiajs/react";
+import createServer from "@inertiajs/server";
+import ReactDOMServer from "react-dom/server";
+async function resolvePageComponent(path, pages) {
+  for (const p of Array.isArray(path) ? path : [path]) {
+    const page = pages[p];
+    if (typeof page === "undefined") {
+      continue;
+    }
+    return typeof page === "function" ? page() : page;
+  }
+  throw new Error(`Page not found: ${path}`);
+}
+const appName = "HOACodeLab";
+createServer(
+  (page) => createInertiaApp({
+    page,
+    render: ReactDOMServer.renderToString,
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, /* @__PURE__ */ Object.assign({ "./Pages/Admin/AdminDashboard.jsx": () => import("./assets/AdminDashboard-BtfZMRFH.js"), "./Pages/Admin/Ads/Index.jsx": () => import("./assets/Index-CynTnDak.js"), "./Pages/Admin/Blog/CreateEdit.jsx": () => import("./assets/CreateEdit-jqdU-wc-.js"), "./Pages/Admin/Blog/Index.jsx": () => import("./assets/Index-DGZQCA0C.js"), "./Pages/Admin/Email/CreateEdit.jsx": () => import("./assets/CreateEdit-AEow00dC.js"), "./Pages/Admin/Email/Index.jsx": () => import("./assets/Index-DbWC_6Yf.js"), "./Pages/Admin/Email/Send.jsx": () => import("./assets/Send-D1QLa-AR.js"), "./Pages/Admin/Email/Settings.jsx": () => import("./assets/Settings-C49NoCNK.js"), "./Pages/Admin/FeatureManagement.jsx": () => import("./assets/FeatureManagement-Bsdaq94k.js"), "./Pages/Admin/FrontManagement.jsx": () => import("./assets/FrontManagement-DkiG1ZOy.js"), "./Pages/Admin/Info.jsx": () => import("./assets/Info-WpSREvtm.js"), "./Pages/Admin/Pages/CreateEdit.jsx": () => import("./assets/CreateEdit-CDL3OVqP.js"), "./Pages/Admin/Pages/Index.jsx": () => import("./assets/Index-BilSqdWA.js"), "./Pages/Admin/Payouts/Index.jsx": () => import("./assets/Index-BxlvcgUH.js"), "./Pages/Admin/Sales/Index.jsx": () => import("./assets/Index-Dnvda02T.js"), "./Pages/Admin/Sales/PaidProjects.jsx": () => import("./assets/PaidProjects-BdEoMvvn.js"), "./Pages/Admin/SubscriptionSettings.jsx": () => import("./assets/SubscriptionSettings-CJYwzNlP.js"), "./Pages/Admin/Support.jsx": () => import("./assets/Support-BWd2Sa1g.js"), "./Pages/Admin/Update.jsx": () => import("./assets/Update-Ba7nkDl8.js"), "./Pages/Admin/UserManagement.jsx": () => import("./assets/UserManagement-DNZWHLqO.js"), "./Pages/Auth/ConfirmPassword.jsx": () => import("./assets/ConfirmPassword-deTSD6qF.js"), "./Pages/Auth/ForgotPassword.jsx": () => import("./assets/ForgotPassword-enBZSXoZ.js"), "./Pages/Auth/Login.jsx": () => import("./assets/Login-DqKSh0qt.js"), "./Pages/Auth/Register.jsx": () => import("./assets/Register-DQdprvws.js"), "./Pages/Auth/ResetPassword.jsx": () => import("./assets/ResetPassword-C-NpV9uY.js"), "./Pages/Auth/VerifyEmail.jsx": () => import("./assets/VerifyEmail-sO3q2ufd.js"), "./Pages/Blog/Index.jsx": () => import("./assets/Index-_meRhdVz.js"), "./Pages/Blog/Show.jsx": () => import("./assets/Show-Bt9NjLjp.js"), "./Pages/Checkout.jsx": () => import("./assets/Checkout-C0tLR3zy.js"), "./Pages/CloudSync.jsx": () => import("./assets/CloudSync-BLYq4KdC.js"), "./Pages/Dashboard.jsx": () => import("./assets/Dashboard-BW25kyLc.js"), "./Pages/Editor.jsx": () => import("./assets/Editor-Dh13fSi_.js"), "./Pages/Explore.jsx": () => import("./assets/Explore-JEuKHaRD.js"), "./Pages/Marketplace.jsx": () => import("./assets/Marketplace-D0q99LFB.js"), "./Pages/MarketplaceProduct.jsx": () => import("./assets/MarketplaceProduct-Bejf5GSB.js"), "./Pages/MyAccount.jsx": () => import("./assets/MyAccount-BbLLVJ0M.js"), "./Pages/MyProjects.jsx": () => import("./assets/MyProjects-DMYhrBua.js"), "./Pages/Page.jsx": () => import("./assets/Page-DpCFyrJB.js"), "./Pages/PaymentStatus.jsx": () => import("./assets/PaymentStatus-Dfwsincz.js"), "./Pages/Profile/Edit.jsx": () => import("./assets/Edit-D_MVxEL3.js"), "./Pages/Profile/Partials/DeleteUserForm.jsx": () => import("./assets/DeleteUserForm-BTWD-efZ.js"), "./Pages/Profile/Partials/IdentityVerificationForm.jsx": () => import("./assets/IdentityVerificationForm-H9PFSPP6.js"), "./Pages/Profile/Partials/UpdatePasswordForm.jsx": () => import("./assets/UpdatePasswordForm-BdyY6w2r.js"), "./Pages/Profile/Partials/UpdateProfileInformationForm.jsx": () => import("./assets/UpdateProfileInformationForm-CNo_7Ror.js"), "./Pages/ProjectView.jsx": () => import("./assets/ProjectView-DOweha4H.js"), "./Pages/Support.jsx": () => import("./assets/Support-DzvXDN7m.js"), "./Pages/Teams/Index.jsx": () => import("./assets/Index-CGkItMFH.js"), "./Pages/Teams/Show.jsx": () => import("./assets/Show-BEqrbzW4.js"), "./Pages/VendorProfile.jsx": () => import("./assets/VendorProfile-SN3Ezr2G.js"), "./Pages/Vendors/Dashboard.jsx": () => import("./assets/Dashboard-hq4Iqo_N.js"), "./Pages/Vendors/Payments.jsx": () => import("./assets/Payments-CHFHALCj.js"), "./Pages/Vendors/Projects.jsx": () => import("./assets/Projects-B-tXgEl4.js"), "./Pages/Vendors/SdkIntegration.jsx": () => import("./assets/SdkIntegration-Dt_-Kwin.js"), "./Pages/Vendors/Sell.jsx": () => import("./assets/Sell-DjFUzPov.js"), "./Pages/Welcome.jsx": () => import("./assets/Welcome-CkCIHv-n.js") })),
+    setup: ({ App, props }) => {
+      return /* @__PURE__ */ jsx(App, { ...props });
+    }
+  })
+);

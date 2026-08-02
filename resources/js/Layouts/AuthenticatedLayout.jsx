@@ -1,9 +1,33 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { 
     LayoutDashboard, 
     Code2, 
     LogOut, 
+    Share2,
     ChevronLeft, 
     ChevronRight,
     Menu,
@@ -38,9 +62,10 @@ import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 import NotificationDropdown from '@/Components/Visuals/NotificationDropdown';
 import UserLevelBadge from '@/Components/Visuals/UserLevelBadge';
 import Dropdown from '@/Components/Dropdown';
+import NoInternetOverlay from '@/Components/NoInternetOverlay';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const { auth } = usePage().props;
+    const { auth, siteSettings } = usePage().props;
     const user = auth?.user;
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -63,7 +88,8 @@ export default function AuthenticatedLayout({ header, children }) {
             { name: 'SDK & APIs', icon: FileCode, href: route('vendors.sdk-integration'), active: route().current('vendors.sdk-integration') },
             { name: 'Payments', icon: DollarSign, href: route('vendors.payments'), active: route().current('vendors.payments') },
             { name: 'Sell Product', icon: Store, href: route('vendors.sell'), active: route().current('vendors.sell') },
-            { name: 'Marketplace', icon: ShoppingBag, href: route('marketplace'), active: route().current('marketplace') },
+            { name: 'Explore', icon: Compass, href: route('explore'), active: route().current('explore') },
+            { name: 'Profile Settings', icon: Settings, href: route('vendors.settings'), active: route().current('vendors.settings') },
         ];
 
     const adminItems = [
@@ -76,6 +102,8 @@ export default function AuthenticatedLayout({ header, children }) {
         { name: 'Vendor Payouts', icon: Wallet, href: route('admin.payouts.index'), active: route().current('admin.payouts.*') },
         { name: 'Mail System', icon: Mail, href: route('admin.email.index'), active: route().current('admin.email.index') },
         { name: 'SMTP Config', icon: Settings, href: route('admin.email.settings'), active: route().current('admin.email.settings') },
+        { name: 'Social Media', icon: Share2, href: route('admin.social-media.settings'), active: route().current('admin.social-media.*') },
+        { name: 'Queue Monitor', icon: Activity, href: route('admin.queue.index'), active: route().current('admin.queue.*') },
         { name: 'Support Queue', icon: LifeBuoy, href: route('admin.support'), active: route().current('admin.support') },
         { name: 'Front Management', icon: LayoutDashboard, href: route('admin.front-management'), active: route().current('admin.front-management') },
         { name: 'Feature Management', icon: Shield, href: route('admin.features'), active: route().current('admin.features') },
@@ -95,11 +123,17 @@ export default function AuthenticatedLayout({ header, children }) {
             >
                 <div className="h-20 flex items-center px-6 border-b border-[var(--border)] shrink-0">
                     <Link href="/" className="flex items-center gap-3">
-                        <div className="p-2 bg-cyan-500 text-white dark:bg-white dark:black rounded">
-                            <Code2 size={20} />
-                        </div>
+                        {siteSettings?.site_logo ? (
+                            <img src={siteSettings.site_logo} alt="Logo" className="h-8 w-auto object-contain" />
+                        ) : (
+                            <div className="p-2 bg-cyan-500 text-black dark:text-white rounded">
+                                <Code2 size={20} />
+                            </div>
+                        )}
                         {isSidebarOpen && (
-                            <span className="font-bold tracking-tight text-[var(--text-main)] uppercase italic">HOACodeLab</span>
+                            <span className="font-bold tracking-tight text-[var(--text-main)] uppercase italic">
+                                {siteSettings?.site_name || 'HOACodeLab'}
+                            </span>
                         )}
                     </Link>
                 </div>
@@ -112,7 +146,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <Link 
                                     key={item.name}
                                     href={item.href}
-                                    className={`flex items-center gap-4 p-3 rounded transition-all ${item.active ? 'bg-cyan-500 text-white dark:text-black font-bold' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-elevated)]'}`}
+                                    className={`flex items-center gap-4 p-3 rounded transition-all ${item.active ? 'bg-cyan-500 text-black dark:text-white font-bold' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-elevated)]'}`}
                                 >
                                     <item.icon size={18} />
                                     {isSidebarOpen && <span className="text-[10px] uppercase tracking-widest">{item.name}</span>}
@@ -131,7 +165,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     <Link 
                                         key={item.name}
                                         href={item.href}
-                                        className={`flex items-center gap-4 p-3 rounded transition-all ${item.active ? 'bg-purple-500 text-white font-bold' : 'text-[var(--text-muted)] hover:text-purple-500 hover:bg-purple-500/5'}`}
+                                        className={`flex items-center gap-4 p-3 rounded transition-all ${item.active ? 'bg-purple-500 text-black dark:text-white font-bold' : 'text-[var(--text-muted)] hover:text-purple-500 hover:bg-purple-500/5'}`}
                                     >
                                         <item.icon size={18} />
                                         {isSidebarOpen && <span className="text-[10px] uppercase tracking-widest">{item.name}</span>}
@@ -150,7 +184,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     <Link 
                                         key={item.name}
                                         href={item.href}
-                                        className={`flex items-center gap-4 p-3 rounded transition-all ${item.active ? 'bg-rose-500 text-white font-bold' : 'text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/5'}`}
+                                        className={`flex items-center gap-4 p-3 rounded transition-all ${item.active ? 'bg-rose-500 text-black dark:text-white font-bold' : 'text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/5'}`}
                                     >
                                         <item.icon size={18} />
                                         {isSidebarOpen && <span className="text-[10px] uppercase tracking-widest">{item.name}</span>}
@@ -196,7 +230,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                         </div>
                                         <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase mt-1">Online</p>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-all shadow-lg overflow-hidden">
+                                    <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-black dark:group-hover:text-white transition-all shadow-lg overflow-hidden">
                                         <Users size={18} />
                                     </div>
                                 </button>
@@ -217,8 +251,14 @@ export default function AuthenticatedLayout({ header, children }) {
 
                 <header className="lg:hidden h-16 bg-[var(--bg-surface)] border-b border-[var(--border)] px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
                     <Link href="/" className="flex items-center gap-3">
-                        <Code2 className="text-cyan-500 dark:text-cyan-400" size={20} />
-                        <span className="font-bold text-[var(--text-main)] text-sm uppercase italic">HOACodeLab</span>
+                        {siteSettings?.site_logo ? (
+                            <img src={siteSettings.site_logo} alt="Logo" className="h-6 w-auto object-contain" />
+                        ) : (
+                            <Code2 className="text-cyan-500 dark:text-cyan-400" size={20} />
+                        )}
+                        <span className="font-bold text-[var(--text-main)] text-sm uppercase italic">
+                            {siteSettings?.site_name || 'HOACodeLab'}
+                        </span>
                     </Link>
                     <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-[var(--text-muted)]"><Menu size={20} /></button>
                 </header>
@@ -236,14 +276,20 @@ export default function AuthenticatedLayout({ header, children }) {
                         <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed right-0 top-0 bottom-0 w-72 bg-[var(--bg-surface)] border-l border-[var(--border)] z-[70] p-8 flex flex-col lg:hidden shadow-2xl">
                             <div className="flex justify-between items-center mb-12">
                                 <div className="flex items-center gap-3">
-                                    <Code2 className="text-cyan-500" size={24} />
-                                    <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)]">System</span>
+                                    {siteSettings?.site_logo ? (
+                                        <img src={siteSettings.site_logo} alt="Logo" className="h-6 w-auto object-contain" />
+                                    ) : (
+                                        <Code2 className="text-cyan-500" size={24} />
+                                    )}
+                                    <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-main)]">
+                                        {siteSettings?.site_name || 'System'}
+                                    </span>
                                 </div>
                                 <button onClick={() => setIsMobileMenuOpen(false)} className="text-[var(--text-muted)] hover:text-[var(--text-main)]"><X size={20} /></button>
                             </div>
                             <nav className="flex-1 space-y-2 overflow-y-auto pb-6">
                                 {userItems.map((item) => (
-                                    <Link key={item.name} href={item.href} className={`flex items-center gap-4 p-4 rounded ${item.active ? 'bg-cyan-500 text-white dark:text-black font-bold' : 'text-[var(--text-muted)]'}`}>
+                                    <Link key={item.name} href={item.href} className={`flex items-center gap-4 p-4 rounded ${item.active ? 'bg-cyan-500 text-black dark:text-white font-bold' : 'text-[var(--text-muted)]'}`}>
                                         <item.icon size={18} />
                                         <span className="uppercase tracking-widest text-[10px]">{item.name}</span>
                                     </Link>
@@ -254,7 +300,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                         <div className="h-px bg-[var(--border)] mx-4 mb-4" />
                                         <div className="px-4 mb-2 text-[9px] font-bold text-purple-500/80 uppercase tracking-[0.3em]">Vendors Portal</div>
                                         {vendorItems.map((item) => (
-                                            <Link key={item.name} href={item.href} className={`flex items-center gap-4 p-4 rounded ${item.active ? 'bg-purple-500 text-white font-bold' : 'text-[var(--text-muted)]'}`}>
+                                            <Link key={item.name} href={item.href} className={`flex items-center gap-4 p-4 rounded ${item.active ? 'bg-purple-500 text-black dark:text-white font-bold' : 'text-[var(--text-muted)]'}`}>
                                                 <item.icon size={18} />
                                                 <span className="uppercase tracking-widest text-[10px]">{item.name}</span>
                                             </Link>
@@ -267,7 +313,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                         <div className="h-px bg-[var(--border)] mx-4 mb-4" />
                                         <div className="px-4 mb-2 text-[9px] font-bold text-rose-500/60 uppercase tracking-[0.3em]">Command</div>
                                         {adminItems.map((item) => (
-                                            <Link key={item.name} href={item.href} className={`flex items-center gap-4 p-4 rounded ${item.active ? 'bg-rose-500 text-white font-bold' : 'text-[var(--text-muted)]'}`}>
+                                            <Link key={item.name} href={item.href} className={`flex items-center gap-4 p-4 rounded ${item.active ? 'bg-rose-500 text-black dark:text-white font-bold' : 'text-[var(--text-muted)]'}`}>
                                                 <item.icon size={18} />
                                                 <span className="uppercase tracking-widest text-[10px]">{item.name}</span>
                                             </Link>
@@ -288,6 +334,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     </>
                 )}
             </AnimatePresence>
+            <NoInternetOverlay />
         </div>
     );
 }

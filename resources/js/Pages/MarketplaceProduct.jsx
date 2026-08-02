@@ -1,9 +1,33 @@
+/*
+|--------------------------------------------------------------------------
+| HelpOfAi (HOA) Professional Software
+|--------------------------------------------------------------------------
+|
+| Copyright (c) 2026 Rajib Adhikary. All Rights Reserved.
+|
+| This file is part of the HelpOfAi Professional Software Suite.
+| Unauthorized copying, modification, redistribution, reverse engineering,
+| decompilation, or commercial use of this source code, in whole or in part,
+| is strictly prohibited without prior written permission from the copyright owner.
+|
+| Author      : Rajib Adhikary
+| Organization: HelpOfAi (HOA)
+| Website     : https://helpofai.com
+| Location    : Basta Purba Para, Aranghata, Nadia, West Bengal, India
+|
+| This source code contains proprietary and confidential information.
+| Any unauthorized access or distribution may violate applicable copyright laws.
+|
+|--------------------------------------------------------------------------
+*/
+
 import React, { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { ShoppingCart, ShoppingBag, ExternalLink, Github, Zap, Shield, Key, Download, CheckCircle2, User, Clock, Code2, Package, ShieldCheck, Star, FileCode } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import UserLevelBadge from '@/Components/Visuals/UserLevelBadge';
 
 export default function MarketplaceProduct({ project, canEdit }) {
     const { auth } = usePage().props;
@@ -160,34 +184,31 @@ export default function MarketplaceProduct({ project, canEdit }) {
                                             <ShieldCheck size={14} className="text-emerald-500" title="Verified Identity" />
                                         )}
                                     </p>
-                                    <div className="flex items-center gap-1 mt-1">
-                                        <Star size={10} className="text-amber-400 fill-amber-400" />
-                                        <span className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-[0.2em]">
-                                            {project.user?.level ? `Level ${project.user.level} Vendor` : 'New Vendor'}
-                                        </span>
+                                    <div className="mt-1.5">
+                                        <UserLevelBadge level={project.user?.level || 1} size="sm" />
                                     </div>
                                 </div>
                             </div>
                             
                             {/* Product Metadata */}
-                            <div className="bg-[var(--bg-elevated)] p-5 rounded-2xl border border-[var(--border)] mt-6 mb-6 space-y-4 shadow-inner">
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className="text-[var(--text-muted)] font-bold uppercase tracking-wider flex items-center gap-2">
+                            <div className="grid grid-cols-1 gap-3 mt-8 mb-8">
+                                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-[var(--bg-elevated)] to-transparent border-l-2 border-cyan-500 rounded-r-2xl group hover:from-cyan-500/10 transition-colors">
+                                    <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest flex items-center gap-2 group-hover:text-cyan-500 transition-colors">
                                         <FileCode size={14} className="text-cyan-500"/> License
                                     </span>
-                                    <span className="text-[var(--text-main)] font-black uppercase bg-[var(--bg-main)] px-2 py-1 rounded border border-[var(--border)] shadow-sm">Standard</span>
+                                    <span className="text-[10px] text-cyan-400 font-black uppercase tracking-widest bg-cyan-500/10 px-3 py-1 rounded-md border border-cyan-500/20 shadow-[0_0_10px_rgba(6,182,212,0.2)]">Standard</span>
                                 </div>
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className="text-[var(--text-muted)] font-bold uppercase tracking-wider flex items-center gap-2">
+                                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-[var(--bg-elevated)] to-transparent border-l-2 border-purple-500 rounded-r-2xl group hover:from-purple-500/10 transition-colors">
+                                    <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest flex items-center gap-2 group-hover:text-purple-500 transition-colors">
                                         <Clock size={14} className="text-purple-500"/> Updated
                                     </span>
-                                    <span className="text-[var(--text-main)] font-black uppercase bg-[var(--bg-main)] px-2 py-1 rounded border border-[var(--border)] shadow-sm">Recently</span>
+                                    <span className="text-[10px] text-purple-400 font-black uppercase tracking-widest bg-purple-500/10 px-3 py-1 rounded-md border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]">Recently</span>
                                 </div>
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className="text-[var(--text-muted)] font-bold uppercase tracking-wider flex items-center gap-2">
+                                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-[var(--bg-elevated)] to-transparent border-l-2 border-emerald-500 rounded-r-2xl group hover:from-emerald-500/10 transition-colors">
+                                    <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest flex items-center gap-2 group-hover:text-emerald-500 transition-colors">
                                         <Package size={14} className="text-emerald-500"/> Version
                                     </span>
-                                    <span className="text-[var(--text-main)] font-black uppercase bg-[var(--bg-main)] px-2 py-1 rounded border border-[var(--border)] shadow-sm">{project.version || '1.0.0'}</span>
+                                    <span className="text-[10px] text-emerald-400 font-black uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-md border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">{project.version || '1.0.0'}</span>
                                 </div>
                             </div>
 

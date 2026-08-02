@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, useForm } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -6,6 +6,8 @@ import {
     Menu, X, Shield, User,
     Github, Share2, Sparkles, Activity
 } from 'lucide-react';
+import { useToast } from '@/Components/Toast/ToastProvider';
+import NoInternetOverlay from '@/Components/NoInternetOverlay';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 import ProBackground from '@/Components/Visuals/ProBackground';
 import NotificationDropdown from '@/Components/Visuals/NotificationDropdown';
@@ -15,6 +17,29 @@ export default function PublicLayout({ children }) {
     const { auth, siteSettings, globalAds } = usePage().props;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const toast = useToast();
+
+    const { data, setData, post, processing, reset, errors } = useForm({
+        email: '',
+    });
+
+    const submitNewsletter = (e) => {
+        e.preventDefault();
+        post(route('newsletter.subscribe'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Successfully subscribed to the newsletter!');
+                reset('email');
+            },
+            onError: (errs) => {
+                if (errs.email) {
+                    toast.error(errs.email);
+                } else {
+                    toast.error('Failed to subscribe. Please try again.');
+                }
+            }
+        });
+    };
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -52,9 +77,10 @@ export default function PublicLayout({ children }) {
                         <div className="hidden sm:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] border-l border-[var(--border)] pl-6 h-6">
                             <a href="/#features" className="hover:text-cyan-500 transition-colors">Features</a>
                             <Link href={route('explore')} className="hover:text-cyan-500 transition-colors">Explore</Link>
-                            <Link href={route('marketplace')} className="hover:text-cyan-500 transition-colors">Marketplace</Link>
-                            <Link href={route('blog.index')} className="hover:text-cyan-500 transition-colors">Blog</Link>
-                            <Link href="/p/about" className="hover:text-cyan-500 transition-colors">About</Link>
+                            <Link href={route('public.search')} className="hover:text-cyan-500 transition-colors">Search</Link>
+                            <Link href={route('public.categories.index')} className="hover:text-cyan-500 transition-colors">Categories</Link>
+                            <Link href={route('public.tags.index')} className="hover:text-cyan-500 transition-colors hidden lg:block">Tags</Link>
+                            <Link href={route('blog.index')} className="hover:text-cyan-500 transition-colors hidden md:block">Blog</Link>
                         </div>
                     </div>
 
@@ -97,10 +123,13 @@ export default function PublicLayout({ children }) {
                             <nav className="flex-1 space-y-6">
                                 {[
                                     { name: 'Home', href: '/' },
+                                    { name: 'Explore', href: route('explore') },
+                                    { name: 'Search', href: route('public.search') },
+                                    { name: 'Categories', href: route('public.categories.index') },
+                                    { name: 'Tags', href: route('public.tags.index') },
                                     { name: 'Features', href: '/#features' },
                                     { name: 'Blog', href: route('blog.index') },
                                     { name: 'About', href: '/p/about' },
-                                    { name: 'Pricing', href: '/#pricing' },
                                 ].map((item) => (
                                     <Link 
                                         key={item.name} 
@@ -136,10 +165,14 @@ export default function PublicLayout({ children }) {
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24">
                         <div className="lg:col-span-4 space-y-8 text-left">
-                            <div className="flex items-center gap-4">
-                                <div className="p-2 bg-[var(--text-main)] text-[var(--bg-main)] rounded"><Code2 size={24} /></div>
-                                <span className="text-2xl font-black tracking-tighter text-[var(--text-main)] uppercase italic">HOACodeLab</span>
-                            </div>
+                            <Link href="/" className="flex items-center gap-4">
+                                {siteSettings?.site_logo ? (
+                                    <img src={siteSettings.site_logo} alt="Logo" className="h-10 w-auto object-contain" />
+                                ) : (
+                                    <div className="p-2 bg-[var(--text-main)] text-[var(--bg-main)] rounded"><Code2 size={24} /></div>
+                                )}
+                                <span className="text-2xl font-black tracking-tighter text-[var(--text-main)] uppercase italic">{siteSettings?.site_name || 'HOACodeLab'}</span>
+                            </Link>
                             <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest max-w-xs leading-loose italic">Secure. Scalable. Optimized development substrate for modern web creators.</p>
                             <div className="flex gap-4">
                                 {[Github, Share2, Globe].map((Icon, i) => (<a key={i} href="#" className="p-3 border border-[var(--border)] rounded-full text-[var(--text-muted)] hover:text-cyan-500 transition-all"><Icon size={16} /></a>))}
@@ -148,10 +181,11 @@ export default function PublicLayout({ children }) {
                         <div className="lg:col-span-2 space-y-8 text-left">
                             <h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Platform</h4>
                             <ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                                <li><a href="/#features" className="hover:text-white transition-colors">Features</a></li>
-                                <li><a href="/#pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                                <li><Link href={route('blog.index')} className="hover:text-white transition-colors">Blog</Link></li>
-                                <li><Link href="/p/about" className="hover:text-white transition-colors">About</Link></li>
+                                <li><a href="/#features" className="hover:text-[var(--text-main)] transition-colors">Features</a></li>
+                                <li><a href="/#pricing" className="hover:text-[var(--text-main)] transition-colors">Pricing</a></li>
+                                <li><Link href={route('public.categories.index')} className="hover:text-[var(--text-main)] transition-colors">Categories</Link></li>
+                                <li><Link href={route('public.tags.index')} className="hover:text-[var(--text-main)] transition-colors">Tags</Link></li>
+                                <li><Link href={route('blog.index')} className="hover:text-[var(--text-main)] transition-colors">Blog</Link></li>
                             </ul>
                         </div>
                         <div className="lg:col-span-2 space-y-8 text-left">
@@ -165,14 +199,30 @@ export default function PublicLayout({ children }) {
                         <div className="lg:col-span-4 space-y-8 text-left">
                             <h4 className="text-[9px] font-black uppercase tracking-[0.5em] text-cyan-500 italic">Newsletter</h4>
                             <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Subscribe for system patches.</p>
-                            <form className="flex gap-2">
-                                <input type="email" placeholder="USER@NET.LINK" className="flex-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded px-4 py-3 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-cyan-500" />
-                                <button className="px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] font-black uppercase text-[10px] tracking-widest rounded hover:bg-cyan-500 hover:text-white transition-colors shadow-lg">Join</button>
+                            <form className="flex flex-col gap-2 relative" onSubmit={submitNewsletter}>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="email" 
+                                        placeholder="USER@NET.LINK" 
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                        className="flex-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded px-4 py-3 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-cyan-500" 
+                                        required
+                                    />
+                                    <button 
+                                        type="submit"
+                                        disabled={processing}
+                                        className="px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] font-black uppercase text-[10px] tracking-widest rounded hover:bg-cyan-500 hover:text-white transition-colors shadow-lg disabled:opacity-50"
+                                    >
+                                        {processing ? '...' : 'Join'}
+                                    </button>
+                                </div>
+                                {errors.email && <div className="text-[10px] text-rose-500 font-bold uppercase tracking-widest">{errors.email}</div>}
                             </form>
                         </div>
                     </div>
                     <div className="pt-12 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-6 text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em]">
-                        <span>© 2026 HOACodeLab // All Rights Reserved</span>
+                        <span>© 2026 {siteSettings?.site_name || 'HOACodeLab'} // All Rights Reserved</span>
                         <div className="flex items-center gap-3 px-4 py-1.5 bg-[var(--bg-surface)] border border-[var(--border)] rounded-full">
                             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                             <span>Systems Operational</span>
@@ -180,6 +230,7 @@ export default function PublicLayout({ children }) {
                     </div>
                 </div>
             </footer>
+            <NoInternetOverlay />
         </div>
     );
 }
