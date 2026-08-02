@@ -244,6 +244,24 @@ class VendorController extends Controller
         });
 
         $markdownFiles = [];
+        $projectVersion = '1.0.0';
+
+        // Also fetch package.json or composer.json to extract the version
+        $configFiles = collect($response->json())->filter(function ($file) {
+            return $file['type'] === 'file' && in_array(strtolower($file['name']), ['package.json', 'composer.json']);
+        });
+
+        foreach ($configFiles as $file) {
+            $contentResponse = $http->withToken($githubConnection->token)->get($file['download_url']);
+            if ($contentResponse->successful()) {
+                $json = json_decode($contentResponse->body(), true);
+                if (isset($json['version'])) {
+                    $projectVersion = $json['version'];
+                    break; // Use the first found version
+                }
+            }
+        }
+
         foreach ($files as $file) {
             $contentResponse = $http->withToken($githubConnection->token)->get($file['download_url']);
             if ($contentResponse->successful()) {
@@ -271,7 +289,8 @@ class VendorController extends Controller
 
         return response()->json([
             'markdown_files' => array_values($markdownFiles),
-            'commits' => $commits
+            'commits' => $commits,
+            'version' => $projectVersion
         ]);
     }
 }

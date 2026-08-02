@@ -19,7 +19,8 @@ export default function Sell() {
         tags: '',
         support_duration: '6_months',
         markdown_files: [],
-        github_commits: []
+        github_commits: [],
+        github_version: '1.0.0'
     });
 
     const [showTerminal, setShowTerminal] = useState(false);
@@ -121,6 +122,7 @@ export default function Sell() {
                 is_private: false,
                 price: parseFloat(formData.price),
                 github_repo_url: formData.github_repo_url,
+                version: formData.github_version,
                 settings: {
                     demo_url: formData.demo_url,
                     markdown_files: formData.markdown_files || [],
@@ -315,8 +317,8 @@ export default function Sell() {
                                                 if (!formData.github_repo_url) return toast.error("Please enter a GitHub URL first.");
                                                 try {
                                                     const res = await axios.post('/api/vendors/github/fetch-md', { repo_url: formData.github_repo_url });
-                                                    setFormData({...formData, markdown_files: res.data.markdown_files, github_commits: res.data.commits || []});
-                                                    toast.success(`Fetched ${res.data.markdown_files.length} markdown file(s) and commit history!`);
+                                                    setFormData({...formData, markdown_files: res.data.markdown_files, github_commits: res.data.commits || [], github_version: res.data.version || '1.0.0'});
+                                                    toast.success(`Fetched v${res.data.version || '1.0.0'}, ${res.data.markdown_files.length} doc(s) and commit history!`);
                                                 } catch (e) {
                                                     toast.error(e.response?.data?.message || "Failed to fetch markdown files.");
                                                 }
@@ -333,7 +335,12 @@ export default function Sell() {
                                     
                                     {formData.markdown_files?.length > 0 && (
                                         <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                                            <p className="text-xs font-bold text-emerald-500 mb-2">Ready to publish:</p>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <p className="text-xs font-bold text-emerald-500">Ready to publish:</p>
+                                                <span className="text-[10px] bg-emerald-500/20 text-emerald-500 px-2 py-1 rounded font-bold">
+                                                    v{formData.github_version}
+                                                </span>
+                                            </div>
                                             <ul className="list-disc list-inside text-sm text-[var(--text-main)]">
                                                 {formData.markdown_files.map((md, idx) => (
                                                     <li key={idx} className="font-mono">{md.name}</li>

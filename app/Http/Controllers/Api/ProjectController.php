@@ -45,6 +45,7 @@ class ProjectController extends Controller
             'is_for_sale' => 'boolean',
             'price' => 'nullable|numeric|min:0',
             'team_id' => 'nullable|exists:teams,id',
+            'version' => 'nullable|string',
         ]);
 
         // If team_id is provided, verify user is member of that team
@@ -88,6 +89,7 @@ class ProjectController extends Controller
             'is_private' => $isPrivate,
             'is_for_sale' => $validated['is_for_sale'] ?? false,
             'price' => $validated['price'] ?? 0.00,
+            'version' => $validated['version'] ?? '1.0.0',
             'support_duration' => $validated['settings']['support_duration'] ?? '6_months',
         ]);
 

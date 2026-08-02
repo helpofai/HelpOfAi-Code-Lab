@@ -174,6 +174,11 @@ export default function ProjectView({ project, canEdit }) {
                                     <Clock size={12} className="text-cyan-500" />
                                     {new Date(project.created_at).toLocaleDateString()}
                                 </span>
+                                {project.version && (
+                                    <span className="flex items-center gap-2 px-2 py-0.5 bg-cyan-500/10 text-cyan-500 rounded font-bold">
+                                        v{project.version}
+                                    </span>
+                                )}
                             </div>
                         </div>
 
