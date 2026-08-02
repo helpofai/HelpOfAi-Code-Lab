@@ -2,6 +2,12 @@
 
 Systematic documentation of all protocol upgrades, module injections, and core optimisations for the HOACodeLab environment.
 
+## [1.18.1] - MIGRATION_IDEMPOTENCY_PATCH - 2026-08-03
+
+### 🛠️ Migration Hardening
+- **Idempotency Matrix:** Wrapped all recent database migrations (`reviews`, `newsletter_subscribers`, `social_media_logs`, `banned_ips`) with `Schema::hasTable` conditional guards.
+- **Legacy Schema Safety:** Refactored foreign keys in the `reviews` table migration from strict `constrained()` methods to raw integer indices to prevent engine-mismatch crashes on legacy shared hosting.
+
 ## [1.18.0] - SECURITY_AND_FIREWALL - 2026-08-02
 
 ### 🛡️ Advanced Application Firewall

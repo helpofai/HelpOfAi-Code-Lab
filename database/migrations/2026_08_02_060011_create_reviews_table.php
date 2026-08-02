@@ -34,18 +34,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reviews', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('project_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->tinyInteger('rating')->unsigned(); // 1 to 5
-            $table->text('comment')->nullable();
-            $table->boolean('is_approved')->default(true);
-            $table->timestamps();
-            
-            // A user can only review a project once
-            $table->unique(['project_id', 'user_id']);
-        });
+        if (!Schema::hasTable('reviews')) {
+            Schema::create('reviews', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('project_id');
+                $table->index('project_id');
+                $table->unsignedBigInteger('user_id');
+                $table->index('user_id');
+                $table->tinyInteger('rating')->unsigned(); // 1 to 5
+                $table->text('comment')->nullable();
+                $table->boolean('is_approved')->default(true);
+                $table->timestamps();
+                
+                // A user can only review a project once
+                $table->unique(['project_id', 'user_id']);
+            });
+        }
     }
 
     /**
