@@ -25,7 +25,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import React from 'react';
 import { FileText, Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 
 export default function BlogIndex({ posts }) {
@@ -37,8 +36,7 @@ export default function BlogIndex({ posts }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex justify-between items-center w-full">
                         <div className="flex items-center space-x-4">

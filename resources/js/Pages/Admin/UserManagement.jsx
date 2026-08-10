@@ -39,7 +39,6 @@ import TextInput from '@/Components/TextInput';
 import PrimaryButton from '@/Components/PrimaryButton';
 import InputLabel from '@/Components/InputLabel';
 import { useToast } from '@/Components/Toast/ToastProvider';
-import ProBackground from '@/Components/Visuals/ProBackground';
 
 export default function UserManagement() {
     const { auth } = usePage().props;
@@ -171,8 +170,7 @@ export default function UserManagement() {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                 <div className="flex justify-between items-center w-full text-left">
                     <div className="flex items-center space-x-4 text-left">

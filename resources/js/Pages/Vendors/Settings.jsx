@@ -28,7 +28,6 @@ import { Save, User, Wallet, FileText, Link as LinkIcon, Shield } from 'lucide-r
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import { useToast } from '@/Components/Toast/ToastProvider';
 import axios from 'axios';
@@ -77,8 +76,7 @@ export default function VendorSettings() {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg text-purple-500">

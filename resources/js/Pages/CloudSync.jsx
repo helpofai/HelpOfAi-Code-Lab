@@ -34,7 +34,6 @@ import {
     Save, Lock, CheckCircle2, FolderPlus, Link as LinkIcon, Code2,
     LayoutGrid, List
 } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import { useToast } from '@/Components/Toast/ToastProvider';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
@@ -210,8 +209,7 @@ export default function CloudSync() {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-cyan-500/30 relative overflow-hidden transition-colors duration-300">
-            <ProBackground />
-
+            
             <AuthenticatedLayout
                 header={
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-6 relative z-10 text-left">
@@ -419,8 +417,13 @@ export default function CloudSync() {
                                                 <h4 className="text-lg font-black uppercase italic tracking-tight text-white">01. Enable Google Drive API</h4>
                                                 <span className="text-[8px] font-black uppercase px-2 py-1 bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 rounded-md">Google Cloud Console</span>
                                             </div>
-                                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 text-[10px] font-bold uppercase tracking-widest leading-loose text-[var(--text-muted)] italic">
-                                                Open the <a href="https://console.cloud.google.com" target="_blank" className="text-cyan-400 underline">Google_Cloud_Dashboard</a> and create a project. In the <span className="text-white">Library</span>, enable the <span className="text-white underline">Google_Drive_API</span>. This grants the kernel permission to interact with satellite storage.
+                                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 text-[11px] font-medium tracking-wide leading-relaxed text-[var(--text-muted)]">
+                                                <ol className="list-decimal list-inside space-y-2">
+                                                    <li>Go to the <a href="https://console.cloud.google.com" target="_blank" className="text-cyan-400 underline font-bold hover:text-cyan-300 transition-colors">Google Cloud Console</a>.</li>
+                                                    <li>Click <span className="text-white font-bold">"Select a project"</span> (top left) then <span className="text-white font-bold">"NEW PROJECT"</span>. Give it a name like "HOACodeLab" and click <span className="text-white font-bold">Create</span>.</li>
+                                                    <li>In the search bar at the top, type <span className="text-white font-bold">"Google Drive API"</span> and click on it.</li>
+                                                    <li>Click the blue <span className="text-white font-bold">"ENABLE"</span> button.</li>
+                                                </ol>
                                             </div>
                                         </div>
                                     </div>
@@ -436,9 +439,14 @@ export default function CloudSync() {
                                                 <span className="text-[8px] font-black uppercase px-2 py-1 bg-purple-500/10 text-purple-500 border border-purple-500/20 rounded-md text-left">OAuth Client ID</span>
                                             </div>
                                             <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 space-y-6">
-                                                <p className="text-[10px] font-bold uppercase tracking-widest leading-loose text-[var(--text-muted)] italic">
-                                                    Create an <span className="text-white font-black">OAuth_2.0_Client_ID</span> (Web Application). Inject the following URI into the <span className="text-white">Authorized Redirect URIs</span> field:
-                                                </p>
+                                                <div className="text-[11px] font-medium tracking-wide leading-relaxed text-[var(--text-muted)]">
+                                                    <ol className="list-decimal list-inside space-y-2">
+                                                        <li>In the left sidebar, click <span className="text-white font-bold">"APIs & Services"</span> then <span className="text-white font-bold">"Credentials"</span>.</li>
+                                                        <li>Click <span className="text-white font-bold">"+ CREATE CREDENTIALS"</span> and select <span className="text-white font-bold">"OAuth client ID"</span>.</li>
+                                                        <li>For Application type, select <span className="text-white font-bold">"Web application"</span>.</li>
+                                                        <li>Paste this Callback URL into the <span className="text-white font-bold">Authorized Redirect URIs</span> field:</li>
+                                                    </ol>
+                                                </div>
                                                 <div className="group relative">
                                                     <code className="block bg-black px-4 py-3 rounded-xl text-emerald-500 lowercase text-[11px] font-mono border border-white/5 break-all leading-normal group-hover:border-emerald-500/30 transition-all">
                                                         {window.location.origin}/api/google-drive/callback
@@ -446,6 +454,11 @@ export default function CloudSync() {
                                                     <div className="absolute top-1/2 -right-2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <span className="bg-emerald-500 text-black text-[8px] font-black px-2 py-1 rounded shadow-xl uppercase">Callback URL</span>
                                                     </div>
+                                                </div>
+                                                <div className="text-[11px] font-medium tracking-wide leading-relaxed text-[var(--text-muted)]">
+                                                    <ol className="list-decimal list-inside" start="5">
+                                                        <li>Click <span className="text-white font-bold">CREATE</span>. Copy the <span className="text-white font-bold">Client ID</span> and <span className="text-white font-bold">Client Secret</span>.</li>
+                                                    </ol>
                                                 </div>
                                             </div>
                                         </div>
@@ -461,14 +474,14 @@ export default function CloudSync() {
                                                 <h4 className="text-lg font-black uppercase italic tracking-tight text-white">03. Connect Account</h4>
                                                 <span className="text-[8px] font-black uppercase px-2 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md">Final Step</span>
                                             </div>
-                                            <div className="bg-black border border-white/5 rounded-2xl p-8 space-y-6 text-left">
-                                                <div className="flex items-start gap-4">
-                                                    <CheckCircle2 className="text-emerald-500 shrink-0" size={16} />
-                                                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] leading-relaxed text-slate-400 italic">
-                                                        Commit your Client ID and Secret in the <span className="text-white">Connection Settings</span> panel. Click <span className="text-cyan-500">'Connect Google Drive'</span> to perform the handshake. 
-                                                        The platform will autonomousely create a <span className="text-white">/HOACodeLab_Nodes</span> directory in your Drive root.
-                                                    </p>
-                                                </div>
+                                            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 text-[11px] font-medium tracking-wide leading-relaxed text-[var(--text-muted)]">
+                                                <ol className="list-decimal list-inside space-y-2">
+                                                    <li>Return to this page and paste the <span className="text-white font-bold">Client ID</span> and <span className="text-white font-bold">Client Secret</span> you copied in Step 2 into the <span className="text-white font-bold">Connection Settings</span> panel above.</li>
+                                                    <li>Click the <span className="text-cyan-500 font-bold">CONNECT</span> button.</li>
+                                                    <li>A Google popup will appear. Sign in with your Google account and click <span className="text-white font-bold">Continue</span> (ignore any "unverified app" warning Â this is normal).</li>
+                                                    <li>Click <span className="text-white font-bold">Allow</span> to give HOACodeLab access.</li>
+                                                    <li>Done! The platform will create a <span className="text-white font-bold">/HOACodeLab_Nodes</span> folder in your Drive automatically.</li>
+                                                </ol>
                                             </div>
                                         </div>
                                     </div>

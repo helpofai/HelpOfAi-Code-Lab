@@ -32,7 +32,6 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import ProBackground from '@/Components/Visuals/ProBackground';
 
 export default function AdminInfo({ infoFiles }) {
     const [activeFile, setActiveFile] = useState(infoFiles[0]?.name || null);
@@ -41,8 +40,7 @@ export default function AdminInfo({ infoFiles }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex justify-between items-center w-full relative z-10">
                         <div className="flex items-center space-x-4 text-left">

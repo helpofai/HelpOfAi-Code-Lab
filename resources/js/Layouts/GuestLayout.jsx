@@ -22,7 +22,7 @@
 */
 
 import { Link } from '@inertiajs/react';
-import ProBackground from '@/Components/Visuals/ProBackground';
+import MouseCursorShadow from '@/Components/Visuals/MouseCursorShadow';
 import { Code2, Fingerprint, Cpu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -30,8 +30,7 @@ import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 export default function GuestLayout({ children }) {
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-cyan-500/30 relative flex flex-col items-center justify-center p-6 transition-colors duration-300">
-            <ProBackground />
-
+            <MouseCursorShadow />
             {/* Theme Switcher for Guests */}
             <div className="fixed top-6 right-6 z-50">
                 <ThemeSwitcher />

@@ -222,7 +222,7 @@ const ProjectPreview = ({ project }) => {
     );
 };
 
-export default function Welcome({ auth, siteSettings }) {
+export default function Welcome({ auth, siteSettings, app_version }) {
     const [featured, setFeatured] = useState([]);
     const [paidProjects, setPaidProjects] = useState([]);
     const [privateProjects, setPrivateProjects] = useState([]);
@@ -291,7 +291,9 @@ export default function Welcome({ auth, siteSettings }) {
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
                         <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-cyan-500/5 border border-cyan-500/10 rounded-full mb-10">
                             <Sparkles size={12} className="text-cyan-500" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 italic">v1.5.0 Stable Build</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 italic">
+                                {app_version ? `v${app_version} Stable Build` : 'Stable Build'}
+                            </span>
                         </div>
                         <h1 className="text-6xl md:text-9xl font-black text-[var(--text-main)] tracking-tighter uppercase italic leading-[0.8] mb-12">Modern <br/> <span className="text-[var(--text-muted)]">Code Editor</span></h1>
                         <p className="text-[var(--text-muted)] text-sm md:text-lg max-w-2xl mx-auto font-bold uppercase tracking-[0.3em] leading-relaxed mb-12 opacity-80 italic">High-performance development substrate for modern web creators.</p>

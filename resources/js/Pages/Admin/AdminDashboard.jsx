@@ -32,7 +32,6 @@ import {
 } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import ProBackground from '@/Components/Visuals/ProBackground';
 
 export default function AdminDashboard() {
     const { auth } = usePage().props;
@@ -76,8 +75,7 @@ export default function AdminDashboard() {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex justify-between items-center w-full relative z-10">
                         <div className="flex items-center space-x-4">

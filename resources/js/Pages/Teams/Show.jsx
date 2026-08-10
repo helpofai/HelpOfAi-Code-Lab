@@ -25,7 +25,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { Users, Shield, UserPlus, Trash2, Mail, X, Check, Activity, Edit2 } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import TextInput from '@/Components/TextInput';
 import PrimaryButton from '@/Components/PrimaryButton';
 import InputLabel from '@/Components/InputLabel';
@@ -81,8 +80,7 @@ export default function TeamShow({ team, isOwner }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 font-sans selection:bg-purple-500/30">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex justify-between items-center w-full">
                         <div className="flex items-center gap-4">

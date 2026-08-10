@@ -25,7 +25,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { FileText, Plus, Edit, Trash2, Globe, Eye, Lock, Unlock, Search, ChevronRight } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import { motion } from 'framer-motion';
 
@@ -45,8 +44,7 @@ export default function PageIndex({ pages }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-6">
                         <div className="flex items-center space-x-4">

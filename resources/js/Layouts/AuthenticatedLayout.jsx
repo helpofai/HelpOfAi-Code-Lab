@@ -59,6 +59,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
+import MouseCursorShadow from '@/Components/Visuals/MouseCursorShadow';
 import NotificationDropdown from '@/Components/Visuals/NotificationDropdown';
 import UserLevelBadge from '@/Components/Visuals/UserLevelBadge';
 import Dropdown from '@/Components/Dropdown';
@@ -116,6 +117,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans flex overflow-hidden transition-colors duration-300">
+            <MouseCursorShadow />
             {/* Desktop Sidebar */}
             <motion.aside 
                 initial={false}

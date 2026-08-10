@@ -9,7 +9,7 @@ import {
 import { useToast } from '@/Components/Toast/ToastProvider';
 import NoInternetOverlay from '@/Components/NoInternetOverlay';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
-import ProBackground from '@/Components/Visuals/ProBackground';
+import MouseCursorShadow from '@/Components/Visuals/MouseCursorShadow';
 import NotificationDropdown from '@/Components/Visuals/NotificationDropdown';
 import AdUnit from '@/Components/AdUnit';
 
@@ -51,7 +51,7 @@ export default function PublicLayout({ children }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-cyan-500/30 overflow-x-hidden transition-colors duration-300">
-            <ProBackground />
+            <MouseCursorShadow />
 
             {/* Global Progress Bar */}
             <motion.div 

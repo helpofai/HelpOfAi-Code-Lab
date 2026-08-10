@@ -61,6 +61,9 @@ const ProjectPreviewContent = ({ project }) => {
     const libs = (project.settings?.externalLibraries || []).map(lib => lib.endsWith('.css') ? `<link rel="stylesheet" href="${lib}">` : `<script src="${lib}"></script>`).join('\n');
     const srcDoc = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; background: white; font-family: sans-serif; } ${compiled.css}</style>${libs}</head><body>${project.code?.html || ''}<script>${compiled.js}</script></body></html>`;
 
+    // Check if it's a vendor/GitHub project that should use the static preview
+    const isVendorProject = !!project.github_repo_url;
+
     if (project.settings?.thumbnail_url) {
         return (
             <div className="w-full h-full relative group">
@@ -72,6 +75,18 @@ const ProjectPreviewContent = ({ project }) => {
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                     <div className="p-3 bg-cyan-500 text-black rounded-full shadow-xl transform scale-90 group-hover:scale-100 transition-transform"><Zap size={20} fill="currentColor" /></div>
                 </div>
+            </div>
+        );
+    }
+
+    if (isVendorProject) {
+        return (
+            <div className="w-full h-full bg-[var(--bg-surface)] flex flex-col items-center justify-center p-4 text-center group">
+                <div className="p-4 rounded-full bg-cyan-500/10 text-cyan-500 mb-3 group-hover:scale-110 transition-transform">
+                    <Zap size={24} />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">Premium Module</span>
+                <span className="text-[8px] font-bold uppercase tracking-widest text-[var(--text-muted)] mt-1">GitHub Powered</span>
             </div>
         );
     }

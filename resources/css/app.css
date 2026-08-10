@@ -38,6 +38,7 @@
         --accent-dim: rgba(6, 182, 212, 0.1);
         --glass: rgba(250, 250, 250, 0.8);
         --grid-color: rgba(6, 182, 212, 0.05);
+        --grid-secondary: rgba(236, 72, 153, 0.05);
 
         /* Semantic Colors */
         --success: #10b981;
@@ -58,6 +59,7 @@
         --accent-dim: rgba(34, 211, 238, 0.15);
         --glass: rgba(15, 15, 19, 0.6);
         --grid-color: rgba(34, 211, 238, 0.08);
+        --grid-secondary: rgba(244, 114, 182, 0.08);
 
         /* Extreme Dark Mode Shadows */
         --tw-shadow-color: rgba(0, 0, 0, 0.95);
@@ -206,6 +208,19 @@
     .btn-secondary {
         @apply px-6 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-main)] font-bold uppercase text-[10px] tracking-widest rounded hover:bg-opacity-80 transition-all active:scale-95;
     }
+
+    /* Grid Animation Definitions */
+    @keyframes gridPulse {
+        0% { opacity: 0.2; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.02); }
+        100% { opacity: 0.2; transform: scale(1); }
+    }
+
+    @keyframes gridFloat {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0); }
+    }
 }
 
 /* Professional NProgress Gradient Override */
@@ -231,4 +246,3 @@
     background-size: 200% 200% !important;
     animation: loadingGradient 2s linear infinite !important;
 }
-

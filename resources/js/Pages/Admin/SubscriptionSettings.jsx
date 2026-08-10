@@ -33,7 +33,6 @@ import {
     Shield, Key, Link as LinkIcon,
     ChevronRight, CheckCircle2, Server
 } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
@@ -101,8 +100,7 @@ export default function SubscriptionSettings({ auth, settings }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 font-sans">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex items-center gap-4 text-left">
                         <div className="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-500">

@@ -27,7 +27,6 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Megaphone, Plus, Search, Edit2, Trash2, Globe, FileCode2, CheckCircle2, XCircle, TrendingUp, DollarSign, Activity, Pointer, Save, Settings } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import InputError from '@/Components/InputError';
 
 export default function AdsIndex({ auth, ads, chartData }) {
@@ -139,8 +138,7 @@ export default function AdsIndex({ auth, ads, chartData }) {
     return (
         <AuthenticatedLayout user={auth.user} header={<h2 className="font-black text-xl text-[var(--text-main)] uppercase tracking-widest italic">Ad Management</h2>}>
             <Head title="Ad Management" />
-            <ProBackground />
-
+            
             <div className="py-12 relative z-10">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
 

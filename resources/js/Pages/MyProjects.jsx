@@ -31,8 +31,8 @@ import {
     Database, Search, LayoutGrid, List,
     Share2, Check, Settings, Save, X, Activity, Briefcase, Bell, ShoppingBag
 } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import { useToast } from '@/Components/Toast/ToastProvider';
+import AnimatedDeleteButton from '@/Components/UI/AnimatedDeleteButton';
 
 function ProjectThumbnail({ project }) {
     const [fullProject, setFullProject] = useState(null);
@@ -318,8 +318,7 @@ export default function MyProjects() {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-cyan-500/30 relative transition-colors duration-300 text-left">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 relative z-10">
                         <div className="flex items-center gap-4">
@@ -379,7 +378,7 @@ export default function MyProjects() {
                                                 <div className="flex gap-2">
                                                     <Link href={route('editor', { slug: project.slug })} className="flex-1 btn-primary text-center">Open</Link>
                                                     <button onClick={() => setEditingProject(project)} className="p-2.5 bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-main)] rounded border border-[var(--border)] transition-all"><Settings size={14}/></button>
-                                                    <button onClick={() => handleDelete(project.id)} className="p-2.5 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white rounded border border-rose-500/10 transition-all"><Trash2 size={14}/></button>
+                                                    <AnimatedDeleteButton onDelete={() => handleDelete(project.id)} className="ml-2" />
                                                 </div>
                                             </div>                                        
                                         </motion.div>
@@ -391,7 +390,7 @@ export default function MyProjects() {
                                         <thead><tr className="bg-[var(--bg-elevated)] text-[9px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)] border-b border-[var(--border)]"><th className="px-6 py-4">Module</th><th className="px-6 py-4">Sector</th><th className="px-6 py-4">Sync</th><th className="px-6 py-4 text-right">Uplink</th></tr></thead>
                                         <tbody className="divide-y divide-[var(--border)]">
                                             {filteredProjects.map((project) => (
-                                                <tr key={project.id} className="hover:bg-[var(--bg-elevated)] transition-colors"><td className="px-6 py-4 font-bold uppercase italic text-sm text-[var(--text-main)]">{project.title}</td><td className="px-6 py-4 text-[10px] font-bold text-[var(--text-muted)]">{project.category || 'General'}</td><td className="px-6 py-4"><span className={`text-[9px] font-bold uppercase ${project.is_public ? 'text-cyan-500' : 'text-rose-500'}`}>{project.is_public ? 'Global' : 'Secure'}</span></td><td className="px-6 py-4 text-right"><div className="flex justify-end gap-2"><Link href={route('editor', { slug: project.slug })} className="p-1.5 hover:text-cyan-500 transition-colors"><ExternalLink size={14} /></Link><button onClick={() => setEditingProject(project)} className="p-1.5 hover:text-[var(--text-main)] transition-colors"><Settings size={14} /></button><button onClick={() => handleDelete(project.id)} className="p-1.5 hover:text-rose-500 transition-colors"><Trash2 size={14} /></button></div></td></tr>
+                                                <tr key={project.id} className="hover:bg-[var(--bg-elevated)] transition-colors"><td className="px-6 py-4 font-bold uppercase italic text-sm text-[var(--text-main)]">{project.title}</td><td className="px-6 py-4 text-[10px] font-bold text-[var(--text-muted)]">{project.category || 'General'}</td><td className="px-6 py-4"><span className={`text-[9px] font-bold uppercase ${project.is_public ? 'text-cyan-500' : 'text-rose-500'}`}>{project.is_public ? 'Global' : 'Secure'}</span></td><td className="px-6 py-4 text-right"><div className="flex justify-end gap-2"><Link href={route('editor', { slug: project.slug })} className="p-1.5 hover:text-cyan-500 transition-colors"><ExternalLink size={14} /></Link><button onClick={() => setEditingProject(project)} className="p-1.5 hover:text-[var(--text-main)] transition-colors"><Settings size={14} /></button><AnimatedDeleteButton onDelete={() => handleDelete(project.id)} className="ml-1" /></div></td></tr>
                                             ))}
                                         </tbody>
                                     </table>

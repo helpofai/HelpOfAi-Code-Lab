@@ -25,7 +25,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { FileText, Save, Image as ImageIcon, X } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
@@ -80,8 +79,7 @@ export default function BlogCreateEdit({ post }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg text-purple-500">

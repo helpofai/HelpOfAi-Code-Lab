@@ -31,7 +31,6 @@ import {
     LayoutGrid, List, Settings, Save, X, Activity, 
     Store, ShoppingBag, ArrowUpRight
 } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import { useToast } from '@/Components/Toast/ToastProvider';
 
 function ProjectThumbnail({ project }) {
@@ -302,8 +301,7 @@ export default function VendorsProjects() {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-purple-500/30 relative transition-colors duration-300 text-left">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 relative z-10">
                         <div className="flex items-center gap-4">

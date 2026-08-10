@@ -30,7 +30,6 @@ import {
     AlertCircle, Trash2, Search, 
     Send, ChevronLeft, Loader2, User, Paperclip, X
 } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import axios from 'axios';
 
@@ -118,8 +117,7 @@ export default function Support({ auth, tickets: initialTickets }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex justify-between items-center w-full">
                         <div className="flex items-center space-x-4">

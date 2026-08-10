@@ -32,7 +32,6 @@ import {
     CreditCard, Code2, Edit, CheckCircle2, LayoutDashboard,
     Search, Download, Share2, Shield, Fingerprint, Zap, Key, BadgeCheck, Plus, Briefcase, Settings, Bell
 } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import UserLevelBadge from '@/Components/Visuals/UserLevelBadge';
 import { useToast } from '@/Components/Toast/ToastProvider';
 import UpdatePasswordForm from './Profile/Partials/UpdatePasswordForm';
@@ -172,8 +171,7 @@ export default function MyAccount({ mustVerifyEmail, status, tokens: initialToke
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-cyan-500/30 overflow-hidden relative transition-colors duration-300">
-            <ProBackground />
-            
+                        
             <AuthenticatedLayout
                 header={
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 relative z-10">

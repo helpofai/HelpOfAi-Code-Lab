@@ -28,7 +28,6 @@ import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 import IdentityVerificationForm from './Partials/IdentityVerificationForm';
 import UserLevelBadge from '@/Components/Visuals/UserLevelBadge';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import { User, Shield, AlertTriangle, Fingerprint, Crown, Zap, CreditCard, BadgeCheck } from 'lucide-react';
 
@@ -38,8 +37,7 @@ export default function Edit({ mustVerifyEmail, status }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 font-sans">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-cyan-500">

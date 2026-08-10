@@ -25,7 +25,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import React, { useEffect } from 'react';
 import { Save, ArrowLeft, Globe, Shield, Zap, Info } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
@@ -62,8 +61,7 @@ export default function CreateEdit({ page = null }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex justify-between items-center w-full">
                         <div className="flex items-center space-x-4">

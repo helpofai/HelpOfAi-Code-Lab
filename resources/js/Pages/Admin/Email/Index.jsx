@@ -25,7 +25,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { Mail, Plus, Edit, Trash2, Send, Clock, CheckCircle2, XCircle, Activity, ChevronRight, Search, BookOpen } from 'lucide-react';
-import ProBackground from '@/Components/Visuals/ProBackground';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -51,8 +50,7 @@ export default function EmailIndex({ templates, logs, stats, subscribers }) {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300">
-            <ProBackground />
-            <AuthenticatedLayout
+                        <AuthenticatedLayout
                 header={
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-6">
                         <div className="flex items-center space-x-4">
