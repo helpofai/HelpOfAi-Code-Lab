@@ -31,7 +31,7 @@ import InputError from '@/Components/InputError';
 
 export default function AdsIndex({ auth, ads, chartData }) {
     const { siteSettings } = usePage().props;
-    const [activeTab, setActiveTab] = useState('units'); // units, reports, networks
+    const [activeTab, setActiveTab] = useState('units'); // units, reports, networks, settings
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAd, setEditingAd] = useState(null);
@@ -58,6 +58,7 @@ export default function AdsIndex({ auth, ads, chartData }) {
         format: 'auto',
         custom_code: '',
         is_active: true,
+        adsense_header_code: siteSettings.adsense_header_code || '',
     });
 
     const filteredAds = ads.filter(ad => 
@@ -177,8 +178,37 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                 >
                                     <Settings size={12} /> Networks
                                 </button>
+                                <button 
+                                    onClick={() => setActiveTab('settings')}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'settings' ? 'bg-rose-500 text-black shadow-lg shadow-rose-500/20' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-1'}`}
+                                >
+                                    <Settings size={12} /> Settings
+                                </button>
                             </div>
                         </div>
+
+                        {activeTab === 'settings' && (
+                            <div className="bg-[var(--bg-elevated)] p-6 rounded-2xl border border-[var(--border)] mt-6">
+                                <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    router.post(route('admin.ads.settings'), { settings: { adsense_header_code: data.adsense_header_code } });
+                                }}>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">
+                                        Global AdSense Header Code
+                                    </label>
+                                    <textarea 
+                                        value={data.adsense_header_code || ''} 
+                                        onChange={e => setData('adsense_header_code', e.target.value)}
+                                        rows="6" 
+                                        className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded font-mono text-xs text-[var(--text-main)] p-3 focus:ring-cyan-500 mb-4" 
+                                        placeholder="<script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-...' crossorigin='anonymous'></script>" 
+                                    />
+                                    <button type="submit" className="px-6 py-3 bg-rose-500 text-black font-black uppercase text-[10px] tracking-widest rounded hover:bg-white transition-all shadow-lg shadow-rose-500/20">
+                                        Save AdSense Settings
+                                    </button>
+                                </form>
+                            </div>
+                        )}
                         
                         {activeTab === 'units' && (
                             <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
