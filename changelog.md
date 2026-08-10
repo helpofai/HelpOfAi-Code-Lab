@@ -2,7 +2,7 @@
 
 Systematic documentation of all protocol upgrades, module injections, and core optimisations for the HOACodeLab environment.
 
-## [1.14.1] - VENDOR_THUMBNAIL_FIX - 2026-08-10
+## [1.18.2] - VENDOR_THUMBNAIL_FIX - 2026-08-10
 
 ### 🎨 Explore Page — Vendor Project Thumbnail Rendering
 - **Smart Fallback for GitHub Projects:** Updated `ProjectPreviewContent` to detect vendor/GitHub-linked projects (`github_repo_url`) and display a professional "Premium Module" placeholder instead of attempting to render broken `iframe` previews.

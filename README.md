@@ -12,7 +12,7 @@
   [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
   [![Inertia](https://img.shields.io/badge/Inertia.js-2.0-9553E9?style=for-the-badge&logo=inertia&logoColor=white)](https://inertiajs.com)
-  [![Version](https://img.shields.io/badge/Version-1.14.1-purple?style=for-the-badge)](https://github.com/helpofai/HelpOfAi-Code-Lab)
+  [![Version](https://img.shields.io/badge/Version-1.18.2-purple?style=for-the-badge)](https://github.com/helpofai/HelpOfAi-Code-Lab)
   
   <br />
 
