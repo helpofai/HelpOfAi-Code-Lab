@@ -24,7 +24,7 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
 
-export default function AdUnit({ ad }) {
+export default function AdUnit({ ad, onAdLoaded }) {
     if (!ad || !ad.is_active) return null;
 
     useEffect(() => {
@@ -33,12 +33,20 @@ export default function AdUnit({ ad }) {
 
         if (ad.provider === 'adsense' && ad.client_id && ad.slot_id) {
             try {
+                // If AdSense is already loaded, just push
                 (window.adsbygoogle = window.adsbygoogle || []).push({});
+                
+                // Notify parent that the ad component is initialized
+                if (onAdLoaded) onAdLoaded();
             } catch (e) {
                 console.error('AdSense error:', e);
             }
+        } else if (onAdLoaded) {
+            // For other providers, treat as loaded immediately
+            onAdLoaded();
         }
-    }, [ad]);
+    }, [ad, onAdLoaded]);
+
 
     if (ad.provider === 'custom' && ad.custom_code) {
         return <div dangerouslySetInnerHTML={{ __html: ad.custom_code }} />;
