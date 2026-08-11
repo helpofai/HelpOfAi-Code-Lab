@@ -110,7 +110,8 @@ export default function AdsIndex({ auth, ads, chartData }) {
 
     const toggleStatus = (ad) => {
         put(route('admin.ads.update', ad.id), {
-            data: { ...ad, is_active: !ad.is_active },
+            ...ad,
+            is_active: !ad.is_active,
             preserveScroll: true
         });
     };
