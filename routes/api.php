@@ -33,6 +33,13 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+// Notifications API
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::put('notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::put('notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+});
+
 // Explore Endpoints
 Route::get('explore', [\App\Http\Controllers\Api\ExploreController::class, 'index']);
 Route::get('explore/categories', [\App\Http\Controllers\Api\ExploreController::class, 'categories']);
