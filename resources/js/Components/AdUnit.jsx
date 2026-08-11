@@ -32,17 +32,23 @@ export default function AdUnit({ ad, onAdLoaded }) {
         axios.post(`/ads/${ad.id}/impression`).catch(e => console.error('Ad tracking blocked:', e));
 
         if (ad.provider === 'adsense' && ad.client_id && ad.slot_id) {
-            try {
-                // Ensure the push is handled even if script is still loading
-                (window.adsbygoogle = window.adsbygoogle || []).push({});
-                
-                // Notify parent that the ad component is initialized
-                if (onAdLoaded) onAdLoaded();
-            } catch (e) {
-                console.error('AdSense error:', e);
-            }
+            const initAd = () => {
+                try {
+                    // Initialize the array if not already present
+                    (window.adsbygoogle = window.adsbygoogle || []).push({});
+                    if (onAdLoaded) onAdLoaded();
+                } catch (e) {
+                    console.error('AdSense initialization error:', e);
+                }
+            };
+
+            // Attempt immediate initialization
+            initAd();
+
+            // Retry initialization after a short delay to ensure script is fully ready
+            const timer = setTimeout(initAd, 1000);
+            return () => clearTimeout(timer);
         } else if (onAdLoaded) {
-            // For other providers, treat as loaded immediately
             onAdLoaded();
         }
     }, [ad, onAdLoaded]);
