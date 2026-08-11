@@ -454,6 +454,7 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                             <option value="top_banner">Top Banner</option>
                                             <option value="sidebar">Sidebar</option>
                                             <option value="in_feed">In-Feed (Between Projects)</option>
+                                            <option value="explore_grid">Explore Grid (Between Projects)</option>
                                             <option value="footer">Footer</option>
                                             <option value="video_reward">Video Reward Ad</option>
                                             <option value="adsLock">Ads Lock</option>
