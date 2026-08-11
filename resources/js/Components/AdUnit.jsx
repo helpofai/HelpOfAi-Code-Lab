@@ -21,13 +21,34 @@
 |--------------------------------------------------------------------------
 */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 
 export default function AdUnit({ ad, onAdLoaded }) {
+    const adRef = useRef(null);
+    const [isVisible, setIsVisible] = useState(false);
+
     if (!ad || !ad.is_active) return null;
 
+    // Intersection Observer to lazy-load ads only when visible (IntersectionObserver API)
     useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                    observer.disconnect();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (adRef.current) observer.observe(adRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (!isVisible) return;
+
         // Log Impression Analytics once per session per ad unit
         const sessionKey = `ad_impression_${ad.id}`;
         if (!sessionStorage.getItem(sessionKey)) {
@@ -39,7 +60,6 @@ export default function AdUnit({ ad, onAdLoaded }) {
         if (ad.provider === 'adsense' && ad.client_id && ad.slot_id) {
             const initAd = () => {
                 try {
-                    // Initialize the array if not already present
                     (window.adsbygoogle = window.adsbygoogle || []).push({});
                     if (onAdLoaded) onAdLoaded();
                 } catch (e) {
@@ -47,50 +67,43 @@ export default function AdUnit({ ad, onAdLoaded }) {
                 }
             };
 
-            // Attempt immediate initialization
             initAd();
-
-            // Retry initialization after a short delay
             const timer = setTimeout(initAd, 1000);
             return () => clearTimeout(timer);
         } else if (onAdLoaded) {
             onAdLoaded();
         }
-    }, [ad, onAdLoaded]);
+    }, [isVisible, ad, onAdLoaded]);
 
-
-    if (ad.provider === 'custom' && ad.custom_code) {
-        // If the custom code contains the adsbygoogle script and ins tag, 
-        // we need to ensure the script execution is triggered or is already present globally.
-        return <div className="custom-ad-container" dangerouslySetInnerHTML={{ __html: ad.custom_code }} />;
-    }
-
-    if (ad.provider === 'facebook' && ad.slot_id) {
-        // Facebook Audience Network Web is deprecated mostly, but if using standard placement:
-        return (
-            <div 
-                className="fb-ad" 
-                data-placementid={ad.slot_id} 
-                data-format={ad.format === 'auto' ? 'native' : ad.format} 
-                data-nativeadid={ad.client_id}
-            />
-        );
-    }
-
-    if (ad.provider === 'adsense') {
-        return (
-            <div className="w-full overflow-hidden text-center my-4">
-                <ins 
-                    className="adsbygoogle"
-                    style={{ display: 'block' }}
-                    data-ad-client={ad.client_id}
-                    data-ad-slot={ad.slot_id}
-                    data-ad-format={ad.format}
-                    data-full-width-responsive="true"
-                />
-            </div>
-        );
-    }
-
-    return null;
+    return (
+        <div ref={adRef} className="w-full min-h-[100px]">
+            {isVisible && (
+                <>
+                    {ad.provider === 'custom' && ad.custom_code && (
+                        <div className="custom-ad-container" dangerouslySetInnerHTML={{ __html: ad.custom_code }} />
+                    )}
+                    {ad.provider === 'facebook' && ad.slot_id && (
+                        <div 
+                            className="fb-ad" 
+                            data-placementid={ad.slot_id} 
+                            data-format={ad.format === 'auto' ? 'native' : ad.format} 
+                            data-nativeadid={ad.client_id}
+                        />
+                    )}
+                    {ad.provider === 'adsense' && (
+                        <div className="w-full overflow-hidden text-center my-4">
+                            <ins 
+                                className="adsbygoogle"
+                                style={{ display: 'block' }}
+                                data-ad-client={ad.client_id}
+                                data-ad-slot={ad.slot_id}
+                                data-ad-format={ad.format}
+                                data-full-width-responsive="true"
+                            />
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+    );
 }

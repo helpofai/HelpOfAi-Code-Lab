@@ -407,6 +407,19 @@ export default function Welcome({ auth, siteSettings, app_version }) {
                 </section>
             )}
 
+            {/* --- AD UNITS --- */}
+            <section className="py-12 bg-[var(--bg-surface)]">
+                <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {globalAds && globalAds.filter(a => a.is_active).slice(0, 3).map((ad, index) => (
+                        <div key={`welcome-ad-${index}`} className="bg-[var(--bg-main)] border border-[var(--border)] rounded-2xl p-4 flex flex-col items-center justify-center min-h-[250px]">
+                            <div className="text-[9px] font-black uppercase text-[var(--text-muted)] tracking-widest mb-4">Sponsored Content</div>
+                            <AdUnit ad={ad} />
+                        </div>
+                    ))}
+                </div>
+            </section>
+            {/* --- END AD UNITS --- */}
+
             {/* Private Projects Section */}
             {privateProjects.length > 0 && (
                 <section className="py-32 px-6 border-b border-[var(--border)] bg-[var(--bg-main)]">
