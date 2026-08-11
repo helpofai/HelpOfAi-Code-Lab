@@ -270,23 +270,33 @@ export default function EmailSettings({ settings }) {
                                     {/* Delivery Documentation */}
                                     <section className="mt-12 pt-12 border-t border-[var(--border)]">
                                         <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-6">Delivery Documentation</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 gap-6">
+                                            {/* Option 1 */}
                                             <div className="p-6 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border)]">
                                                 <h5 className="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-2">Option 1: Cron Job (Recommended)</h5>
-                                                <p className="text-[9px] text-[var(--text-muted)] leading-relaxed">
-                                                    Best for shared hosting. Add a Cron job to your hosting panel to run every minute:
-                                                </p>
-                                                <code className="block mt-3 p-3 bg-black/50 rounded text-[9px] font-mono text-cyan-500">
-                                                    * * * * * php /path/to/artisan queue:work --stop-when-empty
-                                                </code>
+                                                <div className="space-y-2 text-[9px] text-[var(--text-muted)] leading-relaxed">
+                                                    <p>Best for shared hosting. Add a Cron job to your hosting panel to run every minute:</p>
+                                                    <code className="block p-3 bg-black/50 rounded font-mono text-cyan-500">* * * * * php /path/to/artisan queue:work --stop-when-empty</code>
+                                                    <ul className="list-disc pl-4 space-y-1">
+                                                        <li><strong>Batch Size:</strong> 50 emails</li>
+                                                        <li><strong>Batch Delay:</strong> 60 seconds</li>
+                                                        <li><strong>Mechanism:</strong> Batched delays (T+0s, T+60s, etc.)</li>
+                                                        <li><strong>Benefit:</strong> Prevents SMTP rate limit throttling.</li>
+                                                    </ul>
+                                                </div>
                                             </div>
+
+                                            {/* Option 2 */}
                                             <div className="p-6 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border)]">
                                                 <h5 className="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-2">Option 2: Immediate Delivery</h5>
-                                                <p className="text-[9px] text-[var(--text-muted)] leading-relaxed">
-                                                    Sync mode. Sends emails immediately without queuing. Good for small lists but may slow down page loading.
-                                                </p>
-                                                <div className="mt-3 p-3 bg-black/50 rounded text-[9px] font-mono text-purple-500">
-                                                    Enable in settings to bypass queue.
+                                                <div className="space-y-2 text-[9px] text-[var(--text-muted)] leading-relaxed">
+                                                    <p>Sync mode. Sends emails immediately. Enable in settings to bypass queue.</p>
+                                                    <ul className="list-disc pl-4 space-y-1">
+                                                        <li><strong>Batch Size:</strong> 50 emails</li>
+                                                        <li><strong>Batch Delay:</strong> 60 seconds</li>
+                                                        <li><strong>Mechanism:</strong> Uses <code>sleep(60)</code> inside the request loop.</li>
+                                                        <li><strong>Warning:</strong> HTTP request hangs for total batch delay time. Ensure PHP <code>max_execution_time</code> is &gt; 300s.</li>
+                                                    </ul>
                                                 </div>
                                             </div>
                                         </div>
