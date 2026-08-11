@@ -259,6 +259,31 @@ export default function EmailSettings({ settings }) {
                                         </div>
                                     </section>
 
+                                    {/* Delivery Documentation */}
+                                    <section className="mt-12 pt-12 border-t border-[var(--border)]">
+                                        <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-6">Delivery Documentation</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="p-6 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border)]">
+                                                <h5 className="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-2">Option 1: Cron Job (Recommended)</h5>
+                                                <p className="text-[9px] text-[var(--text-muted)] leading-relaxed">
+                                                    Best for shared hosting. Add a Cron job to your hosting panel to run every minute:
+                                                </p>
+                                                <code className="block mt-3 p-3 bg-black/50 rounded text-[9px] font-mono text-cyan-500">
+                                                    * * * * * php /path/to/artisan queue:work --stop-when-empty
+                                                </code>
+                                            </div>
+                                            <div className="p-6 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border)]">
+                                                <h5 className="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-2">Option 2: Immediate Delivery</h5>
+                                                <p className="text-[9px] text-[var(--text-muted)] leading-relaxed">
+                                                    Sync mode. Sends emails immediately without queuing. Good for small lists but may slow down page loading.
+                                                </p>
+                                                <div className="mt-3 p-3 bg-black/50 rounded text-[9px] font-mono text-purple-500">
+                                                    Enable in settings to bypass queue.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
                                     <div className="pt-8 border-t border-[var(--border)]">
                                         <p className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em] italic text-center">
                                             System Notification
