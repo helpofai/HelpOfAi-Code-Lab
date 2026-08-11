@@ -33,7 +33,7 @@ export default function AdUnit({ ad, onAdLoaded }) {
 
         if (ad.provider === 'adsense' && ad.client_id && ad.slot_id) {
             try {
-                // If AdSense is already loaded, just push
+                // Ensure the push is handled even if script is still loading
                 (window.adsbygoogle = window.adsbygoogle || []).push({});
                 
                 // Notify parent that the ad component is initialized

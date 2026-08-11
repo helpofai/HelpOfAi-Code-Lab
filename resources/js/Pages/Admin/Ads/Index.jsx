@@ -41,6 +41,7 @@ export default function AdsIndex({ auth, ads, chartData }) {
             adsense_publisher_id: siteSettings.adsense_publisher_id || '',
             adsense_auto_ads: siteSettings.adsense_auto_ads || '0',
             facebook_app_id: siteSettings.facebook_app_id || '',
+            adsense_header_code: siteSettings.adsense_header_code || '',
         }
     });
 
@@ -189,22 +190,35 @@ export default function AdsIndex({ auth, ads, chartData }) {
 
                         {activeTab === 'settings' && (
                             <div className="bg-[var(--bg-elevated)] p-6 rounded-2xl border border-[var(--border)] mt-6">
-                                <form onSubmit={(e) => {
-                                    e.preventDefault();
-                                    router.post(route('admin.ads.settings'), { settings: { adsense_header_code: data.adsense_header_code } });
-                                }}>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">
-                                        Global AdSense Header Code
-                                    </label>
-                                    <textarea 
-                                        value={data.adsense_header_code || ''} 
-                                        onChange={e => setData('adsense_header_code', e.target.value)}
-                                        rows="6" 
-                                        className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded font-mono text-xs text-[var(--text-main)] p-3 focus:ring-cyan-500 mb-4" 
-                                        placeholder="<script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-...' crossorigin='anonymous'></script>" 
-                                    />
-                                    <button type="submit" className="px-6 py-3 bg-rose-500 text-black font-black uppercase text-[10px] tracking-widest rounded hover:bg-white transition-all shadow-lg shadow-rose-500/20">
-                                        Save AdSense Settings
+                                <form onSubmit={handleNetworkSubmit}>
+                                    <h3 className="text-sm font-black text-white uppercase mb-4">AdSense Settings</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">
+                                                Global AdSense Header Code
+                                            </label>
+                                            <textarea 
+                                                value={networkData.settings.adsense_header_code || ''} 
+                                                onChange={e => setNetworkData('settings', { ...networkData.settings, adsense_header_code: e.target.value })}
+                                                rows="6" 
+                                                className="w-full bg-[var(--bg-main)] border border-[var(--border)] rounded font-mono text-xs text-[var(--text-main)] p-3 focus:ring-cyan-500" 
+                                                placeholder="<script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=...' crossorigin='anonymous'></script>" 
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <label className="flex items-center gap-2 text-xs text-white">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={networkData.settings.adsense_auto_ads === '1'} 
+                                                    onChange={e => setNetworkData('settings', { ...networkData.settings, adsense_auto_ads: e.target.checked ? '1' : '0' })}
+                                                    className="rounded border-[var(--border)] bg-[var(--bg-main)] text-cyan-500 focus:ring-cyan-500"
+                                                />
+                                                Enable Auto Ads
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" disabled={networkProcessing} className="mt-6 px-6 py-3 bg-rose-500 text-black font-black uppercase text-[10px] tracking-widest rounded hover:bg-white transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50">
+                                        {networkProcessing ? 'Saving...' : 'Save AdSense Settings'}
                                     </button>
                                 </form>
                             </div>
@@ -247,8 +261,15 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button onClick={() => toggleStatus(ad)} className={`p-2 rounded-lg transition-all ${ad.is_active ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white' : 'bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white'}`}>
-                                            {ad.is_active ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                                        {/* Enable/Disable Toggle */}
+                                        <button 
+                                            role="switch"
+                                            aria-checked={ad.is_active}
+                                            onClick={() => toggleStatus(ad)} 
+                                            className={`relative inline-flex items-center h-6 w-11 rounded-full transition-colors duration-300 ${ad.is_active ? 'bg-emerald-500' : 'bg-gray-600'}`}
+                                            title={ad.is_active ? 'Click to disable this ad' : 'Click to enable this ad'}
+                                        >
+                                            <span className={`inline-block w-4 h-4 transform rounded-full bg-white shadow-lg transition-transform duration-300 ${ad.is_active ? 'translate-x-6' : 'translate-x-1'}`} />
                                         </button>
                                         <button onClick={() => openModal(ad)} className="p-2 bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] rounded-lg hover:text-cyan-500 transition-all"><Edit2 size={16} /></button>
                                         <button onClick={() => handleDelete(ad.id)} className="p-2 bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] rounded-lg hover:text-red-500 transition-all"><Trash2 size={16} /></button>
@@ -257,6 +278,10 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                 <div className="space-y-2">
                                     {ad.client_id && <div className="text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-elevated)] p-2 rounded truncate">Client: {ad.client_id}</div>}
                                     {ad.slot_id && <div className="text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-elevated)] p-2 rounded truncate">Slot: {ad.slot_id}</div>}
+                                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${ad.is_active ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                                        <span className={`w-1.5 h-1.5 rounded-full ${ad.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                                        {ad.is_active ? 'Active' : 'Disabled'}
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
