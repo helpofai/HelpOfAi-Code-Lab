@@ -55,7 +55,9 @@ export default function AdUnit({ ad, onAdLoaded }) {
 
 
     if (ad.provider === 'custom' && ad.custom_code) {
-        return <div dangerouslySetInnerHTML={{ __html: ad.custom_code }} />;
+        // If the custom code contains the adsbygoogle script and ins tag, 
+        // we need to ensure the script execution is triggered or is already present globally.
+        return <div className="custom-ad-container" dangerouslySetInnerHTML={{ __html: ad.custom_code }} />;
     }
 
     if (ad.provider === 'facebook' && ad.slot_id) {

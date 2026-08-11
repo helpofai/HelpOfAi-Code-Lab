@@ -487,9 +487,16 @@ export default function AdsIndex({ auth, ads, chartData }) {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Custom Ad Code (HTML/JS)</label>
-                                        <textarea value={data.custom_code} onChange={e => setData('custom_code', e.target.value)} rows="6" className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded font-mono text-xs text-[var(--text-main)] p-3 focus:ring-cyan-500" placeholder="<!-- Paste Ad Code Here -->" />
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Custom Ad Code (HTML/JS)</label>
+                                            <textarea value={data.custom_code} onChange={e => setData('custom_code', e.target.value)} rows="6" className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded font-mono text-xs text-[var(--text-main)] p-3 focus:ring-cyan-500" placeholder="<!-- Paste Ad Code Here -->" />
+                                        </div>
+                                        <div className="p-4 bg-amber-500/10 border border-amber-500/50 rounded-xl">
+                                            <p className="text-[10px] text-amber-500 font-bold">
+                                                Tip: If pasting full AdSense code, ensure your Client ID/Slot ID are correctly referenced. For simple HTML, just paste the script and ins tag.
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
 
