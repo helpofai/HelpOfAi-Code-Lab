@@ -248,10 +248,37 @@ class EmailController extends Controller
         $delaySeconds = 0;
         $type = $validated['recipient_type'] === 'specific' ? 'individual' : 'broadcast';
 
+        $useQueue = SiteSetting::where('key', 'mail_use_queue')->value('value') ?? '1';
+
         foreach ($users as $user) {
-            // Stagger emails by 10 seconds to prevent SMTP server blocking
-            SendBroadcastEmailJob::dispatch($user, $template, $type)->delay(now()->addSeconds($delaySeconds));
-            $delaySeconds += 10;
+            if ($useQueue === '1') {
+                // Queue the job
+                SendBroadcastEmailJob::dispatch($user, $template, $type)->delay(now()->addSeconds($delaySeconds));
+                $delaySeconds += 10;
+            } else {
+                // Send immediately (Sync)
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\DynamicEmail($template->subject, str_replace(['{{name}}', '{{email}}'], [$user->name, $user->email], $template->content)));
+                    \App\Models\EmailLog::create([
+                        'recipient' => $user->email,
+                        'subject' => $template->subject,
+                        'status' => 'sent',
+                        'type' => $type,
+                        'user_id' => $user->id,
+                        'template_id' => $template->id,
+                    ]);
+                } catch (\Exception $e) {
+                    \App\Models\EmailLog::create([
+                        'recipient' => $user->email,
+                        'subject' => $template->subject,
+                        'status' => 'failed',
+                        'error' => $e->getMessage(),
+                        'type' => $type,
+                        'user_id' => $user->id,
+                        'template_id' => $template->id,
+                    ]);
+                }
+            }
             $count++;
         }
 

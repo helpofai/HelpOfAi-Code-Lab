@@ -40,6 +40,7 @@ export default function EmailSettings({ settings }) {
         mail_encryption: settings?.mail_encryption || 'tls',
         mail_from_address: settings?.mail_from_address || '',
         mail_from_name: settings?.mail_from_name || 'HOACodeLab',
+        mail_use_queue: settings?.mail_use_queue || '1',
     });
 
     const { data: testData, setData: setTestData, post: postTest, processing: testProcessing, errors: testErrors } = useForm({
@@ -118,6 +119,13 @@ export default function EmailSettings({ settings }) {
                                         <InputLabel value="From Name" />
                                         <TextInput value={data.mail_from_name} onChange={e => setData('mail_from_name', e.target.value)} className="bg-[var(--bg-elevated)]" />
                                         {errors.mail_from_name && <p className="text-rose-500 text-xs">{errors.mail_from_name}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <InputLabel value="Email Transmission Mode" />
+                                        <select value={data.mail_use_queue} onChange={e => setData('mail_use_queue', e.target.value)} className="w-full bg-[var(--bg-elevated)] border-none rounded-xl text-white p-3">
+                                            <option value="1">Queue (Recommended - Cron Job)</option>
+                                            <option value="0">Immediate (Sync - Instant)</option>
+                                        </select>
                                     </div>
                                 </div>
 
