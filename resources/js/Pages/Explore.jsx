@@ -322,11 +322,14 @@ export default function Explore({ auth, siteSettings }) {
                                             </div>
                                         </div>
                                     </Link>
-                                    {(index + 1) % 6 === 0 && globalAds && globalAds.length > 0 && (
+                                    {(index + 1) % 6 === 0 && globalAds && globalAds.filter(a => a.location === 'explore_grid' && a.is_active).length > 0 && (
                                         <div className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-xl flex flex-col items-center justify-center min-h-[300px]">
                                             <div className="absolute top-2 left-4 text-[9px] font-black uppercase text-[var(--text-muted)] tracking-widest z-10">Sponsor Content</div>
                                             <div className="w-full h-full flex items-center justify-center p-4">
-                                                <AdUnit ad={globalAds[Math.floor(Math.random() * globalAds.length)]} />
+                                                {(() => {
+                                                    const ads = globalAds.filter(a => a.location === 'explore_grid' && a.is_active);
+                                                    return <AdUnit ad={ads[Math.floor(Math.random() * ads.length)]} />;
+                                                })()}
                                             </div>
                                         </div>
                                     )}
