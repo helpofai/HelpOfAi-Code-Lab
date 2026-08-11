@@ -22,6 +22,7 @@
 */
 
 import React, { useState, useEffect } from 'react';
+import AdUnit from '@/Components/AdUnit';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Search, Filter, SlidersHorizontal, ChevronRight, LayoutGrid, Code2, Tag, ArrowRight, User, Eye, Lock, ShoppingBag, Loader2 } from 'lucide-react';
@@ -263,11 +264,14 @@ export default function Explore({ auth, siteSettings }) {
                     ) : (
                         <>
                             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                                {projects.map((project) => (
-                                    <Link href={route('project.show', project.slug)} key={project.id} className={`group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden transition-all hover:-translate-y-1 shadow-xl flex flex-col ${project.is_restricted ? 'hover:border-rose-500/30' : 'hover:border-cyan-500/30'}`}>
-                                        <div className={`aspect-video relative overflow-hidden flex items-center justify-center ${project.is_restricted ? 'bg-white' : 'bg-white'}`}>
-                                            
-                                            <ProjectPreviewContent project={project} />
+                                {projects.map((project, index) => (
+                                    <React.Fragment key={project.id}>
+                                        <Link href={route('project.show', project.slug)} className={`group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden transition-all hover:-translate-y-1 shadow-xl flex flex-col ${project.is_restricted ? 'hover:border-rose-500/30' : 'hover:border-cyan-500/30'}`}>
+                                            <div className={`aspect-video relative overflow-hidden flex items-center justify-center ${project.is_restricted ? 'bg-white' : 'bg-white'}`}>
+                                                <ProjectPreviewContent project={project} />
+                                            </div>
+                                        </Link>
+
                                             
                                             {project.is_restricted ? (
                                                 <>
@@ -318,8 +322,18 @@ export default function Explore({ auth, siteSettings }) {
                                             </div>
                                         </div>
                                     </Link>
-                                ))}
-                            </div>
+                                    {(index + 1) % 6 === 0 && globalAds && globalAds.length > 0 && (
+                                        <div className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-xl flex flex-col items-center justify-center min-h-[300px]">
+                                            <div className="absolute top-2 left-4 text-[9px] font-black uppercase text-[var(--text-muted)] tracking-widest z-10">Sponsor Content</div>
+                                            <div className="w-full h-full flex items-center justify-center p-4">
+                                                <AdUnit ad={globalAds[Math.floor(Math.random() * globalAds.length)]} />
+                                            </div>
+                                        </div>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </div>
+
                             
                             {hasMore && (
                                 <div className="pt-8 flex justify-center">
