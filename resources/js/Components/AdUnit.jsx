@@ -45,7 +45,7 @@ export default function AdUnit({ ad, onAdLoaded }) {
             // Attempt immediate initialization
             initAd();
 
-            // Retry initialization after a short delay to ensure script is fully ready
+            // Retry initialization after a short delay
             const timer = setTimeout(initAd, 1000);
             return () => clearTimeout(timer);
         } else if (onAdLoaded) {
