@@ -249,14 +249,23 @@ class EmailController extends Controller
         $type = $validated['recipient_type'] === 'specific' ? 'individual' : 'broadcast';
 
         $useQueue = SiteSetting::where('key', 'mail_use_queue')->value('value') ?? '1';
+        $batchSize = 50; // Emails per batch
+        $batchDelay = 60; // Seconds to wait between batches
 
-        foreach ($users as $user) {
+        foreach ($users as $index => $user) {
+            // Calculate delay: increase delay every batchSize emails
+            $batchIndex = floor($index / $batchSize);
+            $currentDelay = $delaySeconds + ($batchIndex * $batchDelay);
+
             if ($useQueue === '1') {
                 // Queue the job
-                SendBroadcastEmailJob::dispatch($user, $template, $type)->delay(now()->addSeconds($delaySeconds));
-                $delaySeconds += 10;
+                SendBroadcastEmailJob::dispatch($user, $template, $type)->delay(now()->addSeconds($currentDelay));
             } else {
                 // Send immediately (Sync)
+                if ($index > 0 && $index % $batchSize === 0) {
+                    sleep($batchDelay);
+                }
+                
                 try {
                     \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\DynamicEmail($template->subject, str_replace(['{{name}}', '{{email}}'], [$user->name, $user->email], $template->content)));
                     \App\Models\EmailLog::create([
