@@ -28,8 +28,13 @@ export default function AdUnit({ ad, onAdLoaded }) {
     if (!ad || !ad.is_active) return null;
 
     useEffect(() => {
-        // Log Impression Analytics
-        axios.post(`/ads/${ad.id}/impression`).catch(e => console.error('Ad tracking blocked:', e));
+        // Log Impression Analytics once per session per ad unit
+        const sessionKey = `ad_impression_${ad.id}`;
+        if (!sessionStorage.getItem(sessionKey)) {
+            axios.post(`/ads/${ad.id}/impression`)
+                .then(() => sessionStorage.setItem(sessionKey, 'true'))
+                .catch(e => console.error('Ad tracking blocked:', e));
+        }
 
         if (ad.provider === 'adsense' && ad.client_id && ad.slot_id) {
             const initAd = () => {
