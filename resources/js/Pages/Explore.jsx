@@ -289,38 +289,36 @@ export default function Explore({ auth, siteSettings }) {
                                                     </>
                                                 )}
                                             </div>
-                                        </Link>
-                                        </div>
                                         
-                                        <div className="p-6 space-y-4 text-left flex-1 flex flex-col">
-                                            <div className="flex justify-between items-start">
-                                                <h3 className="text-lg font-black text-[var(--text-main)] uppercase italic tracking-tighter truncate">{project.title}</h3>
-                                            </div>
-                                            <div className="flex items-center gap-4 text-[10px] text-[var(--text-muted)] font-mono">
-                                                <span className="flex items-center gap-1 uppercase font-bold">
-                                                    <User size={10} className={project.is_restricted ? "text-rose-500/40" : "text-cyan-500/40"} /> 
-                                                    {project.user?.name || 'Unknown'}
-                                                </span>
-                                            </div>
-                                            <div className="pt-4 mt-auto">
-                                                <div className={`w-full py-3 bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2 ${
-                                                    project.is_restricted 
-                                                        ? 'text-[var(--text-muted)] group-hover:text-rose-500 group-hover:border-rose-500/50' 
-                                                        : (project.is_for_sale 
-                                                            ? 'text-white bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 border-none' 
-                                                            : 'text-[var(--text-muted)] group-hover:text-cyan-500 group-hover:border-cyan-500/50')
-                                                }`}>
-                                                    {project.is_restricted ? (
-                                                        <><Eye size={14} /> View Restricted</>
-                                                    ) : project.is_for_sale ? (
-                                                        <><ShoppingBag size={14} /> Buy Now</>
-                                                    ) : (
-                                                        <><Code2 size={14} /> Open Source</>
-                                                    )}
+                                            <div className="p-6 space-y-4 text-left flex-1 flex flex-col">
+                                                <div className="flex justify-between items-start">
+                                                    <h3 className="text-lg font-black text-[var(--text-main)] uppercase italic tracking-tighter truncate">{project.title}</h3>
+                                                </div>
+                                                <div className="flex items-center gap-4 text-[10px] text-[var(--text-muted)] font-mono">
+                                                    <span className="flex items-center gap-1 uppercase font-bold">
+                                                        <User size={10} className={project.is_restricted ? "text-rose-500/40" : "text-cyan-500/40"} /> 
+                                                        {project.user?.name || 'Unknown'}
+                                                    </span>
+                                                </div>
+                                                <div className="pt-4 mt-auto">
+                                                    <div className={`w-full py-3 bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2 ${
+                                                        project.is_restricted 
+                                                            ? 'text-[var(--text-muted)] group-hover:text-rose-500 group-hover:border-rose-500/50' 
+                                                            : (project.is_for_sale 
+                                                                ? 'text-white bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 border-none' 
+                                                                : 'text-[var(--text-muted)] group-hover:text-cyan-500 group-hover:border-cyan-500/50')
+                                                    }`}>
+                                                        {project.is_restricted ? (
+                                                            <><Eye size={14} /> View Restricted</>
+                                                        ) : project.is_for_sale ? (
+                                                            <><ShoppingBag size={14} /> Buy Now</>
+                                                        ) : (
+                                                            <><Code2 size={14} /> Open Source</>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </Link>
+                                        </Link>
                                     {(index + 1) % 6 === 0 && globalAds && globalAds.filter(a => a.location === 'explore_grid' && a.is_active).length > 0 && (
                                         <div className="group relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-xl flex flex-col items-center justify-center min-h-[300px]">
                                             <div className="absolute top-2 left-4 text-[9px] font-black uppercase text-[var(--text-muted)] tracking-widest z-10">Sponsor Content</div>
