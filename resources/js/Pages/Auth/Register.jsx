@@ -26,10 +26,11 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { User, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function Register() {
+    const { siteSettings } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -50,6 +51,26 @@ export default function Register() {
             <Head title="Register" />
 
             <form onSubmit={submit} className="space-y-6">
+                {/* Social Login Buttons */}
+                {siteSettings.facebook_enabled && (
+                    <a href={route('auth.facebook')} className="flex items-center justify-center gap-3 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-bold text-xs uppercase tracking-widest">
+                        Sign up with Facebook
+                    </a>
+                )}
+                {siteSettings.google_enabled && (
+                    <a href={route('auth.google')} className="flex items-center justify-center gap-3 w-full py-3 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-xl transition-all font-bold text-xs uppercase tracking-widest">
+                        Sign up with Google
+                    </a>
+                )}
+
+                {(siteSettings.facebook_enabled || siteSettings.google_enabled) && (
+                    <div className="relative flex items-center py-4">
+                        <div className="flex-grow border-t border-[var(--border)]"></div>
+                        <span className="flex-shrink mx-4 text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Or continue with</span>
+                        <div className="flex-grow border-t border-[var(--border)]"></div>
+                    </div>
+                )}
+
                 <div className="space-y-2">
                     <InputLabel htmlFor="name" value="Name" />
                     <div className="relative group">
