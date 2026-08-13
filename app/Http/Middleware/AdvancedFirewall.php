@@ -18,8 +18,8 @@ class AdvancedFirewall
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // 0. Exempt Routes (Tracking and Impression routes should not trigger the firewall)
-        if ($request->is('ads/*/impression') || $request->is('api/notifications/*')) {
+        // 0. Exempt Routes (Tracking, impression, and health probe routes should not trigger the firewall)
+        if ($request->is('ads/*/impression') || $request->is('api/notifications/*') || $request->is('api/health')) {
             return $next($request);
         }
 

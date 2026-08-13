@@ -35,6 +35,8 @@ use App\Http\Controllers\Vendors\OnboardingController;
 use App\Http\Controllers\Admin\FrontManagementController;
 use App\Models\SiteSetting;
 use App\Http\Controllers\NewsletterSubscriberController;
+use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Admin\AuthSettingsController;
 
 Route::get('/', function () {
     $settings = SiteSetting::whereIn('group', ['home', 'branding', 'seo', 'typography', 'subscription'])->get()->mapWithKeys(function ($item) {
@@ -65,6 +67,14 @@ Route::get('/tags/{slug}', [\App\Http\Controllers\PublicDirectoryController::cla
 // Newsletter Route
 Route::post('/subscribe', [NewsletterSubscriberController::class, 'store'])->middleware('throttle:5,1')->name('newsletter.subscribe');
 Route::get('/unsubscribe/{token}', [NewsletterSubscriberController::class, 'unsubscribe'])->middleware('throttle:10,1')->name('newsletter.unsubscribe');
+
+// Social Authentication Routes
+Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirectToProvider'])
+    ->where('provider', 'google|facebook|github')
+    ->name('social.redirect');
+Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])
+    ->where('provider', 'google|facebook|github')
+    ->name('social.callback');
 
 Route::get('/editor/{slug?}', function ($slug = null) {
     $project = null;
@@ -291,6 +301,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::delete('/admin/queue/delete/{id}', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'deleteFailed'])->name('admin.queue.delete');
     Route::delete('/admin/queue/clear-pending', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'clearPending'])->name('admin.queue.clear-pending');
     Route::post('/admin/queue/process', [\App\Http\Controllers\Admin\QueueMonitorController::class, 'processQueue'])->name('admin.queue.process');
+
+    // Auth Settings
+    Route::get('/admin/auth-settings', [AuthSettingsController::class, 'index'])->name('admin.auth.settings');
+    Route::post('/admin/auth-settings', [AuthSettingsController::class, 'update'])->name('admin.auth.settings.update');
 
     Route::resource('admin/email', \App\Http\Controllers\Admin\EmailController::class, ['names' => 'admin.email']);
 });

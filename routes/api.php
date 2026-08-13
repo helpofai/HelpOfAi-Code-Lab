@@ -40,6 +40,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
 });
 
+// Health Check Endpoints
+Route::get('health', [\App\Http\Controllers\Api\HealthCheckController::class, 'probe'])->name('api.health.probe');
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::get('health/full', [\App\Http\Controllers\Api\HealthCheckController::class, 'full'])->name('api.health.full');
+});
+
 // Explore Endpoints
 Route::get('explore', [\App\Http\Controllers\Api\ExploreController::class, 'index']);
 Route::get('explore/categories', [\App\Http\Controllers\Api\ExploreController::class, 'categories']);
