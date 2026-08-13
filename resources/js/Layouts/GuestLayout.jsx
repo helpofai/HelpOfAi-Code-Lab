@@ -27,7 +27,7 @@ import { Code2, Fingerprint, Cpu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
 
-export default function GuestLayout({ children }) {
+export default function GuestLayout({ children, appVersion }) {
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-cyan-500/30 relative flex flex-col items-center justify-center p-6 transition-colors duration-300">
             <MouseCursorShadow />
@@ -64,7 +64,7 @@ export default function GuestLayout({ children }) {
                     className="mt-12 flex justify-between items-center px-6 text-[8px] font-bold uppercase tracking-[0.4em] text-[var(--text-muted)]"
                 >
                     <div className="flex items-center gap-3"><Fingerprint size={12}/> <span>System Secure</span></div>
-                    <div className="flex items-center gap-3"><span>v1.4.8</span> <Cpu size={12}/></div>
+                    <div className="flex items-center gap-3"><span>v{appVersion}</span> <Cpu size={12}/></div>
                 </motion.div>
             </div>
         </div>

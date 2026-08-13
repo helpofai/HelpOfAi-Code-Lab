@@ -58,6 +58,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'siteSettings' => \App\Models\SiteSetting::pluck('value', 'key')->toArray(),
+            'appVersion' => config('app.version', '1.18.2'),
             'globalAds' => \Illuminate\Support\Facades\Schema::hasTable('ads') ? \App\Models\Ad::where('is_active', true)->get()->groupBy('location')->toArray() : [],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),

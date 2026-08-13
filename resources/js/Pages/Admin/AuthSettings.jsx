@@ -24,7 +24,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
-import { KeyRound, Save, ShieldCheck, AlertCircle, ExternalLink } from 'lucide-react';
+import { KeyRound, Save, ShieldCheck, AlertCircle, ExternalLink, Settings as SettingsIcon, Activity } from 'lucide-react';
 import AnimatedGrid from '@/Components/Visuals/AnimatedGrid';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
@@ -73,7 +73,7 @@ const PROVIDERS = [
 ];
 
 export default function AuthSettings({ settings }) {
-    const { data, setData, post, processing, errors, wasSuccessful } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         google_client_id: settings?.google_client_id || '',
         google_client_secret: settings?.google_client_secret || '',
         google_enabled: settings?.google_enabled === '1' || settings?.google_enabled === true,
@@ -97,12 +97,12 @@ export default function AuthSettings({ settings }) {
             <AuthenticatedLayout
                 header={
                     <div className="flex items-center gap-4">
-                        <div className={`p-2 ${PROVIDERS[0].bg} ${PROVIDERS[0].border} rounded-lg ${PROVIDERS[0].color}`}>
-                            <KeyRound size={20} />
+                        <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-2xl text-purple-500">
+                            <KeyRound size={24} />
                         </div>
                         <div className="text-left">
-                            <h2 className="text-lg font-black tracking-tighter uppercase italic leading-none">Auth_Config</h2>
-                            <p className="text-[8px] text-purple-500 uppercase tracking-[0.4em] font-bold mt-1">Social Login Protocols</p>
+                            <h2 className="text-2xl font-black tracking-tighter uppercase italic leading-none">Authentication_Protocol</h2>
+                            <p className="text-[10px] text-purple-500 uppercase tracking-[0.4em] font-bold mt-1">Advanced OAuth Settings & Security</p>
                         </div>
                     </div>
                 }
@@ -112,18 +112,15 @@ export default function AuthSettings({ settings }) {
                     <AnimatedGrid />
 
                     <div className="max-w-6xl mx-auto relative z-10 space-y-8">
-                        {/* Global Notice */}
                         <div className="bg-amber-500/5 border border-amber-500/20 rounded-[2rem] p-6">
                             <div className="flex gap-3">
                                 <AlertCircle className="text-amber-500 shrink-0" size={20} />
                                 <div className="space-y-2">
-                                    <h4 className="text-xs font-black text-amber-500 uppercase tracking-widest">Important</h4>
+                                    <h4 className="text-xs font-black text-amber-500 uppercase tracking-widest">Protocol Setup</h4>
                                     <p className="text-[10px] text-amber-500/80 leading-relaxed">
-                                        Add these Redirect URIs to your provider console:
+                                        Configure callback URIs in provider dashboards using your app URL:
                                         <code className="block mt-2 p-2 bg-black/50 rounded text-[9px] font-mono">
-                                            {typeof window !== 'undefined' ? window.location.origin : ''}/auth/google/callback<br/>
-                                            {typeof window !== 'undefined' ? window.location.origin : ''}/auth/facebook/callback<br/>
-                                            {typeof window !== 'undefined' ? window.location.origin : ''}/auth/github/callback
+                                            {typeof window !== 'undefined' ? window.location.origin : ''}/auth/[provider]/callback
                                         </code>
                                     </p>
                                 </div>
@@ -132,18 +129,20 @@ export default function AuthSettings({ settings }) {
 
                         <form onSubmit={submit} className="space-y-8">
                             {PROVIDERS.map((provider) => (
-                                <div key={provider.id} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[2rem] p-8 shadow-2xl">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`p-2 ${provider.bg} ${provider.border} rounded-lg ${provider.color}`}>
-                                                <ShieldCheck size={18} />
+                                <div key={provider.id} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[2rem] p-8 shadow-2xl relative group hover:border-[var(--text-muted)] transition-all">
+                                    <div className="flex items-center justify-between mb-8 pb-6 border-b border-[var(--border)]">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`p-4 ${provider.bg} ${provider.border} rounded-2xl ${provider.color}`}>
+                                                <ShieldCheck size={24} />
                                             </div>
-                                            <h3 className="text-lg font-black uppercase tracking-tighter">{provider.name} OAuth</h3>
+                                            <div>
+                                                <h3 className="text-xl font-black uppercase tracking-tighter">{provider.name} Integration</h3>
+                                                <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest mt-1">Configure {provider.name} OAuth credentials</p>
+                                            </div>
                                         </div>
 
-                                        {/* Enable Toggle */}
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <span className="text-xs text-[var(--text-muted)]">Enable</span>
+                                        <label className="flex flex-col items-center gap-2 cursor-pointer bg-[var(--bg-elevated)] p-4 rounded-2xl border border-[var(--border)]">
+                                            <span className="text-[8px] font-black text-[var(--text-muted)] uppercase">Status</span>
                                             <input
                                                 type="checkbox"
                                                 checked={data[`${provider.id}_enabled`]}
@@ -153,33 +152,35 @@ export default function AuthSettings({ settings }) {
                                         </label>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         {provider.fields.map((field) => (
-                                            <div key={field.key} className="space-y-2">
-                                                <InputLabel value={field.label} />
+                                            <div key={field.key} className="space-y-3">
+                                                <InputLabel value={field.label} className="font-bold text-[10px] uppercase tracking-widest" />
                                                 <TextInput
                                                     type={field.type || 'text'}
                                                     value={data[field.key]}
                                                     onChange={e => setData(field.key, e.target.value)}
-                                                    className="bg-[var(--bg-elevated)]"
+                                                    className="bg-[var(--bg-main)] border-[var(--border)] rounded-xl py-3"
                                                 />
-                                                {errors[field.key] && <p className="text-rose-500 text-xs">{errors[field.key]}</p>}
+                                                {errors[field.key] && <p className="text-rose-500 text-[10px] font-bold">{errors[field.key]}</p>}
                                             </div>
                                         ))}
                                     </div>
 
-                                    <div className="mt-4 flex items-center justify-between text-[9px] text-[var(--text-muted)]">
-                                        <span>Redirect URI: <code className="text-cyan-500">{provider.redirectHint}</code></span>
-                                        <a href={provider.docs} target="_blank" className="flex items-center gap-1 hover:text-purple-500">
-                                            <ExternalLink size={10} /> Get Credentials
+                                    <div className="mt-8 pt-6 border-t border-[var(--border)] flex items-center justify-between text-[10px]">
+                                        <div className="text-[var(--text-muted)] uppercase tracking-widest">
+                                            Redirect URI: <code className="text-cyan-500 bg-black/20 p-1 px-2 rounded font-mono">{provider.redirectHint}</code>
+                                        </div>
+                                        <a href={provider.docs} target="_blank" className="flex items-center gap-2 text-purple-500 hover:text-white transition-colors font-bold uppercase tracking-widest">
+                                            <ExternalLink size={14} /> Documentation
                                         </a>
                                     </div>
                                 </div>
                             ))}
 
-                            <div className="flex justify-end pt-6 border-t border-[var(--border)]">
-                                <PrimaryButton className="bg-purple-500 hover:bg-purple-600 border-purple-500 px-8 py-3" disabled={processing}>
-                                    <Save size={16} className="mr-2" /> Save_Authentication
+                            <div className="flex justify-end pt-8 border-t border-[var(--border)]">
+                                <PrimaryButton className="bg-purple-500 hover:bg-purple-600 px-12 py-4 rounded-xl font-black uppercase tracking-widest text-xs" disabled={processing}>
+                                    <Save size={18} className="mr-2" /> Commit Authentication Settings
                                 </PrimaryButton>
                             </div>
                         </form>
@@ -189,3 +190,4 @@ export default function AuthSettings({ settings }) {
         </div>
     );
 }
+

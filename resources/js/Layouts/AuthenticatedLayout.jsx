@@ -55,7 +55,8 @@ import {
     Store,
     Wallet,
     Briefcase,
-    FileCode
+    FileCode,
+    KeyRound
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSwitcher from '@/Components/Visuals/ThemeSwitcher';
@@ -105,6 +106,7 @@ export default function AuthenticatedLayout({ header, children }) {
         { name: 'SMTP Config', icon: Settings, href: route('admin.email.settings'), active: route().current('admin.email.settings') },
         { name: 'Social Media', icon: Share2, href: route('admin.social-media.settings'), active: route().current('admin.social-media.*') },
         { name: 'Queue Monitor', icon: Activity, href: route('admin.queue.index'), active: route().current('admin.queue.*') },
+        { name: 'Auth Settings', icon: KeyRound, href: route('admin.auth.settings'), active: route().current('admin.auth.settings*') },
         { name: 'Security & Firewall', icon: Shield, href: route('admin.security.index'), active: route().current('admin.security.*') },
         { name: 'Support Queue', icon: LifeBuoy, href: route('admin.support'), active: route().current('admin.support') },
         { name: 'Front Management', icon: LayoutDashboard, href: route('admin.front-management'), active: route().current('admin.front-management') },
