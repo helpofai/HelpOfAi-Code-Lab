@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SiteSetting;
 use App\Models\BannedIp;
+use App\Models\SecurityLog;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,12 +15,18 @@ class SecurityController extends Controller
     public function index()
     {
         $settings = SiteSetting::where('group', 'security')->pluck('value', 'key');
-        
+
         $bannedIps = BannedIp::orderBy('created_at', 'desc')->paginate(15);
+        
+        $stats = [
+            'honeypot_count' => SecurityLog::where('type', 'honeypot')->count(),
+            'brute_force_count' => SecurityLog::where('type', 'brute_force')->count(),
+        ];
 
         return Inertia::render('Admin/Security/Index', [
             'settings' => $settings,
-            'bannedIps' => $bannedIps
+            'bannedIps' => $bannedIps,
+            'stats' => $stats
         ]);
     }
 

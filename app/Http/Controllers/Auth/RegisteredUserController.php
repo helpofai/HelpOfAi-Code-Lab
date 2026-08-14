@@ -58,6 +58,13 @@ class RegisteredUserController extends Controller
             \Illuminate\Support\Facades\Log::alert('Honeypot triggered during registration (bot detected)', [
                 'ip' => $request->ip(),
             ]);
+
+            \App\Models\SecurityLog::create([
+                'type' => 'honeypot',
+                'ip_address' => $request->ip(),
+                'details' => json_encode(['context' => 'register']),
+            ]);
+
             abort(403, 'Bot activity detected');
         }
 

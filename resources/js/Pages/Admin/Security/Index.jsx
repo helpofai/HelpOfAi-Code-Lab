@@ -4,7 +4,7 @@ import { Head, useForm, router } from '@inertiajs/react';
 import { Shield, ShieldAlert, ShieldCheck, Save, Trash2, Ban, Activity, Lock, Plus, MousePointer2, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function SecurityIndex({ auth, settings, bannedIps }) {
+export default function SecurityIndex({ auth, settings, bannedIps, stats }) {
     const { data, setData, post: postSettings, processing, recentlySuccessful } = useForm({
         firewall_enabled: settings.firewall_enabled !== '0' && settings.firewall_enabled !== false,
         firewall_max_attempts: settings.firewall_max_attempts || 150,
@@ -162,7 +162,7 @@ export default function SecurityIndex({ auth, settings, bannedIps }) {
                                 Automated bots attempting to access the registration/login forms via hidden fields are automatically logged and blocked.
                             </p>
                             <div className="mt-6 p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] text-center">
-                                <span className="text-3xl font-black text-cyan-500">0</span>
+                                <span className="text-3xl font-black text-cyan-500">{stats.honeypot_count}</span>
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mt-1">Blocked Attempts</p>
                             </div>
                         </div>
@@ -177,7 +177,7 @@ export default function SecurityIndex({ auth, settings, bannedIps }) {
                                 Repeated failed login attempts trigger rate limiting to prevent credential stuffing attacks.
                             </p>
                             <div className="mt-6 p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] text-center">
-                                <span className="text-3xl font-black text-yellow-500">0</span>
+                                <span className="text-3xl font-black text-yellow-500">{stats.brute_force_count}</span>
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mt-1">Locked Out IPs</p>
                             </div>
                         </div>

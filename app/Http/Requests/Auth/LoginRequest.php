@@ -68,6 +68,13 @@ class LoginRequest extends FormRequest
                 'ip' => $this->ip(),
                 'email' => $this->email
             ]);
+            
+            \App\Models\SecurityLog::create([
+                'type' => 'honeypot',
+                'ip_address' => $this->ip(),
+                'details' => json_encode(['email' => $this->email, 'context' => 'login']),
+            ]);
+
             abort(403, 'Bot activity detected');
         }
 
@@ -80,6 +87,12 @@ class LoginRequest extends FormRequest
             \Illuminate\Support\Facades\Log::warning('Failed login attempt', [
                 'email' => $this->email,
                 'ip' => $this->ip(),
+            ]);
+
+            \App\Models\SecurityLog::create([
+                'type' => 'brute_force',
+                'ip_address' => $this->ip(),
+                'details' => json_encode(['email' => $this->email, 'context' => 'failed_login']),
             ]);
 
             throw ValidationException::withMessages([
