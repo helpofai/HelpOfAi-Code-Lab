@@ -62,8 +62,13 @@ export default function Register() {
                         Sign up with Google
                     </a>
                 )}
+                {siteSettings.github_enabled && (
+                    <a href={route('social.redirect', 'github')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-slate-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-slate-500 hover:text-white">
+                        Sign up with GitHub
+                    </a>
+                )}
 
-                {(siteSettings.facebook_enabled || siteSettings.google_enabled) && (
+                {(siteSettings.facebook_enabled || siteSettings.google_enabled || siteSettings.github_enabled) && (
                     <div className="relative flex items-center py-4">
                         <div className="flex-grow border-t border-[var(--border)]"></div>
                         <span className="flex-shrink mx-4 text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Or continue with</span>
