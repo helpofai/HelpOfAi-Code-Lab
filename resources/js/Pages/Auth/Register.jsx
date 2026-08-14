@@ -38,6 +38,7 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
+        username_alternative: '', // Honeypot field
     });
 
     const submit = (e) => {
@@ -53,6 +54,9 @@ export default function Register() {
             <Head title="Register" />
 
             <form onSubmit={submit} className="space-y-6">
+                {/* Honeypot */}
+                <input type="text" name="username_alternative" value={data.username_alternative} onChange={(e) => setData('username_alternative', e.target.value)} className="hidden" tabIndex="-1" autoComplete="off" />
+
                 {/* Social Login Buttons */}
                 {siteSettings.facebook_enabled == 1 && (
                     <a href={route('social.redirect', 'facebook')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-blue-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-blue-500 hover:text-white">

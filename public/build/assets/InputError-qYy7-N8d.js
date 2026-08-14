@@ -1,1 +1,0 @@
-import{j as n}from"./app-B9HM3f1l.js";function p({message:t,className:r="",...e}){return t?n.jsx("p",{...e,className:"text-[9px] font-black uppercase tracking-widest text-rose-400 "+r,children:t}):null}export{p as I};

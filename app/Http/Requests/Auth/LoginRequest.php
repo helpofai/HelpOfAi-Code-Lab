@@ -62,10 +62,25 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
+        // Honeypot check
+        if ($this->filled('username_alternative')) {
+            \Illuminate\Support\Facades\Log::alert('Honeypot triggered (bot detected)', [
+                'ip' => $this->ip(),
+                'email' => $this->email
+            ]);
+            abort(403, 'Bot activity detected');
+        }
+
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+            
+            // Log failed attempt
+            \Illuminate\Support\Facades\Log::warning('Failed login attempt', [
+                'email' => $this->email,
+                'ip' => $this->ip(),
+            ]);
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
@@ -82,7 +97,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 4)) {
             return;
         }
 

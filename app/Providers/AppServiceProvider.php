@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Observers\ProjectObserver;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -70,6 +71,19 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Schema::defaultStringLength(191);
+
+        // Enforce Secure Password Defaults
+        Password::defaults(function () {
+            $rule = Password::min(8)
+                ->letters()
+                ->mixedCase()
+                ->numbers()
+                ->symbols();
+
+            return $this->app->isProduction()
+                ? $rule->uncompromised()
+                : $rule;
+        });
 
         // Force HTTPS in production (SSL terminates at server/proxy level)
         if ($this->app->environment('production')) {

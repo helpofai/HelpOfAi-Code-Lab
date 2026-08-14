@@ -53,6 +53,14 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Honeypot check
+        if ($request->filled('username_alternative')) {
+            \Illuminate\Support\Facades\Log::alert('Honeypot triggered during registration (bot detected)', [
+                'ip' => $request->ip(),
+            ]);
+            abort(403, 'Bot activity detected');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
