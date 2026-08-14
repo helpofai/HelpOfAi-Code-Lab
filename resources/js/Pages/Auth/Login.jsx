@@ -28,11 +28,13 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 export default function Login({ status, canResetPassword }) {
     const { siteSettings } = usePage().props;
+    const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -59,27 +61,29 @@ export default function Login({ status, canResetPassword }) {
 
             <form onSubmit={submit} className="space-y-6">
                 {/* Social Login Buttons */}
-                {siteSettings.facebook_enabled && (
+                {siteSettings.facebook_enabled == 1 && (
                     <a href={route('social.redirect', 'facebook')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-blue-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-blue-500 hover:text-white">
                         Log in with Facebook
                     </a>
                 )}
-                {siteSettings.google_enabled && (
+                {siteSettings.google_enabled == 1 && (
                     <a href={route('social.redirect', 'google')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-red-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-red-500 hover:text-white">
                         Log in with Google
                     </a>
                 )}
-                {siteSettings.github_enabled && (
+                {siteSettings.github_enabled == 1 && (
                     <a href={route('social.redirect', 'github')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-slate-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-slate-500 hover:text-white">
                         Log in with GitHub
                     </a>
                 )}
 
-                <div className="relative flex items-center py-4">
-                    <div className="flex-grow border-t border-[var(--border)]"></div>
-                    <span className="flex-shrink mx-4 text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Or continue with</span>
-                    <div className="flex-grow border-t border-[var(--border)]"></div>
-                </div>
+                {(siteSettings.facebook_enabled == 1 || siteSettings.google_enabled == 1 || siteSettings.github_enabled == 1) && (
+                    <div className="relative flex items-center py-4">
+                        <div className="flex-grow border-t border-[var(--border)]"></div>
+                        <span className="flex-shrink mx-4 text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Or continue with</span>
+                        <div className="flex-grow border-t border-[var(--border)]"></div>
+                    </div>
+                )}
 
                 <div className="space-y-2">
                     <InputLabel htmlFor="email" value="Email Address" />
@@ -106,49 +110,47 @@ export default function Login({ status, canResetPassword }) {
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" size={16} />
                         <TextInput
                             id="password"
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             name="password"
                             value={data.password}
-                            className="w-full pl-12 bg-[var(--bg-main)] border-[var(--border)] focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl py-3 font-mono text-sm"
+                            className="w-full pl-12 pr-12 bg-[var(--bg-main)] border-[var(--border)] focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl py-3 font-mono text-sm"
                             autoComplete="current-password"
                             onChange={(e) => setData('password', e.target.value)}
                             placeholder="••••••••••••"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-cyan-500 transition-colors"
+                        >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
                     </div>
                     <InputError message={errors.password} />
                 </div>
 
-                <div className="flex items-center justify-between mt-2">
-                    <label className="flex items-center cursor-pointer group">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) => setData('remember', e.target.checked)}
-                            className="rounded bg-[var(--bg-main)] border-[var(--border)] text-cyan-600 focus:ring-cyan-500"
-                        />
-                        <span className="ms-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-cyan-500 transition-colors select-none">
-                            Remember Me
-                        </span>
+                <div className="flex items-center justify-between">
+                    <label className="flex items-center">
+                        <Checkbox name="remember" checked={data.remember} onChange={(e) => setData('remember', e.target.checked)} />
+                        <span className="ml-2 text-[9px] font-bold text-slate-500 uppercase tracking-widest">Remember me</span>
                     </label>
-                    
+
+                    {data.remember && (
+                        <span className="text-[9px] font-bold text-cyan-500 uppercase tracking-widest animate-pulse">
+                            Session extended
+                        </span>
+                    )}
+
                     {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="text-[9px] font-bold text-slate-500 uppercase tracking-widest hover:text-cyan-500 transition-colors"
-                        >
-                            Forgot Password?
+                        <Link href={route('password.request')} className="text-[9px] font-bold text-cyan-500 uppercase tracking-widest hover:text-white transition-colors">
+                            Forgot password?
                         </Link>
                     )}
                 </div>
 
-                <div className="pt-4">
-                    <PrimaryButton className="w-full justify-center py-4 text-[10px] tracking-[0.2em] relative overflow-hidden group" disabled={processing}>
-                        <span className="relative z-10 flex items-center gap-3">
-                            {processing && <Loader2 className="animate-spin" size={14} />}
-                            Log In <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                        </span>
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton className="w-full" disabled={processing}>
+                    {processing ? <Loader2 className="animate-spin" size={16} /> : 'Log In'}
+                </PrimaryButton>
 
                 <div className="text-center pt-4 border-t border-[var(--border)]">
                     <Link href={route('register')} className="text-[9px] font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors">

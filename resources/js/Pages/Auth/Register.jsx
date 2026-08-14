@@ -27,10 +27,12 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { User, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Register() {
     const { siteSettings } = usePage().props;
+    const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -52,23 +54,23 @@ export default function Register() {
 
             <form onSubmit={submit} className="space-y-6">
                 {/* Social Login Buttons */}
-                {siteSettings.facebook_enabled && (
+                {siteSettings.facebook_enabled == 1 && (
                     <a href={route('social.redirect', 'facebook')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-blue-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-blue-500 hover:text-white">
                         Sign up with Facebook
                     </a>
                 )}
-                {siteSettings.google_enabled && (
+                {siteSettings.google_enabled == 1 && (
                     <a href={route('social.redirect', 'google')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-red-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-red-500 hover:text-white">
                         Sign up with Google
                     </a>
                 )}
-                {siteSettings.github_enabled && (
+                {siteSettings.github_enabled == 1 && (
                     <a href={route('social.redirect', 'github')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-slate-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-slate-500 hover:text-white">
                         Sign up with GitHub
                     </a>
                 )}
 
-                {(siteSettings.facebook_enabled || siteSettings.google_enabled || siteSettings.github_enabled) && (
+                {(siteSettings.facebook_enabled == 1 || siteSettings.google_enabled == 1 || siteSettings.github_enabled == 1) && (
                     <div className="relative flex items-center py-4">
                         <div className="flex-grow border-t border-[var(--border)]"></div>
                         <span className="flex-shrink mx-4 text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Or continue with</span>
@@ -120,15 +122,22 @@ export default function Register() {
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" size={16} />
                         <TextInput
                             id="password"
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             name="password"
                             value={data.password}
-                            className="w-full pl-12 bg-[var(--bg-main)] border-[var(--border)] focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl py-3 font-mono text-sm"
+                            className="w-full pl-12 pr-12 bg-[var(--bg-main)] border-[var(--border)] focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl py-3 font-mono text-sm"
                             autoComplete="new-password"
                             onChange={(e) => setData('password', e.target.value)}
                             required
                             placeholder="••••••••••••"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-cyan-500 transition-colors"
+                        >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
                     </div>
                     <InputError message={errors.password} />
                 </div>
@@ -139,10 +148,10 @@ export default function Register() {
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" size={16} />
                         <TextInput
                             id="password_confirmation"
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             name="password_confirmation"
                             value={data.password_confirmation}
-                            className="w-full pl-12 bg-[var(--bg-main)] border-[var(--border)] focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl py-3 font-mono text-sm"
+                            className="w-full pl-12 pr-12 bg-[var(--bg-main)] border-[var(--border)] focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl py-3 font-mono text-sm"
                             autoComplete="new-password"
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             required
@@ -152,14 +161,9 @@ export default function Register() {
                     <InputError message={errors.password_confirmation} />
                 </div>
 
-                <div className="pt-4">
-                    <PrimaryButton className="w-full justify-center py-4 text-[10px] tracking-[0.2em] relative overflow-hidden group" disabled={processing}>
-                        <span className="relative z-10 flex items-center gap-3">
-                            {processing && <Loader2 className="animate-spin" size={14} />}
-                            Register <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                        </span>
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton className="w-full" disabled={processing}>
+                    {processing ? <Loader2 className="animate-spin" size={16} /> : 'Register'}
+                </PrimaryButton>
 
                 <div className="text-center pt-4 border-t border-[var(--border)]">
                     <Link href={route('login')} className="text-[9px] font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors">
