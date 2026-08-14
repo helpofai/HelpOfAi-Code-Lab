@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
-import { Shield, ShieldAlert, ShieldCheck, Save, Trash2, Ban, Activity, Lock, Plus } from 'lucide-react';
+import { Shield, ShieldAlert, ShieldCheck, Save, Trash2, Ban, Activity, Lock, Plus, MousePointer2, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function SecurityIndex({ auth, settings, bannedIps }) {
@@ -149,6 +149,38 @@ export default function SecurityIndex({ auth, settings, bannedIps }) {
                                 </div>
                             </div>
                         </form>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
+                        {/* Bot Prevention Stats */}
+                        <div className="bg-[var(--bg-surface)]/80 backdrop-blur-xl border border-[var(--border)] shadow-2xl rounded-3xl p-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <MousePointer2 className="text-cyan-500" size={20} />
+                                <h3 className="text-lg font-bold text-[var(--text-primary)]">Bot Prevention (Honeypot)</h3>
+                            </div>
+                            <p className="text-sm text-[var(--text-muted)]">
+                                Automated bots attempting to access the registration/login forms via hidden fields are automatically logged and blocked.
+                            </p>
+                            <div className="mt-6 p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] text-center">
+                                <span className="text-3xl font-black text-cyan-500">0</span>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mt-1">Blocked Attempts</p>
+                            </div>
+                        </div>
+
+                        {/* Brute-Force Protection Stats */}
+                        <div className="bg-[var(--bg-surface)]/80 backdrop-blur-xl border border-[var(--border)] shadow-2xl rounded-3xl p-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <Zap className="text-yellow-500" size={20} />
+                                <h3 className="text-lg font-bold text-[var(--text-primary)]">Brute-Force Protection</h3>
+                            </div>
+                            <p className="text-sm text-[var(--text-muted)]">
+                                Repeated failed login attempts trigger rate limiting to prevent credential stuffing attacks.
+                            </p>
+                            <div className="mt-6 p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] text-center">
+                                <span className="text-3xl font-black text-yellow-500">0</span>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mt-1">Locked Out IPs</p>
+                            </div>
+                        </div>
                     </div>
 
                     {/* MANUAL BAN & TABLE */}
