@@ -60,12 +60,12 @@ export default function Login({ status, canResetPassword }) {
             <form onSubmit={submit} className="space-y-6">
                 {/* Social Login Buttons */}
                 {siteSettings.facebook_enabled && (
-                    <a href={route('auth.facebook')} className="flex items-center justify-center gap-3 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-bold text-xs uppercase tracking-widest">
+                    <a href={route('social.redirect', 'facebook')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-blue-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-blue-500 hover:text-white">
                         Log in with Facebook
                     </a>
                 )}
                 {siteSettings.google_enabled && (
-                    <a href={route('auth.google')} className="flex items-center justify-center gap-3 w-full py-3 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-xl transition-all font-bold text-xs uppercase tracking-widest">
+                    <a href={route('social.redirect', 'google')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-red-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-red-500 hover:text-white">
                         Log in with Google
                     </a>
                 )}
@@ -145,29 +145,6 @@ export default function Login({ status, canResetPassword }) {
                     </PrimaryButton>
                 </div>
 
-                <div className="mt-8">
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-[var(--border)]"></div>
-                        </div>
-                        <div className="relative flex justify-center text-[8px] uppercase tracking-widest">
-                            <span className="bg-[var(--bg-surface)] px-2 text-slate-500 font-black">Social_Authentication</span>
-                        </div>
-                    </div>
-
-                    <div className="mt-6 grid grid-cols-3 gap-3">
-                        <a href={route('social.redirect', 'google')} className="flex flex-col items-center gap-2 p-3 bg-red-500/5 border border-red-500/10 rounded-xl hover:bg-red-500/10 transition-all group">
-                            <span className="text-[8px] font-black text-red-500 uppercase tracking-widest">Google</span>
-                        </a>
-                        <a href={route('social.redirect', 'facebook')} className="flex flex-col items-center gap-2 p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl hover:bg-blue-500/10 transition-all group">
-                            <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest">Facebook</span>
-                        </a>
-                        <a href={route('social.redirect', 'github')} className="flex flex-col items-center gap-2 p-3 bg-slate-500/5 border border-slate-500/10 rounded-xl hover:bg-slate-500/10 transition-all group">
-                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">GitHub</span>
-                        </a>
-                    </div>
-                </div>
-                
                 <div className="text-center pt-4 border-t border-[var(--border)]">
                     <Link href={route('register')} className="text-[9px] font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors">
                         No account? <span className="text-cyan-500">Create an account</span>

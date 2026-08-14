@@ -53,12 +53,12 @@ export default function Register() {
             <form onSubmit={submit} className="space-y-6">
                 {/* Social Login Buttons */}
                 {siteSettings.facebook_enabled && (
-                    <a href={route('auth.facebook')} className="flex items-center justify-center gap-3 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-bold text-xs uppercase tracking-widest">
+                    <a href={route('social.redirect', 'facebook')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-blue-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-blue-500 hover:text-white">
                         Sign up with Facebook
                     </a>
                 )}
                 {siteSettings.google_enabled && (
-                    <a href={route('auth.google')} className="flex items-center justify-center gap-3 w-full py-3 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 rounded-xl transition-all font-bold text-xs uppercase tracking-widest">
+                    <a href={route('social.redirect', 'google')} className="flex items-center justify-center gap-3 w-full py-4 bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-red-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl text-red-500 hover:text-white">
                         Sign up with Google
                     </a>
                 )}
