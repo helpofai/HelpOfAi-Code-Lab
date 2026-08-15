@@ -63,7 +63,8 @@ export default function EditorHeader({ handleSave, handleCloudSave, isSaving, is
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         onClick={(e) => e.stopPropagation()}
-                        className={`bg-transparent border-none p-0 text-white font-bold text-sm focus:ring-0 placeholder-white/20 truncate leading-none transition-all duration-300 ${isTitleExpanded ? 'w-full block' : 'hidden sm:block'}`}
+                        disabled={!isOwner}
+                        className={`bg-transparent border-none p-0 text-white font-bold text-sm focus:ring-0 placeholder-white/20 truncate leading-none transition-all duration-300 ${isTitleExpanded ? 'w-full block' : 'hidden sm:block'} ${!isOwner ? 'opacity-60 cursor-not-allowed' : ''}`}
                         placeholder="Untitled"
                     />
                     {!isTitleExpanded && <span className="sm:hidden text-cyan-500 font-black text-[10px] uppercase tracking-tighter shrink-0">Project</span>}
