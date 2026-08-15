@@ -29,11 +29,12 @@ import { useToast } from '@/Components/Toast/ToastProvider';
 import useProjectStore from '@/Stores/useProjectStore';
 
 export default function EditorModals({ 
-    activeModal, 
-    setActiveModal, 
-    project, 
-    collections, 
-    addToCollection, 
+    activeModal,
+    setActiveModal,
+    project,
+    auth,
+    collections,
+    addToCollection,
     createCollection,
     diffRevision
 }) {
@@ -41,6 +42,7 @@ export default function EditorModals({
     const [diffType, setDiffType] = useState('html');
     const { isPrivate, setIsPrivate, isForSale, setIsForSale, price, setPrice, html, css, js } = useProjectStore();
     const toast = useToast();
+    const isOwner = auth?.user?.id === project?.user_id;
 
     const handleCreateCollection = () => {
         if (!newCollectionTitle) return;
@@ -150,7 +152,7 @@ export default function EditorModals({
                                                     </div>
                                                 </div>
                                                 <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} className="sr-only peer" />
+                                                    <input type="checkbox" disabled={!isOwner} checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} className="sr-only peer" />
                                                     <div className="w-9 h-5 bg-[var(--bg-main)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
                                                 </label>
                                             </div>
@@ -169,7 +171,7 @@ export default function EditorModals({
                                                         </div>
                                                     </div>
                                                     <label className="relative inline-flex items-center cursor-pointer">
-                                                        <input type="checkbox" checked={isForSale} onChange={(e) => setIsForSale(e.target.checked)} className="sr-only peer" />
+                                                        <input type="checkbox" disabled={!isOwner} checked={isForSale} onChange={(e) => setIsForSale(e.target.checked)} className="sr-only peer" />
                                                         <div className="w-9 h-5 bg-[var(--bg-main)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500"></div>
                                                     </label>
                                                 </div>

@@ -427,12 +427,13 @@ export default function Editor({ auth, project: initialProject }) {
             />
 
             <EditorModals 
-                activeModal={activeModal} 
-                setActiveModal={setActiveModal} 
-                project={projectData} 
-                collections={collections} 
-                addToCollection={addToCollection} 
-                createCollection={createCollection} 
+                activeModal={activeModal}
+                setActiveModal={setActiveModal}
+                project={projectData}
+                auth={usePage().props.auth}
+                collections={collections}
+                addToCollection={addToCollection}
+                createCollection={createCollection}
                 diffRevision={diffRevision}
             />
 
