@@ -283,6 +283,11 @@ export default function Editor({ auth, project: initialProject }) {
     }, [html, css, js, externalLibraries, preprocessors]);
 
     const handleExport = () => {
+        // Use DOMParser to extract body content if the user pasted a full document
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const bodyContent = doc.body.innerHTML || html;
+
         const fullHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -295,7 +300,7 @@ export default function Editor({ auth, project: initialProject }) {
     </style>
 </head>
 <body>
-    ${html}
+    ${bodyContent}
     <script>
         ${js}
     </script>
