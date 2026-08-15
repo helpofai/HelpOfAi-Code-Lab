@@ -160,7 +160,7 @@ export default function Editor({ auth, project: initialProject }) {
             case 'layout-right': useProjectStore.getState().setLayout('right'); break;
             case 'layout-top': useProjectStore.getState().setLayout('top'); break;
             case 'share': setActiveModal('share'); break;
-            case 'export': handleExportZip(); break;
+            case 'export': handleExport(); break;
             case 'sidebar': setActiveSidebar(prev => prev ? null : 'settings'); break;
             case 'settings': setActiveModal('settings'); break;
         }
@@ -282,25 +282,33 @@ export default function Editor({ auth, project: initialProject }) {
         return () => { window.removeEventListener('message', handleMessage); clearTimeout(timeout); };
     }, [html, css, js, externalLibraries, preprocessors]);
 
-    const handleExportZip = () => {
-        const zipContent = `
-Project: ${title}
-----------------
-HTML:
-${html}
-
-CSS:
-${css}
-
-JS:
-${js}
+    const handleExport = () => {
+        const fullHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+        ${css}
+    </style>
+</head>
+<body>
+    ${html}
+    <script>
+        ${js}
+    </script>
+</body>
+</html>
         `;
-        const blob = new Blob([zipContent], { type: 'text/plain' });
+        const blob = new Blob([fullHtml], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${title.replace(/\s+/g, '_').toLowerCase()}.txt`;
+        a.download = `${title.replace(/\s+/g, '_').toLowerCase()}.html`;
         a.click();
+        URL.revokeObjectURL(url);
     };
 
     const fetchCollections = async () => {
@@ -422,7 +430,7 @@ ${js}
                 setActiveSidebar={setActiveSidebar} 
                 setActiveModal={setActiveModal} 
                 handleFork={handleFork}
-                handleExport={handleExportZip}
+                handleExport={handleExport}
                 fetchCollections={fetchCollections}
             />
 
