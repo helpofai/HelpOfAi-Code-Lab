@@ -2,6 +2,16 @@
 
 Systematic documentation of all protocol upgrades, module injections, and core optimisations for the HOACodeLab environment.
 
+## [1.19.0] - SECURITY_AND_STABILITY_UPGRADE - 2026-08-15
+
+### 🛡️ Security & Access Control
+- **Security Metrics Backend:** Implemented `security_logs` infrastructure to track Honeypot triggers and Brute-force/Rate-limiting events.
+- **Admin Security Dashboard:** Integrated real-time security stats into the Admin Security panel.
+- **Permission Enforcement:** Restricted project title editing, public sharing toggles, and marketplace listing features to project owners only.
+
+### ⚡ Editor & Prototyping
+- **Export Logic Sanitization:** Rebuilt HTML export module with `DOMParser` integration to prevent nested tag duplication and ensure valid document structure.
+
 ## [1.18.2] - VENDOR_THUMBNAIL_FIX - 2026-08-10
 
 ### 🎨 Explore Page — Vendor Project Thumbnail Rendering
