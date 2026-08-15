@@ -26,6 +26,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import AdUnit from '@/Components/AdUnit';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import { Download } from 'lucide-react';
 
 import useProjectStore from '@/Stores/useProjectStore';
 import { useEditorActions } from '@/Hooks/useEditorActions';
@@ -159,7 +160,7 @@ export default function Editor({ auth, project: initialProject }) {
             case 'layout-right': useProjectStore.getState().setLayout('right'); break;
             case 'layout-top': useProjectStore.getState().setLayout('top'); break;
             case 'share': setActiveModal('share'); break;
-            case 'export': handleExport(); break;
+            case 'export': handleExportZip(); break;
             case 'sidebar': setActiveSidebar(prev => prev ? null : 'settings'); break;
             case 'settings': setActiveModal('settings'); break;
         }
@@ -281,12 +282,24 @@ export default function Editor({ auth, project: initialProject }) {
         return () => { window.removeEventListener('message', handleMessage); clearTimeout(timeout); };
     }, [html, css, js, externalLibraries, preprocessors]);
 
-    const handleExport = () => {
-        const blob = new Blob([previewContent], { type: 'text/html' });
+    const handleExportZip = () => {
+        const zipContent = `
+Project: ${title}
+----------------
+HTML:
+${html}
+
+CSS:
+${css}
+
+JS:
+${js}
+        `;
+        const blob = new Blob([zipContent], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${title.replace(/\s+/g, '_').toLowerCase()}.html`;
+        a.download = `${title.replace(/\s+/g, '_').toLowerCase()}.txt`;
         a.click();
     };
 
@@ -409,7 +422,7 @@ export default function Editor({ auth, project: initialProject }) {
                 setActiveSidebar={setActiveSidebar} 
                 setActiveModal={setActiveModal} 
                 handleFork={handleFork}
-                handleExport={handleExport}
+                handleExport={handleExportZip}
                 fetchCollections={fetchCollections}
             />
 
